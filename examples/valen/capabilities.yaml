@@ -1,0 +1,14 @@
+- id: "cap-distributed-systems"
+  name: "Distributed Systems"
+  description: "Event-driven architecture, consensus protocols, observability at scale."
+  evidenceIds: []
+
+- id: "cap-architecture"
+  name: "Software Architecture"
+  description: "System design, domain-driven design, architectural decision records."
+  evidenceIds: []
+
+- id: "cap-developer-tooling"
+  name: "Developer Tooling"
+  description: "CLI tools, CI/CD optimization, internal developer platforms."
+  evidenceIds: []

@@ -1,0 +1,37 @@
+- id: "exp-1"
+  organization: "Acme Corp"
+  title: "Senior Software Engineer"
+  start: "2022-03"
+  location: "Remote"
+  summary: "Led platform reliability initiatives across the engineering org."
+  achievements:
+    - "Reduced p99 latency by 40% through architectural redesign"
+    - "Designed event-driven ingestion pipeline processing 1M+ events/day"
+    - "Mentored 4 junior engineers"
+  technologies:
+    - "TypeScript"
+    - "Rust"
+    - "Kafka"
+    - "PostgreSQL"
+  capabilityIds:
+    - "cap-distributed-systems"
+    - "cap-architecture"
+  evidenceIds: []
+
+- id: "exp-2"
+  organization: "StartupXYZ"
+  title: "Software Engineer"
+  start: "2019-06"
+  end: "2022-02"
+  location: "Madrid"
+  summary: "Full-stack engineer on the developer tools team."
+  achievements:
+    - "Built internal CLI tool used by 50+ engineers"
+    - "Reduced CI pipeline from 25min to 8min"
+  technologies:
+    - "Go"
+    - "React"
+    - "Docker"
+  capabilityIds:
+    - "cap-developer-tooling"
+  evidenceIds: []

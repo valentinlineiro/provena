@@ -1,0 +1,24 @@
+- id: "proj-1"
+  name: "Provena"
+  role: "Creator & Architect"
+  description: "Open-source framework for managing professional identity as structured knowledge."
+  url: "https://github.com/valenlb/provena"
+  start: "2024-01"
+  technologies:
+    - "TypeScript"
+    - "YAML"
+  capabilityIds:
+    - "cap-architecture"
+    - "cap-distributed-systems"
+  evidenceIds: []
+
+- id: "proj-2"
+  name: "TAKT"
+  role: "Architect"
+  description: "Domain-specific language for temporal knowledge representation."
+  technologies:
+    - "TypeScript"
+    - "DSL Design"
+  capabilityIds:
+    - "cap-architecture"
+  evidenceIds: []

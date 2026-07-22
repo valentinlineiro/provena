@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Provena',
   description: 'A canonical domain model for professional identity',
+  base: '/provena/',
   cleanUrls: true,
   themeConfig: {
     nav: [

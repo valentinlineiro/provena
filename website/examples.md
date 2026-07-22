@@ -1,4 +1,4 @@
-# Example
+# Examples
 
 The same identity becomes different outputs depending on the projection.
 
@@ -26,7 +26,7 @@ The same identity becomes different outputs depending on the projection.
 ### Résumé
 
 ```
-# Alice Romero
+# Alex Chen
 
 ## Experience
 ### Acme Corp
@@ -61,21 +61,46 @@ Recent 4 experiences. Top 10 capabilities by evidence. Character-limited.
 ### Bio
 
 ```
-Alice Romero is a Technical Lead at Acme Corp,
-where she works on AI-assisted engineering and
-developer tooling. She focuses on distributed
+Alex Chen is a Technical Lead at Acme Corp,
+where they work on AI-assisted engineering and
+developer tooling. They focus on distributed
 systems and engineering productivity.
 ```
 
 Condensed narrative. Context-specific.
 
+### AI agent (queried, not rendered)
+
+```
+Query: "Prepare a proposal for a distributed systems consulting role."
+
+Relevant:
+  - Designed event-driven ingestion pipeline
+  - Reduced p99 latency by 40%
+  - Capability: Distributed Systems (1 piece of evidence)
+
+Excluded:
+  - Anything outside the distributed-systems capability
+```
+
+Not a document — a selection over the same model, shaped by a question instead of a template.
+
 ## What makes this possible
 
-The Projection layer. Each output uses the same Profile but applies a different selector:
+The Projection layer. Each output uses the same identity but applies a different selector:
 
 ```
-Profile → ResumeProjection → MarkdownRenderer
-Profile → LinkedInProjection → LinkedInRenderer
+Projection = Selection + Transformation + Constraints
+
+LinkedInProjection:
+  select:      experiences.last(4), capabilities.top(10, by: evidenceCount)
+  transform:   experience → headline + summary
+  constraints: character limits, platform conventions
 ```
 
-The domain model never changes. Only the projection does.
+```
+Identity → ResumeProjection    → MarkdownRenderer
+Identity → LinkedInProjection  → LinkedInRenderer
+```
+
+The identity is the source of truth. Outputs are temporary views.

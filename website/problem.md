@@ -11,14 +11,14 @@ LinkedIn says "Senior Engineer"
 Your résumé says "Tech Lead"
 Your bio says "Software Architect"
 
-Visitors notice.
+People notice the inconsistency.
 ```
 
 Every update to one makes the rest outdated. Maintenance becomes overhead. Inconsistencies erode credibility.
 
 ## The root cause
 
-This is not a formatting problem. It is a knowledge representation problem.
+This is not a formatting problem. It is a source-of-truth problem.
 
 Platforms treat your identity as content they host. You paste the same facts into five different boxes. The boxes know nothing about each other.
 

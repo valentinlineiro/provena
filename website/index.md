@@ -4,13 +4,18 @@ layout: home
 hero:
   name: Provena
   text: Your career has a source of truth.
-  tagline: LinkedIn, résumés, websites, and bios are just different views of the same professional identity. Maintain one model. Generate every representation.
+  tagline: |
+    LinkedIn, your résumé, your website, and your bios
+    are just different views of the same professional identity.
+
+    Maintain one model.
+    Generate every representation.
   actions:
     - theme: brand
-      text: See the problem
-      link: /problem
+      text: See how it works
+      link: /concept
     - theme: alt
-      text: Try the example
+      text: View example
       link: /examples
     - theme: alt
       text: GitHub
@@ -31,6 +36,8 @@ features:
     details: One file per aggregate — person, experience, projects, skills. Easy to edit, version, and share.
 ---
 
+*A canonical domain model for professional identity.*
+
 ## The problem
 
 ```
@@ -44,26 +51,25 @@ Your professional story exists in five places.
 
 Each copy drifts.
 Each update costs time.
-
 Visitors notice the inconsistency.
 ```
 
 ## How it works
 
 ```
-              YOUR IDENTITY
+                    YOUR IDENTITY
 
-                 Profile
+                       Profile
 
-        /          |          \
+          ┌────────────┼────────────┐
 
-    Résumé     LinkedIn    Website
+       Résumé       LinkedIn       Website
 
-  One source. Deterministic projections.
+      Markdown      Profile        Bio
 ```
 
 ```
-YAML files → Profile → Projection → Renderer → Output
+YAML Workspace → Profile → Projection → Renderer → Output
 ```
 
 ## Before

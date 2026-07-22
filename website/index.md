@@ -3,14 +3,14 @@ layout: home
 
 hero:
   name: Provena
-  text: A canonical domain model for professional identity.
+  text: Your professional identity has too many copies.
   tagline: |
-    Your career lives in too many places.
-
     LinkedIn. Résumés. Websites. Bios.
 
     They are not different identities.
     They are different views of the same one.
+
+    A canonical model keeps them synchronized.
   actions:
     - theme: brand
       text: See the model
@@ -25,13 +25,13 @@ hero:
 features:
   - title: One Source of Truth
     details: Maintain one canonical career model. Generate every platform-specific representation — résumé, LinkedIn, website — from it.
-  - title: Deterministic Projections
-    details: YAML files → Profile → Projection → Renderer → Output. Every output is a pure function of your canonical data.
+  - title: Every version stays consistent
+    details: Each output is a pure function of your canonical data. Update once. Every representation reflects the change.
   - title: Facts Over Formatting
     details: Your career is not a collection of profiles. It is a body of knowledge with many representations.
-  - title: Pluggable Renderers
+  - title: Publish anywhere
     details: Implement any output format as a plugin. Markdown ships today. LinkedIn, JSON Resume, and more are straightforward to add.
-  - title: Validation Built In
+  - title: Catch mistakes before publishing
     details: Schema validation catches inconsistencies before they reach your résumé or website.
   - title: Modular by Design
     details: One file per aggregate — person, experience, projects, skills. Easy to edit, version, and share.
@@ -47,6 +47,8 @@ They are not designed to be your source of truth.
 Your identity is scattered across LinkedIn, GitHub, your résumé, your website, and conference bios. Each platform owns a copy. Each copy drifts.
 
 ## The model
+
+A canonical domain model for professional identity.
 
 ```
                     Your identity
@@ -64,8 +66,31 @@ Your identity is scattered across LinkedIn, GitHub, your résumé, your website,
    One source. Deterministic projections.
 ```
 
+## Same profile. Different contexts.
+
 ```
-YAML Workspace → Profile → Projection → Renderer → Output
+                    Your Profile
+
+                         ↓
+
+   ┌──────────────────────────────────┐
+   │  Valentín Liñeiro                │
+   │  Engineer · Distributed Systems  │
+   │  Experience at Acme Corp         │
+   └──────────────────────────────────┘
+
+        ↙               ↓               ↘
+
+   ┌──────────┐   ┌──────────┐   ┌──────────────┐
+   │  Résumé  │   │ LinkedIn │   │ Conference   │
+   │          │   │          │   │ Bio          │
+   │ Full     │   │ Recent   │   │              │
+   │ history  │   │ 4 roles  │   │ Condensed    │
+   │ Evidence │   │ Top 10   │   │ narrative    │
+   │ backed   │   │ skills   │   │ for audience │
+   └──────────┘   └──────────┘   └──────────────┘
+
+   Same data. Different views.
 ```
 
 ## Before

@@ -1,11 +1,12 @@
 # Provena
 
-Maintain your professional identity once. Generate multiple representations from a canonical model.
+Professional identity as a canonical domain model.
+
+Maintain your career data once. Generate any representation from a single source of truth.
 
 ```
-examples/valen/    →  YamlWorkspaceLoader  →  Profile  →  ResumeProjection  →  MarkdownResumeRenderer  →  README.md
-                           ↓
-                      LinkedInProjection  →  (future renderer)
+YAML workspace → Profile → ResumeProjection → Markdown
+                         → LinkedInProjection → (future)
 ```
 
 ## Quick start
@@ -15,9 +16,21 @@ npm install
 npx tsx packages/demo/src/load-and-render.ts
 ```
 
-## Architecture
+Outputs a complete Markdown resume from the example profile at `examples/valen/`.
 
-`docs/architecture.md` — four layers: Persistence, Domain, Projection, Presentation.
+## How it works
+
+```
+Workspace (YAML files)
+     ↓
+   Profile — canonical domain model
+     ↓
+ Projection — context-optimized view
+     ↓
+ Renderer — pure output generation
+```
+
+Four layers: **Persistence**, **Domain**, **Projection**, **Presentation**. See `docs/architecture.md`.
 
 ## Packages
 
@@ -29,7 +42,7 @@ npx tsx packages/demo/src/load-and-render.ts
 
 ## Project structure
 
-A Provena workspace is a directory with one file per aggregate:
+A workspace is a directory with one YAML file per aggregate:
 
 ```
 my-profile/
@@ -37,11 +50,11 @@ my-profile/
   person.yaml           # Person
   experience.yaml       # Experience[]
   projects.yaml         # Project[]
+  capabilities.yaml     # Capability[]
   education.yaml        # Education[]
   publications.yaml     # Publication[]
   certifications.yaml   # Certification[]
   recommendations.yaml  # Recommendation[]
-  capabilities.yaml     # Capability[]
   evidence.yaml         # Evidence[]
 ```
 

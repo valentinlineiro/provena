@@ -3,19 +3,20 @@ layout: home
 
 hero:
   name: Provena
-  text: Your career has a source of truth.
+  text: A canonical domain model for professional identity.
   tagline: |
-    LinkedIn, your résumé, your website, and your bios
-    are just different views of the same professional identity.
+    Your career lives in too many places.
 
-    Maintain one model.
-    Generate every representation.
+    LinkedIn. Résumés. Websites. Bios.
+
+    They are not different identities.
+    They are different views of the same one.
   actions:
     - theme: brand
-      text: See how it works
+      text: See the model
       link: /concept
     - theme: alt
-      text: View example
+      text: View the example
       link: /examples
     - theme: alt
       text: GitHub
@@ -36,36 +37,31 @@ features:
     details: One file per aggregate — person, experience, projects, skills. Easy to edit, version, and share.
 ---
 
-*A canonical domain model for professional identity.*
-
-## The problem
+## Why now
 
 ```
-Your professional story exists in five places.
-
-  LinkedIn.
-  Résumé.
-  GitHub.
-  Personal website.
-  Conference bios.
-
-Each copy drifts.
-Each update costs time.
-Visitors notice the inconsistency.
+Professional platforms are optimized for publishing.
+They are not designed to be your source of truth.
 ```
 
-## How it works
+Your identity is scattered across LinkedIn, GitHub, your résumé, your website, and conference bios. Each platform owns a copy. Each copy drifts.
+
+## The model
 
 ```
-                    YOUR IDENTITY
+                    Your identity
 
-                       Profile
+                         ↓
 
-          ┌────────────┼────────────┐
+              Canonical Profile Model
 
-       Résumé       LinkedIn       Website
+          ↙             ↓              ↘
 
-      Markdown      Profile        Bio
+      Résumé        LinkedIn        Website
+
+     Markdown       Profile          Bio
+
+   One source. Deterministic projections.
 ```
 
 ```

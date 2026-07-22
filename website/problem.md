@@ -1,8 +1,13 @@
 # The problem
 
-Your career has facts: roles, projects, skills, achievements, evidence.
+Every time you update your career, you manually rebuild the same identity five times: LinkedIn, your résumé, your GitHub profile, your speaker bio, your conference proposals. Copies drift. Professional identity is fragmented.
 
-Today those facts get copied into different documents — LinkedIn, your résumé, your GitHub profile, your speaker bio, your conference proposals. Copies drift. Professional identity is fragmented.
+Provena is a canonical model for that identity.
+
+```
+It stores:   facts · evidence · history
+It generates: résumé, LinkedIn, website — any representation you need
+```
 
 ## The cost
 
@@ -22,29 +27,32 @@ Every update to one makes the rest outdated. Maintenance becomes overhead. Peopl
 
 ## The root cause
 
-This is not a document problem. It is a knowledge ownership problem.
+The problem is not where your profile is published. The problem is who owns the underlying truth.
 
 Platforms treat your identity as content they host. You paste the same facts into five different boxes. The boxes know nothing about each other — none of them owns the facts, so none of them can keep the others honest.
+
+## Not LinkedIn 2.0
+
+Provena does not replace your profiles. It separates the source from the presentation layer — LinkedIn, your résumé, your website stay exactly where they are. Provena just stops being the place the facts live.
 
 ## The insight
 
 Your career is not a collection of platform profiles. It is a body of knowledge with many possible representations.
 
 ```
-              Professional knowledge
+                    SOURCE OF TRUTH
 
-                       │
-                       ▼
+                  Provena identity model
 
-                Provena model
-        (facts · evidence · history)
+        ┌───────────┬────────────┬───────────┐
+        │ Evidence  │  History   │  Skills   │
+        └───────────┴────────────┴───────────┘
 
-        ↙              │              ↘
+              ↓            ↓            ↓
 
-   Résumé          LinkedIn          Website
-    view             view             view
+          LinkedIn      Résumé       Website
 
-        Same source. Different projections.
+          Same source. Different projections.
 ```
 
 The solution is not a better résumé builder. It is a canonical model that owns the facts and treats every platform as a projection of it.
@@ -61,3 +69,7 @@ Website  ── Experience copy            ↓
 
 Three copies, always diverging.  One model, always in sync.
 ```
+
+## Why now
+
+AI multiplies the number of representations you need — agents summarizing your work, tools generating tailored pitches, platforms scraping your profile into their own format. More representations means more copies to keep honest. A canonical identity layer stops being a nice-to-have and becomes infrastructure.

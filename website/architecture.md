@@ -49,7 +49,9 @@ Identity → Projection → Renderer → Output
 
 The projection does the semantic work — deciding what belongs in this context and what doesn't. The renderer only represents what the projection already decided; it has no domain knowledge and cannot select or omit facts on its own.
 
-Authority flows inward. Formatting flows outward. The canonical model owns meaning — outputs only express it.
+> **Authority flows inward. Formatting flows outward.**
+>
+> The canonical model owns meaning. Outputs only express it.
 
 ## Design invariants
 

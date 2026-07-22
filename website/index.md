@@ -23,12 +23,12 @@ hero:
       link: https://github.com/valentinlineiro/provena
 
 features:
-  - title: One Source of Truth
-    details: Maintain one canonical career model. Generate every platform-specific representation — résumé, LinkedIn, website — from it.
-  - title: Every version stays consistent
-    details: Each output is a pure function of your canonical data. Update once. Every representation reflects the change.
-  - title: Publish anywhere
-    details: Implement any output format as a plugin. Markdown ships today. LinkedIn, JSON Resume, and more are straightforward to add.
+  - title: Canonical identity
+    details: One model owns meaning. Your career facts live in one place, not scattered across every platform that asks for them.
+  - title: Derived representations
+    details: Every output is a pure function of your canonical data. Update once. Every representation stays synchronized.
+  - title: Open projections
+    details: Any context can become a view. Markdown ships today; LinkedIn, JSON Resume, and an AI-agent query are straightforward to add.
 ---
 
 ## The problem
@@ -54,6 +54,12 @@ Every one of them says something slightly different, because every one of them w
 ```
 
 One canonical model. Every representation is generated from it, not copied into it.
+
+## Why this matters
+
+A résumé is not your identity. LinkedIn is not your identity. A bio is not your identity.
+
+They are projections, optimized for different audiences. Confusing a projection for the source is why they drift.
 
 ## Same profile. Different contexts.
 

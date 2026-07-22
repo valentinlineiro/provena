@@ -6,7 +6,7 @@ Provena separates the canonical domain model from data sources, projections, and
                  Identity Model
                       │
                       ▼
-              Projection Engine
+             Projection Functions
                       │
         ┌─────────────┼─────────────┐
         ▼             ▼             ▼
@@ -15,6 +15,10 @@ Provena separates the canonical domain model from data sources, projections, and
 ```
 
 The implementation below follows this model directly.
+
+## Identity Model
+
+The identity model is the source of truth. It represents stable professional facts — experience, capabilities, achievements, education, evidence. It does not contain presentation decisions: no formatting, no character limits, no platform conventions. Those belong to projections and renderers.
 
 ## Package layout
 
@@ -54,7 +58,7 @@ The projection does the semantic work — deciding what belongs in this context 
 
 ## Plugin philosophy
 
-Everything except the domain model is a plugin. A plugin implements an interface defined in core and has no access to the domain model beyond the public API.
+Everything around the domain model is replaceable. A plugin implements an interface defined in core and has no access to the domain model beyond the public API.
 
 ## Extending
 

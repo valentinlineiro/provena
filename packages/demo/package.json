@@ -1,0 +1,11 @@
+{
+  "name": "@provena/demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@provena/core": "*",
+    "@provena/markdown": "*",
+    "@provena/yaml": "*"
+  }
+}

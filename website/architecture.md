@@ -49,6 +49,8 @@ Identity → Projection → Renderer → Output
 
 The projection does the semantic work — deciding what belongs in this context and what doesn't. The renderer only represents what the projection already decided; it has no domain knowledge and cannot select or omit facts on its own.
 
+Authority flows inward. Formatting flows outward. The canonical model owns meaning — outputs only express it.
+
 ## Design invariants
 
 - The identity model is never optimized for a specific output.
@@ -58,7 +60,7 @@ The projection does the semantic work — deciding what belongs in this context 
 
 ## Plugin philosophy
 
-Everything around the domain model is replaceable. A plugin implements an interface defined in core and has no access to the domain model beyond the public API.
+The domain model is the stable core. Everything else is replaceable. A plugin implements an interface defined in core and has no access to the domain model beyond the public API.
 
 ## Extending
 

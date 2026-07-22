@@ -6,8 +6,6 @@ The same information is manually duplicated across LinkedIn, your résumé, your
 
 ## The cost
 
-Every time you update one, the others become outdated. Maintenance becomes overhead. Inconsistencies erode credibility.
-
 ```
 LinkedIn says "Senior Engineer"
 Your résumé says "Tech Lead"
@@ -15,6 +13,8 @@ Your bio says "Software Architect"
 
 Visitors notice.
 ```
+
+Every update to one makes the rest outdated. Maintenance becomes overhead. Inconsistencies erode credibility.
 
 ## The root cause
 

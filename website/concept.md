@@ -1,4 +1,4 @@
-# The concept
+# Concept
 
 One identity. Multiple projections.
 

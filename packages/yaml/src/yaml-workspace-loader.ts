@@ -13,6 +13,7 @@ import type {
   Capability,
   Evidence,
 } from '@provena/core'
+import { validate } from '@provena/core'
 
 function loadYaml<T>(abspath: string): Promise<T | null> {
   return readFile(abspath, 'utf-8').then(
@@ -42,7 +43,7 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
     const capabilities = (await loadYaml<Capability[]>(join(path, 'capabilities.yaml'))) ?? []
     const evidence = (await loadYaml<Evidence[]>(join(path, 'evidence.yaml'))) ?? []
 
-    return {
+    const profile: Profile = {
       identity: {
         person,
         metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
@@ -63,5 +64,13 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
       capabilities,
       evidence,
     }
+
+    const errors = validate(profile)
+    if (errors.length > 0) {
+      const details = errors.map((e) => `  ${e.path}: ${e.message}`).join('\n')
+      throw new Error(`Invalid workspace at ${path}:\n${details}`)
+    }
+
+    return profile
   }
 }

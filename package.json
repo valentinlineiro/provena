@@ -7,7 +7,9 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "demo": "tsx packages/demo/src/load-and-render.ts"
+    "test": "node --import tsx --test packages/*/src/*.test.ts",
+    "demo": "tsx packages/demo/src/load-and-render.ts",
+    "provena": "tsx packages/cli/src/index.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

@@ -1,0 +1,14 @@
+{
+  "name": "@provena/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "provena": "./src/index.ts"
+  },
+  "dependencies": {
+    "@provena/core": "*",
+    "@provena/yaml": "*",
+    "@provena/markdown": "*"
+  }
+}

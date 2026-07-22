@@ -25,7 +25,7 @@ Generate a Markdown résumé from the example workspace:
 
 ```bash
 npm install
-npx tsx packages/demo/src/load-and-render.ts
+npm run provena -- render examples/valen
 ```
 
 ↓
@@ -68,6 +68,7 @@ Four layers: **Persistence**, **Domain**, **Projection**, **Presentation**. See 
 | `@provena/core` | Canonical domain model, validation, and projections |
 | `@provena/yaml` | YAML workspace loader |
 | `@provena/markdown` | Markdown renderer |
+| `@provena/cli` | `provena render <workspace>` |
 
 Additional renderers and workspace loaders can be implemented as independent plugins.
 
@@ -94,8 +95,10 @@ my-profile/
 Provena is in active development.
 
 - ✅ Canonical domain model
-- ✅ YAML workspace loader
+- ✅ YAML workspace loader — rejects invalid workspaces at load time
 - ✅ Markdown renderer
+- ✅ CLI (`provena render`)
+- ✅ Tests for domain invariants (referential integrity, projection purity)
 - 🚧 LinkedIn renderer
 - 🚧 JSON Resume renderer
 

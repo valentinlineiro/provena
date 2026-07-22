@@ -27,8 +27,8 @@ function ids(items: { id: string }[]): readonly string[] {
 
 export class YamlWorkspaceLoader implements WorkspaceLoader {
   async load(path: string): Promise<Profile> {
-    const manifest = await loadYaml<{ version?: string }>(join(path, 'provenav2.yaml'))
-    if (!manifest) throw new Error(`provenav2.yaml not found in ${path}`)
+    const manifest = await loadYaml<{ version?: string }>(join(path, 'provena.yaml'))
+    if (!manifest) throw new Error(`provena.yaml not found in ${path}`)
 
     const person = await loadYaml<Person>(join(path, 'person.yaml'))
     if (!person) throw new Error('person.yaml is required')

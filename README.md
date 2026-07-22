@@ -1,12 +1,17 @@
 # Provena
 
-Professional identity as a canonical domain model.
+A canonical domain model for professional identity.
 
-Maintain your career data once. Generate any representation from a single source of truth.
+Most professionals maintain multiple versions of the same information — LinkedIn, résumés, personal websites, conference bios. Provena replaces duplication with a single canonical model.
 
 ```
-YAML workspace → Profile → ResumeProjection → Markdown
-                         → LinkedInProjection → (future)
+YAML Workspace
+      │
+      ▼
+    Profile
+      │
+      ├── ResumeProjection ─────► Markdown
+      └── LinkedInProjection ───► (future)
 ```
 
 ## Quick start
@@ -16,7 +21,23 @@ npm install
 npx tsx packages/demo/src/load-and-render.ts
 ```
 
-Outputs a complete Markdown resume from the example profile at `examples/valen/`.
+↓
+
+```
+# Valentín Liñeiro Barea
+
+## About
+
+Engineer focused on distributed systems, developer tooling, and knowledge representation.
+
+## Experience
+
+### Acme Corp
+**Senior Software Engineer** | Mar 2022 — Present
+...
+```
+
+A complete Markdown resume from the example profile at `examples/valen/`.
 
 ## How it works
 
@@ -36,9 +57,9 @@ Four layers: **Persistence**, **Domain**, **Projection**, **Presentation**. See 
 
 | Package | Role |
 |---------|------|
-| `@provena/core` | Domain model, validation, projections, renderer interface |
-| `@provena/yaml` | Workspace loader for YAML profiles |
-| `@provena/markdown` | Markdown resume renderer |
+| `@provena/core` | Canonical domain model, validation, and projections |
+| `@provena/yaml` | YAML workspace loader |
+| `@provena/markdown` | Markdown renderer |
 
 ## Project structure
 
@@ -63,4 +84,4 @@ my-profile/
 - **Identity is knowledge.** Documents are projections.
 - **Facts over formatting.** Canonical data contains no presentation concerns.
 - **Evidence over claims.** Capabilities reference evidence.
-- **Renderers never modify identity.** They only transform.
+- **Renderers never modify the domain model. They only render projections.**

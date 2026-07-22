@@ -7,21 +7,21 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Why', link: '/why' },
-      { text: 'How it works', link: '/how-it-works' },
-      { text: 'Example', link: '/example' },
+      { text: 'Problem', link: '/problem' },
+      { text: 'Concept', link: '/concept' },
+      { text: 'Examples', link: '/examples' },
       { text: 'Architecture', link: '/architecture' },
+      { text: 'GitHub', link: 'https://github.com/valentinlineiro/provena' },
     ],
     sidebar: [
       { text: 'Home', link: '/' },
-      { text: 'Why Provena', link: '/why' },
-      { text: 'How it works', link: '/how-it-works' },
-      { text: 'Example', link: '/example' },
+      { text: 'Problem', link: '/problem' },
+      { text: 'Concept', link: '/concept' },
+      { text: 'Examples', link: '/examples' },
       { text: 'Architecture', link: '/architecture' },
     ],
     footer: {
-      message: 'MIT License. Built with VitePress.',
+      message: 'MIT License.',
     },
-    search: { provider: 'local' },
   },
 })

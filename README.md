@@ -2,7 +2,10 @@
 
 A canonical domain model for professional identity.
 
-Most professionals maintain multiple versions of the same information — LinkedIn, résumés, personal websites, conference bios. Provena replaces duplication with a single canonical model.
+Most professionals maintain multiple versions of the same information — LinkedIn, résumés, personal websites, conference bios. They are not different identities. They are different projections of the same one, and treating them as separate documents is why they drift.
+
+> Authority flows inward. Formatting flows outward.
+> The canonical model owns meaning. Outputs only express it.
 
 ```
 YAML Workspace
@@ -13,6 +16,8 @@ YAML Workspace
       ├── ResumeProjection ─────► Markdown
       └── LinkedInProjection ───► (future)
 ```
+
+Read the thesis: [Problem](https://valentinlineiro.github.io/provena/problem) · [Concept](https://valentinlineiro.github.io/provena/concept) · [Examples](https://valentinlineiro.github.io/provena/examples) · [Architecture](https://valentinlineiro.github.io/provena/architecture)
 
 ## Quick start
 

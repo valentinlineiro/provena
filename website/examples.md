@@ -2,6 +2,24 @@
 
 The same identity becomes different outputs depending on the projection.
 
+## At a glance
+
+```
+identity:
+  roles:    [...]
+  skills:   [...]
+  evidence: [...]
+
+        ↓
+
+Résumé      → all experience, evidence-backed
+LinkedIn    → last 4 roles, top skills
+Bio         → condensed narrative
+AI agent    → answers a question
+```
+
+This is not a CV generator producing one document. It is one model, queried or rendered differently depending on who's asking.
+
 ## Same data
 
 ```yaml

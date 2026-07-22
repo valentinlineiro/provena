@@ -2,6 +2,8 @@
 
 One identity. Multiple projections.
 
+Professional identity is not an abstraction — it is skills, experience, evidence, and narrative context. Provena models those facts once and derives everything else from them.
+
 ```
    Domain (canonical identity model)
      ↓
@@ -11,6 +13,12 @@ Presentation (renderer)
 ```
 
 Storage — where the identity model lives — is a separate concern. See [Architecture](/architecture).
+
+## The core principle
+
+> Authority flows inward. Formatting flows outward.
+>
+> The identity model owns meaning. Every representation is derived.
 
 ## Domain
 

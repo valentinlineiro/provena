@@ -1,15 +1,31 @@
 # Architecture
 
-Provena follows a four-layer architecture with clear boundaries between knowledge, transformation, and presentation.
+Provena separates the canonical domain model from data sources, projections, and renderers.
+
+```
+                 Identity Model
+                      │
+                      ▼
+              Projection Engine
+                      │
+        ┌─────────────┼─────────────┐
+        ▼             ▼             ▼
+    Resume        LinkedIn       AI Agent
+    Renderer      Renderer        Query
+```
+
+The implementation below follows this model directly.
 
 ## Package layout
 
 ```
 packages/
-  core/       Domain types, Profile, projections, interfaces
+  core/       Domain types, Profile, projection contracts, interfaces
   yaml/       YAML workspace loader
   markdown/   Markdown renderer
 ```
+
+Core owns the domain model and the *contracts* a projection or renderer must satisfy — `Renderer<TProjection>`, `WorkspaceLoader`. It also ships the first-party projections (`toResumeProjection`, `toLinkedInProjection`) as a convenience, but a projection is not required to live in core: any package can write a `Profile → Projection` function against the public API.
 
 ## Key interfaces
 
@@ -22,6 +38,19 @@ interface Renderer<TProjection> {
   render(projection: TProjection): string
 }
 ```
+
+```
+Identity → Projection → Renderer → Output
+```
+
+The projection does the semantic work — deciding what belongs in this context and what doesn't. The renderer only represents what the projection already decided; it has no domain knowledge and cannot select or omit facts on its own.
+
+## Design invariants
+
+- The identity model is never optimized for a specific output.
+- Projections are derived, never authoritative — they can be recomputed from the identity at any time.
+- Renderers have no domain knowledge.
+- New formats do not require changes to core.
 
 ## Plugin philosophy
 

@@ -60,65 +60,50 @@ This is not a CV generator producing one document. It is one model, queried or r
 
 Full experiences. All achievements. Evidence-backed skills.
 
-### LinkedIn (in development)
+### JSON Resume
 
-```
-Headline: Technical Lead
-About: Engineering leader focused on AI-assisted
-development and developer tooling.
-
-Experience:
-  Acme Corp — Technical Lead (Mar 2022 — Present)
-  Led AI adoption and engineering productivity.
-
-Top skills: Distributed Systems
-```
-
-Recent 4 experiences. Top 10 capabilities by evidence. Character-limited.
-
-### Bio
-
-```
-Alex Chen is a Technical Lead at Acme Corp,
-where they work on AI-assisted engineering and
-developer tooling. They focus on distributed
-systems and engineering productivity.
+```json
+{
+  "basics": {
+    "name": "Alex Chen",
+    "title": "Technical Lead",
+    "summary": "..."
+  },
+  "experiences": [
+    {
+      "company": "Acme Corp",
+      "position": "Technical Lead",
+      "startDate": "2022-03"
+    }
+  ],
+  "skills": [
+    { "name": "Distributed Systems", "keywords": ["1 evidence items"] }
+  ]
+}
 ```
 
-Condensed narrative. Context-specific.
-
-### AI agent (queried, not rendered)
-
-```
-Query: "Prepare a proposal for a distributed systems consulting role."
-
-Relevant:
-  - Designed event-driven ingestion pipeline
-  - Reduced p99 latency by 40%
-  - Capability: Distributed Systems (1 piece of evidence)
-
-Excluded:
-  - Anything outside the distributed-systems capability
-```
-
-Not a document — a selection over the same model, shaped by a question instead of a template.
+Standard format. Toolable. Interoperable.
 
 ## What makes this possible
 
 The Projection layer. Each output uses the same identity but applies a different selector:
 
 ```
-Projection = Selection + Transformation + Constraints
+Projection = Selection + Transformation
 
-LinkedInProjection:
-  select:      experiences.last(4), capabilities.top(10, by: evidenceCount)
-  transform:   experience → headline + summary
-  constraints: character limits, platform conventions
+ResumeProjector:
+  select:      all experiences, all capabilities
+  transform:   capability → name + evidenceCount
+
+JsonResumeProjector:
+  select:      all experiences, all capabilities
+  transform:   capability → name + keywords
+  output:      JSON Resume schema
 ```
 
 ```
-Identity → ResumeProjection    → MarkdownRenderer
-Identity → LinkedInProjection  → LinkedInRenderer
+Identity → ResumeProjector          → MarkdownRenderer  → resume.md
+Identity → JsonResumeProjector      → JsonResumeRenderer → resume.json
 ```
 
 The identity is the source of truth. Outputs are temporary views.

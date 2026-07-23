@@ -8,17 +8,17 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Quick Start', link: '/quickstart' },
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },
-      { text: 'Examples', link: '/examples' },
       { text: 'Architecture', link: '/architecture' },
       { text: 'GitHub', link: 'https://github.com/valentinlineiro/provena' },
     ],
     sidebar: [
       { text: 'Home', link: '/' },
+      { text: 'Quick Start', link: '/quickstart' },
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },
-      { text: 'Examples', link: '/examples' },
       { text: 'Architecture', link: '/architecture' },
     ],
     footer: {

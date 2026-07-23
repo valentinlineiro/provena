@@ -13,11 +13,11 @@ hero:
     A canonical model keeps them synchronized.
   actions:
     - theme: brand
+      text: Try it in 5 minutes
+      link: /quickstart
+    - theme: alt
       text: See the model
       link: /concept
-    - theme: alt
-      text: View the example
-      link: /examples
     - theme: alt
       text: GitHub
       link: https://github.com/valentinlineiro/provena
@@ -25,11 +25,34 @@ hero:
 features:
   - title: Canonical identity
     details: One model owns meaning. Your career facts live in one place, not scattered across every platform that asks for them.
-  - title: Derived representations
-    details: Every output is a pure function of your canonical data. Update once. Every representation stays synchronized.
-  - title: Open projections
-    details: Any context can become a view. Markdown ships today; LinkedIn, JSON Resume, and an AI-agent query are straightforward to add.
+  - title: Verified projections
+    details: Every output is a pure function of your canonical data. Once updated, every representation stays synchronized. Tests enforce it.
+  - title: Ready today
+    details: CLI available. Markdown and JSON Resume output. Five-minute Quick Start. No build step, no platform lock-in.
 ---
+
+## From one workspace to multiple formats
+
+```yaml
+# person.yaml
+name: "Alex Morgan"
+title: "Software Engineer"
+summary: "..."
+```
+
+```
+        ↓
+   ┌────────────┐
+   │  Identity  │  (canonical model — facts, evidence, history)
+   └─────┬──────┘
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+ resume.md  resume.json
+```
+
+**Same source. Different projections.** Add a skill once. Both outputs reflect it.
 
 ## The problem
 
@@ -43,31 +66,19 @@ Every one of them says something slightly different, because every one of them w
 
 ```
         Identity Model
-
               ↓
-
          Projections
-
-      ↙        ↓        ↘
-
-    CV      LinkedIn   Website
+       ↙        ↓        ↘
+     CV      LinkedIn   Website
 ```
 
 One canonical model. Every representation is generated from it, not copied into it.
-
-## Why this matters
-
-A résumé is not your identity. LinkedIn is not your identity. A bio is not your identity.
-
-They are projections, optimized for different audiences. Confusing a projection for the source is why they drift.
 
 ## Same profile. Different contexts.
 
 ```
                      Your Profile
-
                           ↓
-
    ┌──────────────────────────────────────┐
    │  Alex Morgan                         │
    │  Software Engineer · Distributed Sys │
@@ -101,5 +112,20 @@ LinkedIn      Résumé       Website
 
    Three copies. Always diverging.
 ```
+
+## Status
+
+**v0.4** — From architecture to adoption.
+
+| Capability | Status |
+|------------|--------|
+| Canonical identity model | ✅ |
+| Executable validation | ✅ |
+| Projector + Renderer contracts | ✅ |
+| Markdown renderer | ✅ |
+| JSON Resume renderer | ✅ |
+| CLI (`render`, `validate`, `--format`, `--stdout`) | ✅ |
+| Five-minute Quick Start | ✅ |
+| I6: Multiple renderers per representation | 🚧 Deferred |
 
 > **Identity is knowledge. Documents are projections. Facts over formatting. Evidence over claims.**

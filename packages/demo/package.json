@@ -6,6 +6,7 @@
   "dependencies": {
     "@provena/core": "*",
     "@provena/markdown": "*",
+    "@provena/jsonresume": "*",
     "@provena/yaml": "*"
   }
 }

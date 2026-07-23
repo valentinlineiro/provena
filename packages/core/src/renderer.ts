@@ -1,3 +1,3 @@
-export interface Renderer<TProjection> {
-  render(projection: TProjection): string
+export interface Renderer<TModel> {
+  render(model: TModel): string
 }

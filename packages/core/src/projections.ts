@@ -1,6 +1,10 @@
 import type { Profile } from './profile.js'
 import type { Education, Publication, Certification } from './types.js'
 
+export interface Projector<TModel> {
+  project(profile: Profile): TModel
+}
+
 function resolve<T extends { id: string }>(ids: readonly string[], items: readonly T[]): T[] {
   const map = new Map(items.map((i) => [i.id, i]))
   return ids.map((id) => map.get(id)).filter((x): x is T => x !== undefined)
@@ -30,7 +34,7 @@ export interface ResumeSkill {
   readonly evidenceCount: number
 }
 
-export interface ResumeProjection {
+export interface ResumeModel {
   readonly name: string
   readonly email?: string
   readonly location?: string
@@ -64,7 +68,7 @@ export interface LinkedInCapability {
   readonly evidenceCount: number
 }
 
-export interface LinkedInProjection {
+export interface LinkedInModel {
   readonly headline: string
   readonly about: string
   readonly experiences: readonly LinkedInExperience[]
@@ -72,41 +76,43 @@ export interface LinkedInProjection {
   readonly topCapabilities: readonly LinkedInCapability[]
 }
 
-export function toResumeProjection(profile: Profile): ResumeProjection {
-  return {
-    name: profile.identity.person.name,
-    email: profile.identity.person.email,
-    location: profile.identity.person.location,
-    urls: profile.identity.person.urls,
-    summary: profile.identity.person.summary ?? '',
-    experiences: resolve(profile.identity.experienceIds, profile.experiences).map((e) => ({
-      organization: e.organization,
-      title: e.title,
-      start: e.start,
-      end: e.end,
-      summary: e.summary,
-      achievements: e.achievements,
-      technologies: e.technologies,
-    })),
-    projects: resolve(profile.identity.projectIds, profile.projects).map((p) => ({
-      name: p.name,
-      role: p.role,
-      description: p.description,
-      url: p.url,
-      technologies: p.technologies,
-    })),
-    education: resolve(profile.identity.educationIds, profile.education),
-    publications: resolve(profile.identity.publicationIds, profile.publications),
-    certifications: resolve(profile.identity.certificationIds, profile.certifications),
-    capabilities: resolve(profile.identity.capabilityIds, profile.capabilities).map((c) => ({
-      name: c.name,
-      description: c.description,
-      evidenceCount: c.evidenceIds.length,
-    })),
-  }
+export const resumeProjector: Projector<ResumeModel> = {
+  project(profile: Profile): ResumeModel {
+    return {
+      name: profile.identity.person.name,
+      email: profile.identity.person.email,
+      location: profile.identity.person.location,
+      urls: profile.identity.person.urls,
+      summary: profile.identity.person.summary ?? '',
+      experiences: resolve(profile.identity.experienceIds, profile.experiences).map((e) => ({
+        organization: e.organization,
+        title: e.title,
+        start: e.start,
+        end: e.end,
+        summary: e.summary,
+        achievements: e.achievements,
+        technologies: e.technologies,
+      })),
+      projects: resolve(profile.identity.projectIds, profile.projects).map((p) => ({
+        name: p.name,
+        role: p.role,
+        description: p.description,
+        url: p.url,
+        technologies: p.technologies,
+      })),
+      education: resolve(profile.identity.educationIds, profile.education),
+      publications: resolve(profile.identity.publicationIds, profile.publications),
+      certifications: resolve(profile.identity.certificationIds, profile.certifications),
+      capabilities: resolve(profile.identity.capabilityIds, profile.capabilities).map((c) => ({
+        name: c.name,
+        description: c.description,
+        evidenceCount: c.evidenceIds.length,
+      })),
+    }
+  },
 }
 
-export function toLinkedInProjection(profile: Profile): LinkedInProjection {
+export function toLinkedInProjection(profile: Profile): LinkedInModel {
   const experiences = resolve(profile.identity.experienceIds, profile.experiences)
     .sort((a, b) => b.start.localeCompare(a.start))
     .slice(0, 4)

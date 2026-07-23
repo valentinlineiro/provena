@@ -16,16 +16,17 @@ export type {
 export type { Profile } from './profile.js'
 
 export type {
+  Projector,
   ResumeExperience,
   ResumeProject,
   ResumeSkill,
-  ResumeProjection,
+  ResumeModel,
   LinkedInExperience,
   LinkedInProject,
   LinkedInCapability,
-  LinkedInProjection,
+  LinkedInModel,
 } from './projections.js'
-export { toResumeProjection, toLinkedInProjection } from './projections.js'
+export { resumeProjector, toLinkedInProjection } from './projections.js'
 
 export type { Renderer } from './renderer.js'
 

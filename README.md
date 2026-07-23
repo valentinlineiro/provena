@@ -2,84 +2,126 @@
 
 A canonical domain model for professional identity.
 
-Most professionals maintain multiple versions of the same information — LinkedIn, résumés, personal websites, conference bios. They are not different identities. They are different projections of the same one, and treating them as separate documents is why they drift.
+Your professional information is scattered. Your résumé. Your LinkedIn. Your
+website. Each copy diverges. Provena stores your professional identity once
+and derives everything else.
 
 > Authority flows inward. Formatting flows outward.
 > The canonical model owns meaning. Outputs only express it.
 
-```
-YAML Workspace
-      │
-      ▼
-    Profile
-      │
-      ├── ResumeProjection ─────► Markdown
-      └── LinkedInProjection ───► (future)
-```
-
-Read the thesis: [Problem](https://valentinlineiro.github.io/provena/problem) · [Concept](https://valentinlineiro.github.io/provena/concept) · [Examples](https://valentinlineiro.github.io/provena/examples) · [Architecture](https://valentinlineiro.github.io/provena/architecture)
-
 ## Quick start
 
-Generate a Markdown résumé from the example workspace:
+```bash
+git clone https://github.com/valenlb/provena.git
+cd provena
+npm install
+```
+
+Create a minimal workspace:
 
 ```bash
+mkdir my-profile
+
+cat > my-profile/person.yaml << 'EOF'
+name: "Your Name"
+email: "you@example.com"
+title: "Software Engineer"
+summary: "A short professional summary."
+urls:
+  github: "https://github.com/you"
+EOF
+
+cat > my-profile/provena.yaml << 'EOF'
+version: "1.0"
+EOF
+```
+
+Render it:
+
+```bash
+provena render my-profile
+cat my-profile/resume.md
+
+provena render my-profile --format jsonresume
+cat my-profile/resume.json
+```
+
+Validate it:
+
+```bash
+provena validate my-profile
+```
+
+Total time: under five minutes.
+
+## Golden Path
+
+A clean checkout SHALL satisfy this sequence without any manual intervention:
+
+```bash
+git clone https://github.com/valenlb/provena.git
+cd provena
 npm install
-npm run provena -- render examples/valen
+provena render examples/valen
+provena render examples/valen --format jsonresume
+provena validate examples/valen
 ```
 
-↓
-
-```
-# Valentín Liñeiro Barea
-
-## About
-
-Engineer focused on distributed systems, developer tooling, and knowledge representation.
-
-## Experience
-
-### Acme Corp
-**Senior Software Engineer** | Mar 2022 — Present
-...
-```
+Each command SHALL return the correct exit code and produce the expected
+artifact with no prior editing.
 
 ## How it works
 
 ```
-Workspace (Persistence)
+Workspace (YAML files)
         │
         ▼
-   Profile (Domain)
+   Profile  (canonical model)
         │
-        ▼
- Projection
+        ├─── Projector<ResumeModel> ────► MarkdownRenderer ───► resume.md
         │
-        ▼
-  Renderer
+        └─── Projector<JsonResumeModel> ──► JsonResumeRenderer ──► resume.json
 ```
 
-Four layers: **Persistence**, **Domain**, **Projection**, **Presentation**. See `docs/architecture.md`.
+Four layers: **Persistence** loads a workspace into a **Profile** (the
+canonical domain model). A **Projector** transforms the Profile into a
+representation (ResumeModel, JsonResumeModel). A **Renderer** serializes that
+representation into an artifact (Markdown, JSON).
+
+Each layer is a pure function with no access to layers above it. Plugins
+implement core interfaces and add zero cost when not installed.
 
 ## Packages
 
-| Package | Role |
-|---------|------|
-| `@provena/core` | Canonical domain model, validation, and projections |
-| `@provena/yaml` | YAML workspace loader |
-| `@provena/markdown` | Markdown renderer |
-| `@provena/cli` | `provena render <workspace>` |
+| Package | Role | API Status |
+|---------|------|------------|
+| `@provena/core` | Canonical domain model, validation, contracts | Stable |
+| `@provena/yaml` | YAML workspace loader | Stable |
+| `@provena/markdown` | Markdown renderer | Stable |
+| `@provena/jsonresume` | JSON Resume projector + renderer | Stable |
+| `@provena/cli` | CLI (`provena render`, `provena validate`) | Stable |
 
-Additional renderers and workspace loaders can be implemented as independent plugins.
+## Public API
 
-## Project structure
+Stable exports from `@provena/core`:
 
-A workspace is a directory with one YAML file per aggregate:
+| Export | Kind | Role |
+|--------|------|------|
+| `Identity` | type | Domain aggregate — references entities by ID |
+| `Profile` | type | Canonical model — holds all entity arrays |
+| `Projector<TModel>` | interface | Contract: `Profile → TModel` |
+| `Renderer<TModel>` | interface | Contract: `TModel → string` |
+| `WorkspaceLoader` | interface | Contract: `path → Promise<Profile>` |
+| `validate()` | function | Check referential integrity |
+| `resumeProjector` | object | `Projector<ResumeModel>` |
+| `ResumeModel` | type | Resume representation |
+
+## Workspace structure
 
 ```
 my-profile/
-  provena.yaml       # manifest
-  person.yaml           # Person
+  provena.yaml       # manifest (version: "1.0")
+  person.yaml           # Person (name, email, title, summary, urls)
   experience.yaml       # Experience[]
   projects.yaml         # Project[]
   capabilities.yaml     # Capability[]
@@ -90,22 +132,20 @@ my-profile/
   evidence.yaml         # Evidence[]
 ```
 
+All entity references are by ID (e.g. `Experience.capabilityIds`). The
+validator checks for dangling references and duplicate IDs at load time.
+
 ## Status
 
-Provena is in active development.
-
 - ✅ Canonical domain model
-- ✅ YAML workspace loader — rejects invalid workspaces at load time
+- ✅ YAML workspace loader with validation
 - ✅ Markdown renderer
-- ✅ CLI (`provena render`)
-- ✅ Tests for domain invariants (referential integrity, projection purity)
-- 🚧 LinkedIn renderer
-- 🚧 JSON Resume renderer
+- ✅ JSON Resume renderer
+- ✅ CLI (`render`, `validate`, `--format`, `--stdout`, `--help`)
+- ✅ Tests for architectural invariants (I1-I5)
+- 🚧 I6 — multiple renderers for one representation (needs a second `Renderer<ResumeModel>`)
 
 ## Philosophy
 
-> Identity is knowledge. Documents are projections.
->
 > Facts over formatting. Evidence over claims.
->
 > The domain model is canonical. Everything else is replaceable.

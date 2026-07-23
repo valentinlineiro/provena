@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { resumeProjector } from '@provena/core'
 import type { Profile } from '@provena/core'
 import { jsonResumeProjector } from './index.js'
 
@@ -55,4 +56,13 @@ test('I4: projector is deterministic — same input, same output', () => {
   const a = jsonResumeProjector.project(profile)
   const b = jsonResumeProjector.project(profile)
   assert.deepEqual(a, b)
+})
+
+test('I5: two distinct representations preserve the same meaning', () => {
+  const profile = makeProfile()
+  const resume = resumeProjector.project(profile)
+  const jsonResume = jsonResumeProjector.project(profile)
+
+  assert.equal(resume.name, profile.identity.person.name)
+  assert.equal(jsonResume.basics.name, profile.identity.person.name)
 })

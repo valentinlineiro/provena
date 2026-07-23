@@ -12,6 +12,7 @@ export default defineConfig({
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },
       { text: 'Architecture', link: '/architecture' },
+      { text: 'Roadmap', link: '/roadmap' },
       { text: 'GitHub', link: 'https://github.com/valentinlineiro/provena' },
     ],
     sidebar: [
@@ -20,6 +21,7 @@ export default defineConfig({
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },
       { text: 'Architecture', link: '/architecture' },
+      { text: 'Roadmap', link: '/roadmap' },
     ],
     footer: {
       message: 'MIT License.',

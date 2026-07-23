@@ -8,6 +8,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Why', link: '/why' },
       { text: 'Quick Start', link: '/quickstart' },
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },
@@ -17,6 +18,7 @@ export default defineConfig({
     ],
     sidebar: [
       { text: 'Home', link: '/' },
+      { text: 'Why', link: '/why' },
       { text: 'Quick Start', link: '/quickstart' },
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },

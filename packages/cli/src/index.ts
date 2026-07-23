@@ -1,7 +1,7 @@
 #!/usr/bin/env -S node --import tsx
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { toResumeProjection } from '@provena/core'
+import { resumeProjector } from '@provena/core'
 import { YamlWorkspaceLoader } from '@provena/yaml'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 
@@ -20,11 +20,11 @@ try {
   console.log('✓ Workspace valid')
   console.log('✓ Identity loaded')
 
-  const projection = toResumeProjection(profile)
-  console.log('✓ Resume projection generated')
+  const model = resumeProjector.project(profile)
+  console.log('✓ Resume model projected')
 
   const renderer = new MarkdownResumeRenderer()
-  const output = renderer.render(projection)
+  const output = renderer.render(model)
 
   const outPath = join(workspacePath, 'resume.md')
   await writeFile(outPath, output, 'utf-8')

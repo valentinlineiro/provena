@@ -1,9 +1,9 @@
 import { YamlWorkspaceLoader } from '@provena/yaml'
-import { toResumeProjection } from '@provena/core'
+import { resumeProjector } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 
 const loader = new YamlWorkspaceLoader()
 const profile = await loader.load('examples/valen')
-const projection = toResumeProjection(profile)
+const model = resumeProjector.project(profile)
 const renderer = new MarkdownResumeRenderer()
-console.log(renderer.render(projection))
+console.log(renderer.render(model))

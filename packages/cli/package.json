@@ -20,6 +20,7 @@
     "@provena/yaml": "*",
     "@provena/jsonresume": "*",
     "@provena/markdown": "*",
+    "@provena/html": "*",
     "tsup": "^8.0.0"
   }
 }

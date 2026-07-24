@@ -5,6 +5,7 @@ import { resumeProjector } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
 import { YamlWorkspaceLoader } from '@provena/yaml'
 import { MarkdownResumeRenderer } from '@provena/markdown'
+import { HtmlResumeRenderer } from '@provena/html'
 import { cmdInit } from './init.js'
 
 const [, , command, ...args] = process.argv
@@ -24,7 +25,7 @@ Commands:
   init      Create a new workspace from a template
 
 Options:
-  --format <format>  Output format: markdown (default) | jsonresume
+  --format <format>  Output format: markdown (default) | jsonresume | html
   --stdout           Write to stdout instead of file
   --help             Show this message
 `)
@@ -39,7 +40,7 @@ Arguments:
   workspace           Path to workspace directory
 
 Options:
-  --format <format>   Output format: markdown (default) | jsonresume
+  --format <format>   Output format: markdown (default) | jsonresume | html
   --stdout            Write to stdout instead of file
   --help              Show this message
 
@@ -63,8 +64,8 @@ function parseArgs(argv: string[]): { format: string; stdout: boolean; help: boo
         console.error('Error: --format requires a value (markdown | jsonresume)')
         process.exit(2)
       }
-      if (val !== 'markdown' && val !== 'jsonresume') {
-        console.error(`Error: unknown format "${val}". Use markdown or jsonresume.`)
+      if (val !== 'markdown' && val !== 'jsonresume' && val !== 'html') {
+        console.error(`Error: unknown format "${val}". Use markdown, jsonresume, or html.`)
         process.exit(2)
       }
       result.format = val
@@ -87,7 +88,17 @@ async function cmdRender(path: string, opts: { format: string; stdout: boolean }
   const loader = new YamlWorkspaceLoader()
   const profile = await loader.load(path)
 
-  if (opts.format === 'jsonresume') {
+  if (opts.format === 'html') {
+    const model = resumeProjector.project(profile)
+    const output = new HtmlResumeRenderer().render(model)
+    if (opts.stdout) {
+      console.log(output)
+    } else {
+      const outPath = join(path, 'resume.html')
+      await writeFile(outPath, output, 'utf-8')
+      console.log(`Written: ${outPath}`)
+    }
+  } else if (opts.format === 'jsonresume') {
     const model = jsonResumeProjector.project(profile)
     const output = jsonResumeRenderer.render(model)
     if (opts.stdout) {

@@ -1,0 +1,1 @@
+export { HtmlResumeRenderer } from './html-resume-renderer.js'

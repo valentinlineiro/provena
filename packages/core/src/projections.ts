@@ -112,6 +112,9 @@ export const resumeProjector: Projector<ResumeModel> = {
   },
 }
 
+/**
+ * @experimental Not yet consumed by any renderer. API may change before v1.0.
+ */
 export function toLinkedInProjection(profile: Profile): LinkedInModel {
   const experiences = resolve(profile.identity.experienceIds, profile.experiences)
     .sort((a, b) => b.start.localeCompare(a.start))

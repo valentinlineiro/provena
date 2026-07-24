@@ -2,18 +2,18 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import yaml from 'js-yaml'
 import type { WorkspaceLoader, Profile } from '@provena/core'
-import type {
-  Person,
-  Experience,
-  Project,
-  Education,
-  Publication,
-  Certification,
-  Recommendation,
-  Capability,
-  Evidence,
-} from '@provena/core'
 import { validate, formatValidationErrors } from '@provena/core'
+import {
+  parsePerson,
+  parseExperiences,
+  parseProjects,
+  parseEducation,
+  parsePublications,
+  parseCertifications,
+  parseRecommendations,
+  parseCapabilities,
+  parseEvidence,
+} from './schema.js'
 
 function loadYaml<T>(abspath: string): Promise<T | null> {
   return readFile(abspath, 'utf-8').then(
@@ -31,17 +31,18 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
     const manifest = await loadYaml<{ version?: string }>(join(path, 'provena.yaml'))
     if (!manifest) throw new Error(`provena.yaml not found in ${path}`)
 
-    const person = await loadYaml<Person>(join(path, 'person.yaml'))
-    if (!person) throw new Error('person.yaml is required')
+    const rawPerson = await loadYaml<unknown>(join(path, 'person.yaml'))
+    if (!rawPerson) throw new Error('person.yaml is required')
+    const person = parsePerson(rawPerson)
 
-    const experiences = (await loadYaml<Experience[]>(join(path, 'experience.yaml'))) ?? []
-    const projects = (await loadYaml<Project[]>(join(path, 'projects.yaml'))) ?? []
-    const education = (await loadYaml<Education[]>(join(path, 'education.yaml'))) ?? []
-    const publications = (await loadYaml<Publication[]>(join(path, 'publications.yaml'))) ?? []
-    const certifications = (await loadYaml<Certification[]>(join(path, 'certifications.yaml'))) ?? []
-    const recommendations = (await loadYaml<Recommendation[]>(join(path, 'recommendations.yaml'))) ?? []
-    const capabilities = (await loadYaml<Capability[]>(join(path, 'capabilities.yaml'))) ?? []
-    const evidence = (await loadYaml<Evidence[]>(join(path, 'evidence.yaml'))) ?? []
+    const experiences = parseExperiences((await loadYaml<unknown>(join(path, 'experience.yaml'))) ?? [])
+    const projects = parseProjects((await loadYaml<unknown>(join(path, 'projects.yaml'))) ?? [])
+    const education = parseEducation((await loadYaml<unknown>(join(path, 'education.yaml'))) ?? [])
+    const publications = parsePublications((await loadYaml<unknown>(join(path, 'publications.yaml'))) ?? [])
+    const certifications = parseCertifications((await loadYaml<unknown>(join(path, 'certifications.yaml'))) ?? [])
+    const recommendations = parseRecommendations((await loadYaml<unknown>(join(path, 'recommendations.yaml'))) ?? [])
+    const capabilities = parseCapabilities((await loadYaml<unknown>(join(path, 'capabilities.yaml'))) ?? [])
+    const evidence = parseEvidence((await loadYaml<unknown>(join(path, 'evidence.yaml'))) ?? [])
 
     const profile: Profile = {
       identity: {

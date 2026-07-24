@@ -1,0 +1,8 @@
+name: "Your Name"
+email: "you@example.com"
+location: "City, Country"
+title: "Software Engineer"
+summary: "A short professional summary — one or two sentences about what you do."
+urls:
+  github: "https://github.com/you"
+  linkedin: "https://linkedin.com/in/you"

@@ -5,6 +5,7 @@ import { resumeProjector } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
 import { YamlWorkspaceLoader } from '@provena/yaml'
 import { MarkdownResumeRenderer } from '@provena/markdown'
+import { cmdInit } from './init.js'
 
 const [, , command, ...args] = process.argv
 
@@ -14,11 +15,13 @@ function help(stream: NodeJS.WriteStream = process.stdout): void {
 Usage:
   provena render <workspace> [options]
   provena validate <workspace>
+  provena init <workspace> [options]
   provena --help
 
 Commands:
   render    Generate output from a workspace
   validate  Check workspace integrity
+  init      Create a new workspace from a template
 
 Options:
   --format <format>  Output format: markdown (default) | jsonresume
@@ -138,6 +141,20 @@ if (command === 'render') {
   } catch (e) {
     err(e instanceof Error ? e.message : String(e))
   }
+} else if (command === 'init') {
+  const path = args[0]
+  if (!path || path === '--help') {
+    console.error('Usage: provena init <workspace> [--template default|consultant|academic]')
+    process.exit(1)
+  }
+  const template = args.includes('--template')
+    ? args[args.indexOf('--template') + 1] ?? 'default'
+    : 'default'
+  try {
+    await cmdInit(path, template)
+  } catch (e) {
+    err(e instanceof Error ? e.message : String(e))
+  }
 } else {
-  err(`Unknown command: "${command}"`, 'Available commands: render, validate')
+  err(`Unknown command: "${command}"`, 'Available commands: render, validate, init')
 }

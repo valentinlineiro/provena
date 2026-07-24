@@ -1,0 +1,6 @@
+- id: "edu-1"
+  institution: "University"
+  degree: "Degree"
+  field: "Field of Study"
+  start: "YYYY"
+  end: "YYYY"

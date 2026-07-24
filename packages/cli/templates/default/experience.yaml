@@ -1,0 +1,13 @@
+- id: "exp-1"
+  organization: "Your Organization"
+  title: "Your Role"
+  start: "YYYY-MM"
+  summary: "What you did and why it mattered."
+  achievements:
+    - "Key achievement with measurable impact"
+    - "Another achievement"
+  technologies:
+    - "Technology"
+  capabilityIds:
+    - "cap-1"
+  evidenceIds: []

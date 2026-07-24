@@ -10,7 +10,7 @@
     "provena": "./dist/cli.js"
   },
   "main": "./dist/cli.js",
-  "files": ["dist", "README.md"],
+  "files": ["dist", "templates", "README.md"],
   "scripts": {
     "build": "tsup",
     "prepublishOnly": "npm run build"

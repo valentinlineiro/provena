@@ -1,0 +1,12 @@
+- id: "eng-1"
+  organization: "Client Organization"
+  title: "Engagement Lead"
+  start: "YYYY-MM"
+  summary: "Led delivery of X initiative."
+  achievements:
+    - "Delivered outcome with measurable impact"
+  technologies:
+    - "Technology"
+  capabilityIds:
+    - "cap-1"
+  evidenceIds: []

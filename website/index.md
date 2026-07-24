@@ -3,129 +3,87 @@ layout: home
 
 hero:
   name: Provena
-  text: Your professional identity has too many copies.
+  text: Define your identity once. Export everywhere.
   tagline: |
-    LinkedIn. Résumés. Websites. Bios.
-
-    They are not different identities.
-    They are different views of the same one.
-
-    A canonical model keeps them synchronized.
+    A canonical model for your professional identity.
+    One YAML workspace. CV, JSON Resume, HTML, and more — all generated from the same source.
   actions:
     - theme: brand
-      text: Try it in 5 minutes
+      text: Quick start in 5 minutes
       link: /quickstart
     - theme: alt
       text: See the model
       link: /concept
     - theme: alt
+      text: View example output
+      link: /examples
+    - theme: alt
       text: GitHub
       link: https://github.com/valentinlineiro/provena
 
 features:
-  - title: Canonical identity
-    details: One model owns meaning. Your career facts live in one place, not scattered across every platform that asks for them.
-  - title: Verified projections
-    details: Every output is a pure function of your canonical data. Once updated, every representation stays synchronized. Tests enforce it.
-  - title: Ready today
-    details: CLI available. Markdown and JSON Resume output. Five-minute Quick Start. No build step, no platform lock-in.
+  - title: One source of truth
+    details: Your career facts live in YAML files. Every output is derived — never copied, never out of sync.
+  - title: Multiple projections
+    details: Resume, LinkedIn profile, conference bio, JSON Resume — different views of the same identity.
+  - title: Verified by validation
+    details: Referential integrity checks catch broken links between skills, experience, and evidence before you render.
+  - title: CLI-first
+    details: No build step, no platform lock-in. `provena render` from any directory. Works with your editor, not instead of it.
+  - title: Future-proof
+    details: New output format? New projection? The model stays the same. Add a renderer, don't reshape your data.
+  - title: Open source
+    details: MIT license. Your identity is not a SaaS subscription. Own your data, own your toolchain.
 ---
 
-## From one workspace to multiple formats
-
-```yaml
-# person.yaml
-name: "Alex Morgan"
-title: "Software Engineer"
-summary: "..."
-```
+## YAML → Profile → Outputs
 
 ```
-        ↓
-   ┌────────────┐
-   │  Identity  │  (canonical model — facts, evidence, history)
-   └─────┬──────┘
-         │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
- resume.md  resume.json
+┌─────────────────────┐
+│  person.yaml        │
+│  experience.yaml    │
+│  capabilities.yaml  │  Canonical identity model
+│  projects.yaml      │
+│  provena.yaml       │
+└─────────┬───────────┘
+          │
+          ▼
+   ┌──────────────┐
+   │   Profile    │  (validated, referentially sound)
+   └──────┬───────┘
+          │
+     ┌────┴────┐
+     │         │
+     ▼         ▼         ▼
+  resume.md  resume.json  resume.html
+  (Markdown) (JSON Resume) (HTML — coming soon)
 ```
 
-**Same source. Different projections.** Add a skill once. Both outputs reflect it.
+## Who is it for?
 
-## The problem
+**Developers** who want their CV to reflect their actual work, not a hand-edited copy from last year.
 
-```
-LinkedIn ≠ Résumé ≠ Portfolio ≠ Bio
-```
+**Freelancers** who manage multiple bios for different clients and platforms, and want one source of truth.
 
-Every one of them says something slightly different, because every one of them was updated on a different day, by hand. Keeping them in sync is manual work that never ends — and nobody notices until they don't match.
+**Job seekers** who need polished, consistent outputs across every application channel.
 
-## The solution
+**Consultants** who maintain capability statements, case studies, and speaker profiles — all from one model.
 
-```
-        Identity Model
-              ↓
-         Projections
-       ↙        ↓        ↘
-     CV      LinkedIn   Website
+Try it:
+
+```bash
+npx @provena/cli render examples/valen
+cat examples/valen/resume.md
 ```
 
-One canonical model. Every representation is generated from it, not copied into it.
+## See it in action
 
-## Same profile. Different contexts.
+| Input YAML | Output Markdown |
+|---|---|
+| `person.yaml` defines name, title, summary | Header shows name and about section |
+| `experience.yaml` lists roles with achievements | Each role is a section with org, title, dates |
+| `capabilities.yaml` defines skills with evidence | Skills are listed with optional descriptions |
+| Identity links experiences to capabilities | No duplication — references, not copies |
 
-```
-                     Your Profile
-                          ↓
-   ┌──────────────────────────────────────┐
-   │  Alex Morgan                         │
-   │  Software Engineer · Distributed Sys │
-   │  Experience at Acme Corp             │
-   └──────────────────────────────────────┘
-
-        ↙               ↓               ↘
-
-   ┌─────────────┐  ┌──────────┐  ┌──────────────┐
-   │   Résumé    │  │ LinkedIn │  │ Conference   │
-   │             │  │          │  │ Bio          │
-   │ Full        │  │ Recent   │  │              │
-   │ history     │  │ 4 roles  │  │ Condensed    │
-   │ Evidence    │  │ Top 10   │  │ narrative    │
-   │ backed      │  │ skills   │  │ for audience │
-   └─────────────┘  └──────────┘  └──────────────┘
-
-   Same data. Different views.
-```
-
-## Before
-
-```
-LinkedIn      Résumé       Website
-    |            |            |
- Experience   Experience   Experience
-    |            |            |
-   Skills       Skills       Skills
-    |            |            |
-  Projects     Projects     Projects
-
-   Three copies. Always diverging.
-```
-
-## Status
-
-**v0.4** — From architecture to adoption.
-
-| Capability | Status |
-|------------|--------|
-| Canonical identity model | ✅ |
-| Executable validation | ✅ |
-| Projector + Renderer contracts | ✅ |
-| Markdown renderer | ✅ |
-| JSON Resume renderer | ✅ |
-| CLI (`render`, `validate`, `--format`, `--stdout`) | ✅ |
-| Five-minute Quick Start | ✅ |
-| I6: Multiple renderers per representation | 🚧 Deferred |
-
-> **Identity is knowledge. Documents are projections. Facts over formatting. Evidence over claims.**
+[Render the example workspace](/examples) →
+[Start your own in 5 minutes](/quickstart) →

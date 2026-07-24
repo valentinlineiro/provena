@@ -14,6 +14,7 @@ export default defineConfig({
       { text: 'Concept', link: '/concept' },
       { text: 'Architecture', link: '/architecture' },
       { text: 'Roadmap', link: '/roadmap' },
+      { text: 'Use Cases', link: '/use-cases' },
       { text: 'GitHub', link: 'https://github.com/valentinlineiro/provena' },
     ],
     sidebar: [
@@ -23,6 +24,7 @@ export default defineConfig({
       { text: 'Problem', link: '/problem' },
       { text: 'Concept', link: '/concept' },
       { text: 'Architecture', link: '/architecture' },
+      { text: 'Use Cases', link: '/use-cases' },
       { text: 'Roadmap', link: '/roadmap' },
     ],
     footer: {

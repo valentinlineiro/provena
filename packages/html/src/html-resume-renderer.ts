@@ -16,7 +16,32 @@ function esc(s: string): string {
 
 export class HtmlResumeRenderer implements Renderer<ResumeModel> {
   render(model: ResumeModel): string {
-    const parts: string[] = ['<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + esc(model.name) + '</title></head><body>']
+    const head = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(model.name)}</title>
+<style>
+  :root { --c-text: #111; --c-muted: #555; --c-border: #ddd; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; color: var(--c-text);
+         max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; line-height: 1.6; }
+  h1 { font-size: 2rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.2rem; margin: 2rem 0 .75rem; border-bottom: 1px solid var(--c-border); padding-bottom: .25rem; }
+  h3 { font-size: 1rem; margin-bottom: .15rem; }
+  time, small { color: var(--c-muted); font-size: .875rem; }
+  ul { padding-left: 1.25rem; }
+  a { color: inherit; }
+  @media print {
+    body { margin: 0; padding: 0; max-width: 100%; font-size: 11pt; }
+    h2 { page-break-after: avoid; }
+    article { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>`
+    const parts: string[] = [head]
 
     parts.push('<article>')
     parts.push('<header>')

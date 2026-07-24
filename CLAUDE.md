@@ -9,12 +9,13 @@ Provena is a canonical domain model for professional identity: a single `Profile
 ## Commands
 
 ```bash
-npm install                                    # install (npm workspaces, packages/*)
-npm run typecheck                              # tsc --noEmit across all packages
-npx tsx packages/demo/src/load-and-render.ts   # or: npm run demo
+npm install            # instalar (npm workspaces, packages/*)
+npm run typecheck      # tsc --noEmit en todos los paquetes
+npm test               # node --import tsx --test packages/*/src/*.test.ts
+npm run demo           # carga examples/valen y renderiza a stdout
 ```
 
-There is no test suite, linter, or build step configured yet — `typecheck` is the only verification available.
+typecheck + test son los dos pasos de verificación. No hay linter configurado todavía.
 
 ## Architecture
 

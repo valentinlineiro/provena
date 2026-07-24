@@ -8,7 +8,6 @@ function makeProfile(): Profile {
   return {
     identity: {
       person: { name: 'Test User', title: 'Engineer', summary: 'A summary.', urls: {} },
-      metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
       experienceIds: ['exp-1'],
       projectIds: ['proj-1'],
       educationIds: ['edu-1'],

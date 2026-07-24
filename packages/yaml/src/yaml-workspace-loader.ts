@@ -46,7 +46,6 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
     const profile: Profile = {
       identity: {
         person,
-        metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
         experienceIds: ids(experiences),
         projectIds: ids(projects),
         educationIds: ids(education),

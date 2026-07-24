@@ -7,7 +7,6 @@ import type { Identity, Experience, Capability } from './types.js'
 function identity(overrides: Partial<Identity> = {}): Identity {
   return {
     person: { name: 'Alex Chen', urls: {} },
-    metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
     experienceIds: [],
     projectIds: [],
     educationIds: [],

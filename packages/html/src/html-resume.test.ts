@@ -8,7 +8,6 @@ function makeProfile(): Profile {
   return {
     identity: {
       person: { name: 'Alex Chen', title: 'Engineer', summary: 'Test.', urls: {} },
-      metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
       experienceIds: ['exp-1'],
       projectIds: [],
       educationIds: [],
@@ -54,6 +53,8 @@ test('HTML renderer produces valid document structure', () => {
   assert.match(html, /<article>/)
   assert.match(html, /<time>/)
   assert.match(html, /<\/html>/)
+  assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1">/)
+  assert.match(html, /<style>[\s\S]*body\s*\{[\s\S]*<\/style>/)
 })
 
 test('HTML renderer escapes special characters', () => {

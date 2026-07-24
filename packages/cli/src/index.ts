@@ -7,6 +7,31 @@ import { YamlWorkspaceLoader } from '@provena/yaml'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import { cmdInit } from './init.js'
+import type { Profile } from '@provena/core'
+
+interface FormatEntry {
+  project: (profile: Profile) => unknown
+  render: (model: unknown) => string
+  ext: string
+}
+
+const FORMAT_REGISTRY: Record<string, FormatEntry> = {
+  markdown: {
+    project: (p) => resumeProjector.project(p),
+    render: (m) => new MarkdownResumeRenderer().render(m as never),
+    ext: 'md',
+  },
+  jsonresume: {
+    project: (p) => jsonResumeProjector.project(p),
+    render: (m) => jsonResumeRenderer.render(m as never),
+    ext: 'json',
+  },
+  html: {
+    project: (p) => resumeProjector.project(p),
+    render: (m) => new HtmlResumeRenderer().render(m as never),
+    ext: 'html',
+  },
+}
 
 const [, , command, ...args] = process.argv
 
@@ -25,11 +50,13 @@ Commands:
   init      Create a new workspace from a template
 
 Options:
-  --format <format>  Output format: markdown (default) | jsonresume | html
+  --format <format>  Output format: ${formatsList()}
   --stdout           Write to stdout instead of file
   --help             Show this message
 `)
 }
+
+function formatsList(): string { return Object.keys(FORMAT_REGISTRY).join(' | ') }
 
 function renderHelp(stream: NodeJS.WriteStream = process.stdout): void {
   stream.write(`Usage: provena render <workspace> [options]
@@ -40,7 +67,7 @@ Arguments:
   workspace           Path to workspace directory
 
 Options:
-  --format <format>   Output format: markdown (default) | jsonresume | html
+  --format <format>   Output format: ${formatsList()}
   --stdout            Write to stdout instead of file
   --help              Show this message
 
@@ -61,11 +88,11 @@ function parseArgs(argv: string[]): { format: string; stdout: boolean; help: boo
     else if (arg === '--format') {
       const val = argv[++i]
       if (!val || val.startsWith('--')) {
-        console.error('Error: --format requires a value (markdown | jsonresume | html)')
+        console.error(`Error: --format requires a value (${formatsList()})`)
         process.exit(2)
       }
-      if (val !== 'markdown' && val !== 'jsonresume' && val !== 'html') {
-        console.error(`Error: unknown format "${val}". Use markdown, jsonresume, or html.`)
+      if (!(val in FORMAT_REGISTRY)) {
+        console.error(`Error: unknown format "${val}". Use ${formatsList()}.`)
         process.exit(2)
       }
       result.format = val
@@ -85,39 +112,20 @@ function err(msg: string, hint?: string): never {
 }
 
 async function cmdRender(path: string, opts: { format: string; stdout: boolean }): Promise<void> {
+  const entry = FORMAT_REGISTRY[opts.format]
+  if (!entry) err(`Unknown format "${opts.format}". Use: ${formatsList()}`)
+
   const loader = new YamlWorkspaceLoader()
   const profile = await loader.load(path)
+  const model = entry.project(profile)
+  const output = entry.render(model)
 
-  if (opts.format === 'html') {
-    const model = resumeProjector.project(profile)
-    const output = new HtmlResumeRenderer().render(model)
-    if (opts.stdout) {
-      console.log(output)
-    } else {
-      const outPath = join(path, 'resume.html')
-      await writeFile(outPath, output, 'utf-8')
-      console.log(`Written: ${outPath}`)
-    }
-  } else if (opts.format === 'jsonresume') {
-    const model = jsonResumeProjector.project(profile)
-    const output = jsonResumeRenderer.render(model)
-    if (opts.stdout) {
-      console.log(output)
-    } else {
-      const outPath = join(path, 'resume.json')
-      await writeFile(outPath, output, 'utf-8')
-      console.log(`Written: ${outPath}`)
-    }
+  if (opts.stdout) {
+    console.log(output)
   } else {
-    const model = resumeProjector.project(profile)
-    const output = new MarkdownResumeRenderer().render(model)
-    if (opts.stdout) {
-      console.log(output)
-    } else {
-      const outPath = join(path, 'resume.md')
-      await writeFile(outPath, output, 'utf-8')
-      console.log(`Written: ${outPath}`)
-    }
+    const outPath = join(path, `resume.${entry.ext}`)
+    await writeFile(outPath, output, 'utf-8')
+    console.log(`Written: ${outPath}`)
   }
 }
 

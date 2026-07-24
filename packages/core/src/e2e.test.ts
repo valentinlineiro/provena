@@ -20,7 +20,6 @@ function validProfile() {
   }]
   const identity: Identity = {
     person,
-    metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
     experienceIds: ['exp-1'],
     projectIds: [],
     educationIds: [],

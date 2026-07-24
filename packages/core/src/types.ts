@@ -1,10 +1,3 @@
-export interface Metadata {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  readonly version: number
-}
-
 export type EvidenceSource =
   | 'experience'
   | 'project'
@@ -107,7 +100,6 @@ export interface Person {
 
 export interface Identity {
   readonly person: Person
-  readonly metadata: Metadata
   readonly experienceIds: readonly string[]
   readonly projectIds: readonly string[]
   readonly educationIds: readonly string[]

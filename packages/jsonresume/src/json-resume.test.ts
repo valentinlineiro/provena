@@ -16,7 +16,6 @@ function makeProfile(): Profile {
   return deepFreeze({
     identity: {
       person: { name: 'Alex Chen', title: 'Technical Lead', urls: {} },
-      metadata: { id: 'default', createdAt: '', updatedAt: '', version: 1 },
       experienceIds: ['exp-1'],
       projectIds: [],
       educationIds: [],

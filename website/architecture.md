@@ -74,7 +74,7 @@ decided; it has no domain knowledge and cannot select or omit facts on its own.
 | I3 | Renderers never mutate representations. | ✅ Tested |
 | I4 | Representations are deterministic. | ✅ Tested |
 | I5 | Different representations preserve the same meaning. | ✅ Tested |
-| I6 | One representation may have multiple artifacts. | 🚧 Deferred |
+| I6 | One representation may have multiple artifacts. | ✅ Tested |
 
 ## Plugin philosophy
 

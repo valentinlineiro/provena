@@ -1,15 +1,25 @@
 {
   "name": "@provena/cli",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
-    "provena": "./src/index.ts"
+    "provena": "./dist/cli.js"
   },
-  "dependencies": {
+  "main": "./dist/cli.js",
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
     "@provena/core": "*",
     "@provena/yaml": "*",
     "@provena/jsonresume": "*",
-    "@provena/markdown": "*"
+    "@provena/markdown": "*",
+    "tsup": "^8.0.0"
   }
 }

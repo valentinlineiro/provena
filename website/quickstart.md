@@ -2,12 +2,17 @@
 
 Clone, install, create a workspace, and render it. No previous setup needed.
 
-## 1. Clone and install
+## 1. Use the CLI directly
 
 ```bash
-git clone https://github.com/valentinlineiro/provena.git
-cd provena
-npm install
+npx @provena/cli render examples/valen
+```
+
+Or install globally:
+
+```bash
+npm install -g @provena/cli
+provena render examples/valen
 ```
 
 ## 2. Create a workspace
@@ -34,21 +39,21 @@ EOF
 Render as Markdown:
 
 ```bash
-provena render my-profile
+npx @provena/cli render my-profile
 cat my-profile/resume.md
 ```
 
 Render as JSON Resume:
 
 ```bash
-provena render my-profile --format jsonresume
+npx @provena/cli render my-profile --format jsonresume
 cat my-profile/resume.json
 ```
 
 ## 4. Validate it
 
 ```bash
-provena validate my-profile
+npx @provena/cli validate my-profile
 ```
 
 ## Total time

@@ -21,6 +21,7 @@
     "@provena/jsonresume": "*",
     "@provena/markdown": "*",
     "@provena/html": "*",
+    "@provena/linkedin": "*",
     "tsup": "^8.0.0"
   }
 }

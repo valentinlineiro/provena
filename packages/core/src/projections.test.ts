@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resumeProjector, toLinkedInProjection } from './projections.js'
+import { resumeProjector } from './projections.js'
 import type { Profile } from './profile.js'
 
 function deepFreeze<T>(value: T): T {
@@ -48,22 +48,14 @@ function makeProfile(): Profile {
 test('a projector never mutates the identity it was derived from', () => {
   const profile = makeProfile()
   resumeProjector.project(profile)
-  toLinkedInProjection(profile)
   assert.equal(profile.identity.person.name, 'Alex Chen')
 })
 
-test('the same identity produces different, independent projections', () => {
+test('a projector is deterministic — same input, same output', () => {
   const profile = makeProfile()
-  const resume = resumeProjector.project(profile)
-  const linkedin = toLinkedInProjection(profile)
-
-  assert.equal(resume.name, 'Alex Chen')
-  assert.equal(resume.experiences[0]?.organization, 'Acme Corp')
-
-  assert.equal(linkedin.headline, 'Technical Lead')
-  assert.equal(linkedin.experiences[0]?.organization, 'Acme Corp')
-
-  assert.notEqual(Object.keys(resume).join(','), Object.keys(linkedin).join(','))
+  const a = resumeProjector.project(profile)
+  const b = resumeProjector.project(profile)
+  assert.deepEqual(a, b)
 })
 
 test('a capability carries its evidence count, not a free-form claim', () => {

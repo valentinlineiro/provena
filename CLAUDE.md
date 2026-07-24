@@ -26,17 +26,17 @@ Persistence (WorkspaceLoader) → Domain (Profile) → Projection (pure fn) → 
 ```
 
 - **Persistence** — reads a workspace (dir of YAML files) into a `Profile`. Implements `WorkspaceLoader` from core. `@provena/yaml`'s `YamlWorkspaceLoader` is the only implementation.
-- **Domain** (`packages/core`) — the canonical model: entity types in `types.ts` (Person, Experience, Project, Education, Publication, Certification, Recommendation, Capability, Evidence), `Identity` (aggregate root referencing entities by id) and `Profile` (`profile.ts`, holds the entity arrays `Identity` points into). Pure types, zero I/O, zero dependencies. This is the only layer that is never a plugin.
-- **Projection** (`projections.ts`) — pure functions `Profile → Projection` (e.g. `toResumeProjection`, `toLinkedInProjection`) that select, filter, and reshape the canonical model for one consumer. Entity references are ids; projections resolve them via the `resolve()` helper.
-- **Presentation** — a `Renderer<TProjection>` (interface in `renderer.ts`) is a pure function `Projection → string`, with no access to `Profile`. `@provena/markdown`'s `MarkdownResumeRenderer` is the only implementation.
+- **Domain** (`packages/core`) — the canonical model: entity types in `types.ts` (Person, Experience, Project, Education, Publication, Certification, Recommendation, Capability, Evidence), `Identity` (aggregate root referencing entities by id) and `Profile` (`profile.ts`, holds the entity arrays `Identity` points into). Also defines the `Projector<T>`, `Renderer<T>`, and `WorkspaceLoader` interfaces, plus the resume projection (`resumeProjector`) as the one built-in example. Pure types, zero I/O, zero dependencies. This is the only layer that is never a plugin.
+- **Projection** — a `Projector<TModel>` (`project(profile: Profile): TModel`) that selects, filters, and reshapes the canonical model for one consumer. Each new platform gets its own `Projector` implementation in its own package (`@provena/jsonresume`'s `jsonResumeProjector`, `@provena/linkedin`'s `linkedInProjector`); only the resume projection lives in core.
+- **Presentation** — a `Renderer<TModel>` (interface in `renderer.ts`) is a pure function `TModel → string`, with no access to `Profile`. `@provena/markdown`'s `MarkdownResumeRenderer`, `@provena/html`'s `HtmlResumeRenderer`, `@provena/jsonresume`'s `jsonResumeRenderer`, and `@provena/linkedin`'s `linkedInRenderer` each implement it.
 
-Everything outside `@provena/core` is a plugin: it implements a core interface (`WorkspaceLoader` or `Renderer<T>`), has no access to domain internals beyond the public API, and should add zero cost when not installed.
+Everything outside `@provena/core` is a plugin: it implements a core interface (`WorkspaceLoader`, `Projector<T>`, or `Renderer<T>`), has no access to domain internals beyond the public API, and should add zero cost when not installed.
 
 ### Extension points (see CONTRIBUTING.md)
 
 - New aggregate type → touches the canonical model in `packages/core`, needs core review.
 - New output format → implement `Renderer<T>` for an existing projection, as a new package.
-- New platform (LinkedIn, JSON Resume) → new projection function + new renderer.
+- New platform (e.g. LinkedIn, JSON Resume) → new package with its own `Projector<T>` + `Renderer<T>`.
 - New data source (SQLite, Notion, ...) → implement `WorkspaceLoader`, as a new package.
 
 Guiding question for any change: does this strengthen the canonical model or expand the plugin ecosystem? If neither, it probably doesn't belong.
@@ -49,11 +49,12 @@ Entities reference each other by id (e.g. `Experience.capabilityIds`, `Capabilit
 
 ```
 packages/
-  core/       domain types, Profile, projections, validation, Renderer/WorkspaceLoader interfaces
+  core/       domain types, Profile, resumeProjector, validation, Projector/Renderer/WorkspaceLoader interfaces
   yaml/       YamlWorkspaceLoader — reads a workspace dir (provena.yaml manifest + person/experience/projects/... .yaml), validates shape against schema.ts before returning a Profile
   markdown/   MarkdownResumeRenderer
   html/       HtmlResumeRenderer
   jsonresume/ JSON Resume projector + renderer
+  linkedin/   LinkedIn projector + renderer (headline/about/experience text sized to platform limits)
   cli/        provena CLI (render, validate, init) with workspace templates in templates/
 examples/valen/   sample workspace consumed by `npm run demo` and the CLI
 website/          VitePress docs site (separate npm project, own package.json)

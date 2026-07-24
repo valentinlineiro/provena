@@ -20,12 +20,8 @@ export type {
   ResumeProject,
   ResumeSkill,
   ResumeModel,
-  LinkedInExperience,
-  LinkedInProject,
-  LinkedInCapability,
-  LinkedInModel,
 } from './projections.js'
-export { resumeProjector, toLinkedInProjection } from './projections.js'
+export { resumeProjector } from './projections.js'
 
 export type { Renderer } from './renderer.js'
 

@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { resumeProjector } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
+import { linkedInProjector, linkedInRenderer } from '@provena/linkedin'
 import { YamlWorkspaceLoader } from '@provena/yaml'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
@@ -30,6 +31,11 @@ const FORMAT_REGISTRY: Record<string, FormatEntry> = {
     project: (p) => resumeProjector.project(p),
     render: (m) => new HtmlResumeRenderer().render(m as never),
     ext: 'html',
+  },
+  linkedin: {
+    project: (p) => linkedInProjector.project(p),
+    render: (m) => linkedInRenderer.render(m as never),
+    ext: 'linkedin.md',
   },
 }
 

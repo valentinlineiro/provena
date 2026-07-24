@@ -85,5 +85,7 @@ cat examples/valen/resume.md
 | `capabilities.yaml` defines skills with evidence | Skills are listed with optional descriptions |
 | Identity links experiences to capabilities | No duplication — references, not copies |
 
-[Render the example workspace](/examples) →
+The [examples page](/examples) shows this workspace's real YAML side by side with its actual `resume.md`, `resume.json`, and `resume.linkedin.md` — not mockups, the real CLI output.
+
+[See the real input and output](/examples) →
 [Start your own in 5 minutes](/quickstart) →

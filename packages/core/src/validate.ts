@@ -13,9 +13,21 @@ import type {
 export interface ValidationError {
   path: string
   message: string
+  source?: string
 }
 
 type Identifiable = { id: string }
+
+function sourceFromPath(path: string): string | undefined {
+  if (path.startsWith('identity.')) return 'provena.yaml'
+  if (path.startsWith('experience')) return 'experience.yaml'
+  if (path.startsWith('project')) return 'projects.yaml'
+  if (path.startsWith('education')) return 'education.yaml'
+  if (path.startsWith('publication')) return 'publications.yaml'
+  if (path.startsWith('certification')) return 'certifications.yaml'
+  if (path.startsWith('capabilities')) return 'capabilities.yaml'
+  return undefined
+}
 
 function collectIds(items: readonly Identifiable[]): Set<string> {
   return new Set(items.map((i) => i.id))
@@ -27,18 +39,20 @@ function findMissing(
   knownIds: Set<string>,
   errors: ValidationError[],
 ): void {
+  const source = sourceFromPath(label)
   for (const id of ids) {
     if (!knownIds.has(id)) {
-      errors.push({ path: label, message: `Reference to unknown id "${id}"` })
+      errors.push({ path: label, message: `Reference to unknown id "${id}"`, source })
     }
   }
 }
 
 function findDuplicates(label: string, items: readonly Identifiable[], errors: ValidationError[]): void {
+  const source = sourceFromPath(label)
   const seen = new Set<string>()
   for (const item of items) {
     if (seen.has(item.id)) {
-      errors.push({ path: label, message: `Duplicate id "${item.id}"` })
+      errors.push({ path: label, message: `Duplicate id "${item.id}"`, source })
     }
     seen.add(item.id)
   }
@@ -92,6 +106,14 @@ export function validate(data: {
   findMissing('identity.recommendationIds', data.identity.recommendationIds, recommendationIds, errors)
   findMissing('identity.capabilityIds', data.identity.capabilityIds, capabilityIds, errors)
 
+  if (!data.identity.person.name || data.identity.person.name.trim() === '') {
+    errors.push({
+      path: 'identity.person',
+      message: 'Field "name" is required',
+      source: 'person.yaml',
+    })
+  }
+
   for (const exp of allExperiences) {
     findMissing(`experience.${exp.id}.capabilityIds`, exp.capabilityIds, capabilityIds, errors)
     findMissing(`experience.${exp.id}.evidenceIds`, exp.evidenceIds, evidenceIds, errors)
@@ -112,4 +134,11 @@ export function validate(data: {
   }
 
   return errors
+}
+
+export function formatValidationErrors(errors: ValidationError[]): string {
+  return errors.map((e) => {
+    const file = e.source ? ` [${e.source}]` : ''
+    return `  ${e.path}${file}: ${e.message}`
+  }).join('\n')
 }

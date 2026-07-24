@@ -13,7 +13,7 @@ import type {
   Capability,
   Evidence,
 } from '@provena/core'
-import { validate } from '@provena/core'
+import { validate, formatValidationErrors } from '@provena/core'
 
 function loadYaml<T>(abspath: string): Promise<T | null> {
   return readFile(abspath, 'utf-8').then(
@@ -67,8 +67,7 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
 
     const errors = validate(profile)
     if (errors.length > 0) {
-      const details = errors.map((e) => `  ${e.path}: ${e.message}`).join('\n')
-      throw new Error(`Invalid workspace at ${path}:\n${details}`)
+      throw new Error(`Invalid workspace at ${path}:\n${formatValidationErrors(errors)}`)
     }
 
     return profile

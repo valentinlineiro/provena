@@ -32,5 +32,5 @@ export type { Renderer } from './renderer.js'
 
 export type { WorkspaceLoader } from './workspace.js'
 
-export { validate } from './validate.js'
+export { validate, formatValidationErrors } from './validate.js'
 export type { ValidationError } from './validate.js'

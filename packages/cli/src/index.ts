@@ -61,7 +61,7 @@ function parseArgs(argv: string[]): { format: string; stdout: boolean; help: boo
     else if (arg === '--format') {
       const val = argv[++i]
       if (!val || val.startsWith('--')) {
-        console.error('Error: --format requires a value (markdown | jsonresume)')
+        console.error('Error: --format requires a value (markdown | jsonresume | html)')
         process.exit(2)
       }
       if (val !== 'markdown' && val !== 'jsonresume' && val !== 'html') {

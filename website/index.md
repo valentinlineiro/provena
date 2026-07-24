@@ -56,7 +56,7 @@ features:
      │         │
      ▼         ▼         ▼
   resume.md  resume.json  resume.html
-  (Markdown) (JSON Resume) (HTML — coming soon)
+  (Markdown) (JSON Resume) (HTML)
 ```
 
 ## Who is it for?

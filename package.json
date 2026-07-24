@@ -10,7 +10,7 @@
     "build:all": "npm run build -w packages/cli",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test packages/*/src/*.test.ts",
-    "demo": "tsx packages/demo/src/load-and-render.ts",
+    "demo": "tsx packages/cli/src/index.ts render examples/valen --stdout",
     "provena": "tsx packages/cli/src/index.ts"
   },
   "devDependencies": {

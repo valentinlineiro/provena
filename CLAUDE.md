@@ -43,17 +43,19 @@ Guiding question for any change: does this strengthen the canonical model or exp
 
 ### Cross-references and validation
 
-Entities reference each other by id (e.g. `Experience.capabilityIds`, `Capability.evidenceIds`), never by embedding. `validate.ts` checks referential integrity (duplicate ids, dangling references) over a full data bundle — it is not wired into the loader automatically, so call it explicitly when validating a workspace.
+Entities reference each other by id (e.g. `Experience.capabilityIds`, `Capability.evidenceIds`), never by embedding. `validate.ts` checks referential integrity (duplicate ids, dangling references) over a full data bundle. `YamlWorkspaceLoader` runs it automatically after loading and throws on any violation.
 
 ## Package layout
 
 ```
 packages/
   core/       domain types, Profile, projections, validation, Renderer/WorkspaceLoader interfaces
-  yaml/       YamlWorkspaceLoader — reads a workspace dir (provena.yaml manifest + person/experience/projects/... .yaml)
+  yaml/       YamlWorkspaceLoader — reads a workspace dir (provena.yaml manifest + person/experience/projects/... .yaml), validates shape against schema.ts before returning a Profile
   markdown/   MarkdownResumeRenderer
-  demo/       load-and-render.ts, wires yaml loader → resume projection → markdown renderer
-examples/valen/   sample workspace consumed by the demo
+  html/       HtmlResumeRenderer
+  jsonresume/ JSON Resume projector + renderer
+  cli/        provena CLI (render, validate, init) with workspace templates in templates/
+examples/valen/   sample workspace consumed by `npm run demo` and the CLI
 website/          VitePress docs site (separate npm project, own package.json)
 ```
 

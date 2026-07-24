@@ -22,13 +22,18 @@ function loadYaml<T>(abspath: string): Promise<T | null> {
   )
 }
 
-function ids(items: { id: string }[]): readonly string[] {
-  return items.map((i) => i.id)
+interface Manifest {
+  version?: string
+  order?: Record<string, string[]>
+}
+
+function orderedIds(manifest: Manifest, key: string, items: { id: string }[]): readonly string[] {
+  return manifest.order?.[key] ?? items.map((i) => i.id)
 }
 
 export class YamlWorkspaceLoader implements WorkspaceLoader {
   async load(path: string): Promise<Profile> {
-    const manifest = await loadYaml<{ version?: string }>(join(path, 'provena.yaml'))
+    const manifest = await loadYaml<Manifest>(join(path, 'provena.yaml'))
     if (!manifest) throw new Error(`provena.yaml not found in ${path}`)
 
     const rawPerson = await loadYaml<unknown>(join(path, 'person.yaml'))
@@ -47,13 +52,13 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
     const profile: Profile = {
       identity: {
         person,
-        experienceIds: ids(experiences),
-        projectIds: ids(projects),
-        educationIds: ids(education),
-        publicationIds: ids(publications),
-        certificationIds: ids(certifications),
-        recommendationIds: ids(recommendations),
-        capabilityIds: ids(capabilities),
+        experienceIds: orderedIds(manifest, 'experiences', experiences),
+        projectIds: orderedIds(manifest, 'projects', projects),
+        educationIds: orderedIds(manifest, 'education', education),
+        publicationIds: orderedIds(manifest, 'publications', publications),
+        certificationIds: orderedIds(manifest, 'certifications', certifications),
+        recommendationIds: orderedIds(manifest, 'recommendations', recommendations),
+        capabilityIds: orderedIds(manifest, 'capabilities', capabilities),
       },
       experiences,
       projects,

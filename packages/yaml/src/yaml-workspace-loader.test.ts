@@ -62,3 +62,28 @@ test('provena.yaml order referencing an unknown id fails validation', async () =
     await rm(dir, { recursive: true })
   }
 })
+
+test('migration roundtrip: load with migration writes migrated workspace', async () => {
+  const dir = await makeWorkspace('version: 1\n')
+  try {
+    // A fake migration that adds an order field
+    const fakeMigrations = [{
+      from: 1, to: 2,
+      migrate: (d: Record<string, unknown>) => ({ ...d, order: { experiences: ['exp-a', 'exp-b'] } }),
+    }]
+    const loader = new YamlWorkspaceLoader(fakeMigrations)
+    const { profile, migrated } = await loader.load(dir)
+    assert.equal(migrated, true)
+
+    // Write migrated profile back
+    const { YamlWorkspaceWriter } = await import('./yaml-workspace-writer.js')
+    await new YamlWorkspaceWriter().write(dir, profile, 2)
+
+    // Load again — should be at version 2, no migration needed
+    const loader2 = new YamlWorkspaceLoader([{ from: 1, to: 2, migrate: (d: unknown) => d as Record<string, unknown> }])
+    const { migrated: migratedAgain } = await loader2.load(dir)
+    assert.equal(migratedAgain, false)
+  } finally {
+    await rm(dir, { recursive: true })
+  }
+})

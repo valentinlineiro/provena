@@ -83,3 +83,31 @@ test('new entities are added to identity reference arrays', () => {
   const result = merge(imported, existing)
   assert.ok(result.identity.experienceIds.includes('exp-2'))
 })
+
+test('importing same data twice is idempotent', () => {
+  const existing = baseProfile()
+  const imported: Partial<Profile> = {
+    experiences: [{ id: 'exp-2', organization: 'New Co', title: 'Dev', start: '2023-01', achievements: [], technologies: [], capabilityIds: [], evidenceIds: [], provenance: linkedinProvenance }],
+  }
+  const first = merge(imported, existing)
+  const second = merge(imported, first)
+  assert.equal(second.experiences.length, 2)
+  assert.equal(second.experiences[0]?.id, 'exp-1')
+  assert.equal(second.experiences[1]?.id, 'exp-2')
+})
+
+test('user-edited summary survives re-import of same experience', () => {
+  const existing = baseProfile()
+  existing.experiences[0]!.summary = 'User wrote this summary manually'
+
+  const imported: Partial<Profile> = {
+    experiences: [{
+      id: 'ignored-id', organization: 'Acme', title: 'Engineer', start: '2020-01',
+      achievements: [], technologies: [], capabilityIds: [], evidenceIds: [],
+      summary: 'LinkedIn auto-imported summary',
+      provenance: linkedinProvenance,
+    }],
+  }
+  const result = merge(imported, existing)
+  assert.equal(result.experiences[0]?.summary, 'User wrote this summary manually')
+})

@@ -1,3 +1,8 @@
+export interface Provenance {
+  readonly source: 'linkedin' | 'manual'
+  readonly importedAt?: string
+}
+
 export type EvidenceSource =
   | 'experience'
   | 'project'
@@ -13,6 +18,7 @@ export interface Evidence {
   readonly description: string
   readonly url?: string
   readonly date?: string
+  readonly provenance?: Provenance
 }
 
 export interface Capability {
@@ -20,6 +26,7 @@ export interface Capability {
   readonly name: string
   readonly description?: string
   readonly evidenceIds: readonly string[]
+  readonly provenance?: Provenance
 }
 
 export interface Experience {
@@ -34,6 +41,7 @@ export interface Experience {
   readonly technologies: readonly string[]
   readonly capabilityIds: readonly string[]
   readonly evidenceIds: readonly string[]
+  readonly provenance?: Provenance
 }
 
 export interface Project {
@@ -47,6 +55,7 @@ export interface Project {
   readonly technologies: readonly string[]
   readonly capabilityIds: readonly string[]
   readonly evidenceIds: readonly string[]
+  readonly provenance?: Provenance
 }
 
 export interface Education {
@@ -56,6 +65,7 @@ export interface Education {
   readonly field?: string
   readonly start?: string
   readonly end?: string
+  readonly provenance?: Provenance
 }
 
 export interface Publication {
@@ -68,6 +78,7 @@ export interface Publication {
   readonly doi?: string
   readonly capabilityIds: readonly string[]
   readonly evidenceIds: readonly string[]
+  readonly provenance?: Provenance
 }
 
 export interface Certification {
@@ -78,6 +89,7 @@ export interface Certification {
   readonly expiry?: string
   readonly url?: string
   readonly evidenceIds: readonly string[]
+  readonly provenance?: Provenance
 }
 
 export interface Recommendation {
@@ -86,6 +98,7 @@ export interface Recommendation {
   readonly relationship: string
   readonly text: string
   readonly date?: string
+  readonly provenance?: Provenance
 }
 
 export interface Person {
@@ -96,6 +109,7 @@ export interface Person {
   readonly title?: string
   readonly summary?: string
   readonly urls: Record<string, string>
+  readonly provenance?: Provenance
 }
 
 export interface Identity {

@@ -1,3 +1,7 @@
+export type { Provenance } from './types.js'
+
+export type { Importer } from './importer.js'
+
 export type {
   EvidenceSource,
   Evidence,

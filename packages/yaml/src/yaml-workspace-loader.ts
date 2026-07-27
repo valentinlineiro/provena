@@ -14,6 +14,9 @@ import {
   parseCapabilities,
   parseEvidence,
 } from './schema.js'
+import { applyMigrations, type SchemaVersion, type Migration } from './migration-runner.js'
+
+export const MIGRATIONS: Migration[] = []
 
 function loadYaml<T>(abspath: string): Promise<T | null> {
   return readFile(abspath, 'utf-8').then(
@@ -23,8 +26,17 @@ function loadYaml<T>(abspath: string): Promise<T | null> {
 }
 
 interface Manifest {
-  version?: string
+  version?: SchemaVersion
   order?: Record<string, string[]>
+}
+
+function parseVersion(v: unknown): SchemaVersion {
+  if (typeof v === 'number') return v
+  if (typeof v === 'string') {
+    const n = parseInt(v, 10)
+    if (!isNaN(n)) return n
+  }
+  return 1
 }
 
 function orderedIds(manifest: Manifest, key: string, items: { id: string }[]): readonly string[] {
@@ -32,9 +44,19 @@ function orderedIds(manifest: Manifest, key: string, items: { id: string }[]): r
 }
 
 export class YamlWorkspaceLoader implements WorkspaceLoader {
-  async load(path: string): Promise<Profile> {
-    const manifest = await loadYaml<Manifest>(join(path, 'provena.yaml'))
-    if (!manifest) throw new Error(`provena.yaml not found in ${path}`)
+  readonly #migrations: Migration[]
+
+  constructor(migrations: Migration[] = MIGRATIONS) {
+    this.#migrations = migrations
+  }
+
+  async load(path: string): Promise<{ profile: Profile; migrated: boolean }> {
+    const rawManifest = await loadYaml<Record<string, unknown>>(join(path, 'provena.yaml'))
+    if (!rawManifest) throw new Error(`provena.yaml not found in ${path}`)
+
+    const currentVersion = parseVersion(rawManifest.version)
+    const migrated = applyMigrations(currentVersion, rawManifest, this.#migrations)
+    const manifest = migrated.data as unknown as Manifest
 
     const rawPerson = await loadYaml<unknown>(join(path, 'person.yaml'))
     if (!rawPerson) throw new Error('person.yaml is required')
@@ -75,6 +97,6 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
       throw new Error(`Invalid workspace at ${path}:\n${formatValidationErrors(errors)}`)
     }
 
-    return profile
+    return { profile, migrated: migrated.migrated }
   }
 }

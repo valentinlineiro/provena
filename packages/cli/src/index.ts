@@ -122,7 +122,7 @@ async function cmdRender(path: string, opts: { format: string; stdout: boolean }
   if (!entry) err(`Unknown format "${opts.format}". Use: ${formatsList()}`)
 
   const loader = new YamlWorkspaceLoader()
-  const profile = await loader.load(path)
+  const { profile } = await loader.load(path)
   const model = entry.project(profile)
   const output = entry.render(model)
 

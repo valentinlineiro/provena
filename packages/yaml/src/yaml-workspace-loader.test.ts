@@ -35,9 +35,9 @@ async function makeWorkspace(provenaYaml: string): Promise<string> {
 }
 
 test('experienceIds follow experience.yaml order by default', async () => {
-  const dir = await makeWorkspace('version: "1.0"\n')
+  const dir = await makeWorkspace('version: 1\n')
   try {
-    const profile = await new YamlWorkspaceLoader().load(dir)
+    const { profile } = await new YamlWorkspaceLoader().load(dir)
     assert.deepEqual(profile.identity.experienceIds, ['exp-a', 'exp-b'])
   } finally {
     await rm(dir, { recursive: true })
@@ -45,9 +45,9 @@ test('experienceIds follow experience.yaml order by default', async () => {
 })
 
 test('provena.yaml order overrides experience.yaml order', async () => {
-  const dir = await makeWorkspace('version: "1.0"\norder:\n  experiences: [exp-b, exp-a]\n')
+  const dir = await makeWorkspace('version: 1\norder:\n  experiences: [exp-b, exp-a]\n')
   try {
-    const profile = await new YamlWorkspaceLoader().load(dir)
+    const { profile } = await new YamlWorkspaceLoader().load(dir)
     assert.deepEqual(profile.identity.experienceIds, ['exp-b', 'exp-a'])
   } finally {
     await rm(dir, { recursive: true })
@@ -55,7 +55,7 @@ test('provena.yaml order overrides experience.yaml order', async () => {
 })
 
 test('provena.yaml order referencing an unknown id fails validation', async () => {
-  const dir = await makeWorkspace('version: "1.0"\norder:\n  experiences: [exp-a, exp-does-not-exist]\n')
+  const dir = await makeWorkspace('version: 1\norder:\n  experiences: [exp-a, exp-does-not-exist]\n')
   try {
     await assert.rejects(() => new YamlWorkspaceLoader().load(dir), /exp-does-not-exist/)
   } finally {

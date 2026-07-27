@@ -12,6 +12,9 @@ export interface ParsedCsvs {
   capabilities: Capability[]
 }
 
+// ponytail: naive split-on-comma CSV parser. Fails on quoted fields with
+// embedded commas (e.g. "Company, Inc."). LinkedIn's export CSVs don't
+// seem to produce these in practice. Upgrade to csv-parse if issues appear.
 function parseCsv(text: string): Record<string, string>[] {
   const lines = text.trim().split('\n')
   if (lines.length < 2) return []

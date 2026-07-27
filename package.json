@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/linkedin-import"
   ],
   "scripts": {
     "build": "npm run build -w packages/cli",

@@ -1,0 +1,17 @@
+{
+  "name": "@provena/linkedin-import",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@provena/core": "*",
+    "yauzl": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/yauzl": "^3.0.0"
+  }
+}

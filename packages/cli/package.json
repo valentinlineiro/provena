@@ -22,6 +22,7 @@
     "@provena/markdown": "*",
     "@provena/html": "*",
     "@provena/linkedin": "*",
+    "@provena/linkedin-import": "*",
     "tsup": "^8.0.0"
   }
 }

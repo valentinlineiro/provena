@@ -1,14 +1,69 @@
 #!/usr/bin/env -S node --import tsx
-import { writeFile } from 'node:fs/promises'
+import { access, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { resumeProjector } from '@provena/core'
+import { LinkedInImporter } from '@provena/linkedin-import'
+import { resumeProjector, validate, formatValidationErrors } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
 import { linkedInProjector, linkedInRenderer } from '@provena/linkedin'
-import { YamlWorkspaceLoader } from '@provena/yaml'
+import { YamlWorkspaceLoader, YamlWorkspaceWriter, merge } from '@provena/yaml'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import { cmdInit } from './init.js'
 import type { Profile } from '@provena/core'
+
+async function cmdImportLinkedin(
+  zipPath: string,
+  workspacePath: string,
+  opts: { fresh: boolean },
+): Promise<void> {
+  const importer = new LinkedInImporter()
+  const imported = await importer.read(zipPath)
+
+  const workspaceExists = await access(join(workspacePath, 'provena.yaml')).then(() => true).catch(() => false)
+
+  let profile: Profile
+
+  if (workspaceExists && opts.fresh) {
+    err(`Workspace at "${workspacePath}" already exists. Use --fresh only on empty workspaces.`)
+  }
+
+  if (workspaceExists && !opts.fresh) {
+    const loader = new YamlWorkspaceLoader()
+    const loaded = await loader.load(workspacePath)
+    profile = merge(imported, loaded.profile)
+  } else {
+    profile = {
+      identity: {
+        person: imported.identity?.person ?? { name: 'Imported', urls: {} },
+        experienceIds: imported.experiences?.map((e) => e.id) ?? [],
+        projectIds: imported.projects?.map((p) => p.id) ?? [],
+        educationIds: imported.education?.map((e) => e.id) ?? [],
+        publicationIds: imported.publications?.map((p) => p.id) ?? [],
+        certificationIds: imported.certifications?.map((c) => c.id) ?? [],
+        recommendationIds: imported.recommendations?.map((r) => r.id) ?? [],
+        capabilityIds: imported.capabilities?.map((c) => c.id) ?? [],
+      },
+      experiences: imported.experiences ?? [],
+      projects: imported.projects ?? [],
+      education: imported.education ?? [],
+      publications: imported.publications ?? [],
+      certifications: imported.certifications ?? [],
+      recommendations: imported.recommendations ?? [],
+      capabilities: imported.capabilities ?? [],
+      evidence: [],
+    }
+  }
+
+  const errors = validate(profile)
+  if (errors.length > 0) {
+    err(`Validation failed:\n${formatValidationErrors(errors)}`)
+  }
+
+  const writer = new YamlWorkspaceWriter()
+  await writer.write(workspacePath, profile)
+
+  console.log(`✓ Imported from "${zipPath}" into "${workspacePath}"`)
+}
 
 interface FormatEntry {
   project: (profile: Profile) => unknown
@@ -48,12 +103,14 @@ Usage:
   provena render <workspace> [options]
   provena validate <workspace>
   provena init <workspace> [options]
+  provena import linkedin <export.zip> [options]
   provena --help
 
 Commands:
   render    Generate output from a workspace
   validate  Check workspace integrity
   init      Create a new workspace from a template
+  import    Import data into a workspace from external sources
 
 Options:
   --format <format>  Output format: ${formatsList()}
@@ -179,6 +236,24 @@ if (command === 'render') {
     await cmdInit(path, template)
   } catch (e) {
     err(e instanceof Error ? e.message : String(e))
+  }
+} else if (command === 'import') {
+  const subcommand = args[0]
+  if (subcommand === 'linkedin') {
+    const zipPath = args[1]
+    if (!zipPath || zipPath.startsWith('--')) {
+      err('Usage: provena import linkedin <export.zip> [--workspace <path>] [--fresh]')
+    }
+    let workspacePath = '.'
+    let fresh = false
+    for (let i = 2; i < args.length; i++) {
+      if (args[i] === '--workspace') workspacePath = args[++i] ?? '.'
+      else if (args[i] === '--fresh') fresh = true
+    }
+    try { await cmdImportLinkedin(zipPath, workspacePath, { fresh }) }
+    catch (e) { err(e instanceof Error ? e.message : String(e)) }
+  } else {
+    err(`Unknown import source: "${subcommand}". Available: linkedin`)
   }
 } else {
   err(`Unknown command: "${command}"`, 'Available commands: render, validate, init')

@@ -98,7 +98,7 @@ test('importing same data twice is idempotent', () => {
 
 test('user-edited summary survives re-import of same experience', () => {
   const existing = baseProfile()
-  existing.experiences[0]!.summary = 'User wrote this summary manually'
+  ;(existing.experiences as any)[0].summary = 'User wrote this summary manually'
 
   const imported: Partial<Profile> = {
     experiences: [{

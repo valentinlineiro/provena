@@ -10,6 +10,13 @@ cd my-profile && provena render # generates resume.md, resume.json
 **Why:** Your resume, LinkedIn, website, and portfolio all diverge over time.
 Provena stores your identity as structured data and projects it into any format.
 
+## Product Principles
+
+- **Capture once.** Never reconstruct professional history from memory.
+- **One source of truth.** Every representation is generated from the canonical profile.
+- **Projections are disposable.** CVs, LinkedIn, portfolios are outputs, not the product.
+- **Events drive the roadmap.** Ideas do not enter the roadmap without a real friction event.
+
 ### 60-second demo
 
 ```bash

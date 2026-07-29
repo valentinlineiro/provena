@@ -45,6 +45,30 @@ After they see the model and outputs:
 Do not ask "Do you like it?" Ask "What would you do?" and wait through
 the silence.
 
+## Session metrics
+
+| Metric | Value |
+|--------|------:|
+| Time to `demo` | |
+| Time to complete `init` | |
+| Time to first output | |
+| Questions asked | |
+
+Capture times per-user — not to optimize seconds, but because hesitation
+often reveals friction the user doesn't verbalize.
+
+## Notes format
+
+Separate observed behavior from expressed opinion in every session note.
+
+| Behavior | Opinion |
+|----------|---------|
+| Ran `demo` immediately | "Seems interesting." |
+| Hesitated 40s on a question | "It's easy to use." |
+| Didn't reopen the editor | "Yes, I think I'd use it." |
+
+When both align, evidence is strong. When they diverge, behavior weighs more.
+
 ## Results matrix
 
 | User | Pain | Completes init | Would return | Would use capture | Notes |

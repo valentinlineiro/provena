@@ -102,14 +102,16 @@ function help(stream: NodeJS.WriteStream = process.stdout): void {
 Usage:
   provena render <workspace> [options]
   provena validate <workspace>
-  provena init <workspace> [options]
+  provena init <workspace>
+  provena demo [options]
   provena import linkedin <export.zip> [options]
   provena --help
 
 Commands:
   render    Generate output from a workspace
   validate  Check workspace integrity
-  init      Create a new workspace from a template
+  init      Guided setup of a new workspace
+  demo      See a sample profile rendered immediately
   import    Import data into a workspace from external sources
 
 Options:
@@ -198,6 +200,47 @@ async function cmdValidate(path: string): Promise<void> {
   console.log('✓ Workspace is valid')
 }
 
+const DEMO_PROFILE: Profile = {
+  identity: {
+    person: { name: 'Alex Chen', title: 'Technical Lead', summary: 'Engineer focused on distributed systems and developer tooling.', urls: { github: 'https://github.com/alex', linkedin: 'https://linkedin.com/in/alex' } },
+    experienceIds: ['exp-1'],
+    projectIds: ['proj-1', 'proj-2'],
+    educationIds: [],
+    publicationIds: [],
+    certificationIds: [],
+    recommendationIds: [],
+    capabilityIds: ['cap-1', 'cap-2', 'cap-3'],
+  },
+  experiences: [{
+    id: 'exp-1', organization: 'Acme Corp', title: 'Technical Lead',
+    start: '2022-03', summary: 'Led platform reliability initiatives.',
+    achievements: ['Reduced p99 latency by 40%', 'Designed event-driven pipeline processing 1M+ events/day'],
+    technologies: ['TypeScript', 'Rust', 'Kafka', 'PostgreSQL'],
+    capabilityIds: ['cap-1', 'cap-2'], evidenceIds: [],
+  }],
+  projects: [
+    { id: 'proj-1', name: 'Provena', role: 'Creator', description: 'Open-source framework for professional identity.', url: 'https://github.com/valenlb/provena', technologies: ['TypeScript', 'YAML'], capabilityIds: ['cap-2'], evidenceIds: [] },
+    { id: 'proj-2', name: 'Observability Pipeline', role: 'Architect', description: 'Real-time monitoring for 200+ microservices.', technologies: ['Rust', 'Kafka'], capabilityIds: ['cap-1'], evidenceIds: [] },
+  ],
+  education: [],
+  publications: [],
+  certifications: [],
+  recommendations: [],
+  capabilities: [
+    { id: 'cap-1', name: 'Distributed Systems', description: 'Event-driven architecture, consensus protocols.', evidenceIds: [] },
+    { id: 'cap-2', name: 'Software Architecture', description: 'System design, domain-driven design.', evidenceIds: [] },
+    { id: 'cap-3', name: 'Developer Tooling', description: 'CLI tools, CI/CD optimization.', evidenceIds: [] },
+  ],
+  evidence: [],
+}
+
+async function cmdDemo(format: string): Promise<void> {
+  const entry = FORMAT_REGISTRY[format]
+  if (!entry) err(`Unknown format "${format}". Use: ${formatsList()}`)
+  const model = entry.project(DEMO_PROFILE)
+  console.log(entry.render(model))
+}
+
 if (!command || command === '--help') {
   help()
   process.exit(0)
@@ -226,17 +269,18 @@ if (command === 'render') {
 } else if (command === 'init') {
   const path = args[0]
   if (!path || path === '--help') {
-    console.error('Usage: provena init <workspace> [--template default|consultant|academic]')
+    console.error('Usage: provena init <workspace>')
     process.exit(1)
   }
-  const template = args.includes('--template')
-    ? args[args.indexOf('--template') + 1] ?? 'default'
-    : 'default'
   try {
-    await cmdInit(path, template)
+    await cmdInit(path)
   } catch (e) {
     err(e instanceof Error ? e.message : String(e))
   }
+} else if (command === 'demo') {
+  const opts = parseArgs(args)
+  try { await cmdDemo(opts.format) }
+  catch (e) { err(e instanceof Error ? e.message : String(e)) }
 } else if (command === 'import') {
   const subcommand = args[0]
   if (subcommand === 'linkedin') {

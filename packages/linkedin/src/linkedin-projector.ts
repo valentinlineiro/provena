@@ -36,7 +36,11 @@ function resolve<T extends { id: string }>(ids: readonly string[], items: readon
 export const linkedInProjector: Projector<LinkedInModel> = {
   project(profile: Profile): LinkedInModel {
     const experiences = resolve(profile.identity.experienceIds, profile.experiences)
-      .sort((a, b) => b.start.localeCompare(a.start))
+      .sort((a, b) => {
+        if (!a.end) return -1
+        if (!b.end) return 1
+        return b.end.localeCompare(a.end)
+      })
       .slice(0, 4)
       .map((e) => ({
         organization: e.organization,

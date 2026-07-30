@@ -1,0 +1,26 @@
+- id: 810fe6dd-05d5-4d8a-a534-5fa6c6d5bf94
+  name: ''
+  description: >-
+    Research project focused on improving software reliability through automated
+    test generation techniques.  Developed mutation-based approaches to generate
+    and optimize test suites for service-oriented architectures.
+  url: >-
+    https://neptuno.uca.es/redmine/projects/sources-fm/repository/show/trunk/src/test-generator-autoseed
+  technologies: []
+  capabilityIds: []
+  evidenceIds: []
+  provenance: &ref_0
+    source: linkedin
+    importedAt: '2026-07-30T07:42:17.425Z'
+- id: 53797b09-5e5c-4d48-a5d5-c51c82875b88
+  name: ''
+  description: >-
+    Research project exploring mutation testing strategies to improve test
+    coverage and fault detection in WS-BPEL 2.0 systems.  Designed new mutation
+    operators to evaluate software quality and testing effectiveness.
+  url: >-
+    https://neptuno.uca.es/redmine/projects/sources-fm/repository/show/trunk/src/mubpel/src/main/resources/es/uca/webservices/mutants/operators
+  technologies: []
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0

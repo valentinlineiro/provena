@@ -1,0 +1,298 @@
+- id: f8f2ce27-6d36-4d45-9622-112aded6fcd5
+  name: Software Engineering Practices
+  evidenceIds: []
+  provenance: &ref_0
+    source: linkedin
+    importedAt: '2026-07-30T07:42:17.425Z'
+- id: a7c18e4f-6124-46c8-87f9-51be8a8c3843
+  name: Mutation Testing
+  evidenceIds: []
+  provenance: *ref_0
+- id: 72e03a49-5880-401e-8aec-c1f6c0b21efd
+  name: Technical Leadership
+  evidenceIds: []
+  provenance: *ref_0
+- id: 140e92d7-f793-4001-a737-7acf8e319871
+  name: Formal Verification
+  evidenceIds: []
+  provenance: *ref_0
+- id: c1ca533e-199c-41c8-a4e5-b0f2901ffe18
+  name: Internal Tools
+  evidenceIds: []
+  provenance: *ref_0
+- id: 354ab922-0901-4b49-9378-5952bb680b89
+  name: Software Design
+  evidenceIds: []
+  provenance: *ref_0
+- id: cb1676fd-9cf9-4e64-b1e7-f4d023edefc8
+  name: Formal Concept Analysis
+  evidenceIds: []
+  provenance: *ref_0
+- id: efe55daf-2a9a-4ea6-bb79-0ce3228f5e8d
+  name: Data Analysis
+  evidenceIds: []
+  provenance: *ref_0
+- id: aecf03a0-e35d-4b3a-aba9-aec91a862d5e
+  name: Fuzzy Logic
+  evidenceIds: []
+  provenance: *ref_0
+- id: 4058c79d-0ba8-4a20-bfce-e4a8df5fd971
+  name: Knowledge Extraction
+  evidenceIds: []
+  provenance: *ref_0
+- id: 8ec73bea-4eaf-4574-b250-5c47b7cb038b
+  name: Legacy Systems
+  evidenceIds: []
+  provenance: *ref_0
+- id: 2e1a0367-03e6-46ec-ab31-33e60a3e1c29
+  name: Front-End Development
+  evidenceIds: []
+  provenance: *ref_0
+- id: 49dd7b2b-0dc6-4d4a-86ba-5a409e0ac610
+  name: Developer Productivity
+  evidenceIds: []
+  provenance: *ref_0
+- id: 7ab84b2f-5ef0-4619-8784-c700f27c2694
+  name: AI-Assisted Engineering
+  evidenceIds: []
+  provenance: *ref_0
+- id: 420b07b6-c49e-43ee-a409-f569e60378ab
+  name: Software Architecture
+  evidenceIds: []
+  provenance: *ref_0
+- id: e04c4fe8-7f64-4b3a-96e6-e2b729b09b06
+  name: Artificial Intelligence (AI)
+  evidenceIds: []
+  provenance: *ref_0
+- id: 96644e82-3f15-4d00-842c-207a9af76db9
+  name: Agentic AI Development
+  evidenceIds: []
+  provenance: *ref_0
+- id: 5cdea70c-e1b8-4699-abec-cbc326ba0ab1
+  name: Distributed Systems
+  evidenceIds: []
+  provenance: *ref_0
+- id: dbda0e3e-2592-4f27-98f6-147d341a8fc8
+  name: Cloud-Native Architecture
+  evidenceIds: []
+  provenance: *ref_0
+- id: 995557c1-b741-4e9b-bdfb-4e34dbf55989
+  name: Software Development
+  evidenceIds: []
+  provenance: *ref_0
+- id: 463c0c30-d80b-4287-b435-e5aea69785fb
+  name: Continuous Integration and Continuous Delivery (CI/CD)
+  evidenceIds: []
+  provenance: *ref_0
+- id: 8b0eeaff-e59d-47d1-b3c5-3882cb5ea490
+  name: Retrieval-Augmented Generation (RAG)
+  evidenceIds: []
+  provenance: *ref_0
+- id: 2051d54c-119b-4967-9131-0eadee354ae3
+  name: Model Context Protocol (MCP)
+  evidenceIds: []
+  provenance: *ref_0
+- id: 59a7b5d2-e924-418a-a7ad-6037b7e539c1
+  name: Java
+  evidenceIds: []
+  provenance: *ref_0
+- id: 5c5da9af-cf39-48f1-a605-190786f80921
+  name: Test Automation
+  evidenceIds: []
+  provenance: *ref_0
+- id: 252fc0de-b99e-45dc-8ad0-0832f2c0d1c3
+  name: Software Quality
+  evidenceIds: []
+  provenance: *ref_0
+- id: 5e6d4306-782a-462f-87ba-cef26e293f3d
+  name: Research Skills
+  evidenceIds: []
+  provenance: *ref_0
+- id: 005e1053-dde3-4a5a-8360-f7a1d907866e
+  name: Automation
+  evidenceIds: []
+  provenance: *ref_0
+- id: fb1c751b-d2a6-4109-acbe-c5d7a4625abe
+  name: Software Testing
+  evidenceIds: []
+  provenance: *ref_0
+- id: f0768993-90de-4d4f-b262-bce2dde57acd
+  name: Google Gemini
+  evidenceIds: []
+  provenance: *ref_0
+- id: 82fa515f-0f43-4685-96f3-051832cece8f
+  name: Anthropic Claude
+  evidenceIds: []
+  provenance: *ref_0
+- id: 12d370ae-ebcd-4190-833a-66985f83be46
+  name: Spring Boot
+  evidenceIds: []
+  provenance: *ref_0
+- id: de7e9885-3680-46db-8497-822bacae9ac1
+  name: Microservices
+  evidenceIds: []
+  provenance: *ref_0
+- id: 84f33db4-1a56-43ce-b04a-8db818a024c3
+  name: REST APIs
+  evidenceIds: []
+  provenance: *ref_0
+- id: 37668881-f368-48c3-bb3c-66301f9ea573
+  name: Apache Kafka
+  evidenceIds: []
+  provenance: *ref_0
+- id: 82f61c1e-214a-4225-9aa9-0fdeeedd1a07
+  name: Docker Products
+  evidenceIds: []
+  provenance: *ref_0
+- id: f015666b-67f0-4f20-a0a2-de593c30761a
+  name: Kubernetes
+  evidenceIds: []
+  provenance: *ref_0
+- id: 83b0f4db-2236-4ddf-ad3d-755c18da12a4
+  name: Microsoft Azure
+  evidenceIds: []
+  provenance: *ref_0
+- id: d4f60d62-fa43-46f8-8581-7025dde513a6
+  name: Multithreading
+  evidenceIds: []
+  provenance: *ref_0
+- id: 5a58add3-20db-4a69-8827-40f99a0dc59b
+  name: Recogida de basura
+  evidenceIds: []
+  provenance: *ref_0
+- id: 2bc7a84e-05f8-4f95-b4bf-6170e76e475a
+  name: Scrum
+  evidenceIds: []
+  provenance: *ref_0
+- id: b167cfb0-6125-4046-b59f-d9c8fa210a52
+  name: Kanban
+  evidenceIds: []
+  provenance: *ref_0
+- id: d7592ad4-a15c-4dfc-b316-083431064b55
+  name: Avro
+  evidenceIds: []
+  provenance: *ref_0
+- id: 4a895d31-9ae4-4d68-8ca3-3c985af6bef1
+  name: Telemetry
+  evidenceIds: []
+  provenance: *ref_0
+- id: e3c7479a-ed90-43cd-9444-3ef7b1d6854d
+  name: Troubleshooting
+  evidenceIds: []
+  provenance: *ref_0
+- id: 71cb594f-94a8-49a0-b645-5befb2f74eed
+  name: Problem Solving
+  evidenceIds: []
+  provenance: *ref_0
+- id: e5e37aa2-a306-433c-bd79-fbdf815bf279
+  name: Java Virtual Machine (JVM)
+  evidenceIds: []
+  provenance: *ref_0
+- id: 74e85b27-d7ac-4121-a4a6-a0a295aead3b
+  name: XML
+  evidenceIds: []
+  provenance: *ref_0
+- id: c256343b-f5cb-4617-967b-d749687f0a57
+  name: Spring Framework
+  evidenceIds: []
+  provenance: *ref_0
+- id: 1ea6e7de-a795-4893-a8fe-1fa33e1bf7e4
+  name: Diseño de software
+  evidenceIds: []
+  provenance: *ref_0
+- id: 86791087-2d38-4f45-8e0c-bbc7b2521176
+  name: Python (Programming Language)
+  evidenceIds: []
+  provenance: *ref_0
+- id: 4c906a6a-962b-4cb5-87f5-b59c501efd1f
+  name: Machine Learning
+  evidenceIds: []
+  provenance: *ref_0
+- id: 9037cd02-b563-48ec-81ae-3eaa4ff9f3f9
+  name: C++
+  evidenceIds: []
+  provenance: *ref_0
+- id: 60458cb8-f297-4bb4-a7b8-17a4b7193722
+  name: Microsoft SQL Server
+  evidenceIds: []
+  provenance: *ref_0
+- id: 2fc44dfa-0a08-481d-a7b9-e918210b2676
+  name: Planificación de pruebas
+  evidenceIds: []
+  provenance: *ref_0
+- id: 3bd5ef4b-a75d-41ec-bf09-ba26cc11ad2c
+  name: Agile Methodologies
+  evidenceIds: []
+  provenance: *ref_0
+- id: b7f41439-937a-4993-a48d-62e010a5c963
+  name: Ingeniería de software
+  evidenceIds: []
+  provenance: *ref_0
+- id: aa6a4c54-935b-4d36-96b2-ce0e5d0f3f75
+  name: Patrones de diseño
+  evidenceIds: []
+  provenance: *ref_0
+- id: 8a455238-9100-44a8-b820-cde3a1be728d
+  name: Análisis
+  evidenceIds: []
+  provenance: *ref_0
+- id: 22a4a709-b95c-45c6-a165-bd1e2e06d7e4
+  name: Automatización de pruebas
+  evidenceIds: []
+  provenance: *ref_0
+- id: 11c1b3e0-05d5-4aef-be81-b43266960402
+  name: MongoDB
+  evidenceIds: []
+  provenance: *ref_0
+- id: 05662f57-596f-4e9f-ab39-93d1fe102ba9
+  name: JavaScript
+  evidenceIds: []
+  provenance: *ref_0
+- id: 4f98ba57-0f68-4fec-834a-696eafb3daf4
+  name: HTML5
+  evidenceIds: []
+  provenance: *ref_0
+- id: abb3cecd-285e-424b-bdff-889d85605fb8
+  name: Git
+  evidenceIds: []
+  provenance: *ref_0
+- id: a711b017-ca8a-431c-ba96-5d04a4639e3f
+  name: Linux
+  evidenceIds: []
+  provenance: *ref_0
+- id: 7c639d01-1906-417b-8b11-0252f80ee8b8
+  name: SQL
+  evidenceIds: []
+  provenance: *ref_0
+- id: 73fb085e-3daf-4c87-9278-6d9699b95684
+  name: JUnit
+  evidenceIds: []
+  provenance: *ref_0
+- id: 80b85151-9f9d-46f1-9a4d-6a88fde95f0a
+  name: Javascript
+  evidenceIds: []
+  provenance: *ref_0
+- id: e22ad058-ecd8-447f-b04b-42a6421cff48
+  name: Maven
+  evidenceIds: []
+  provenance: *ref_0
+- id: a623ac26-20ea-4d85-b576-160f1f5a2c41
+  name: Angular
+  evidenceIds: []
+  provenance: *ref_0
+- id: c07ed2a8-fadd-494a-a9e8-0c7236aeac93
+  name: Trabajo en equipo
+  evidenceIds: []
+  provenance: *ref_0
+- id: 247c3df9-1f2e-48f1-87ad-fa824e2be3b2
+  name: Inglés
+  evidenceIds: []
+  provenance: *ref_0
+- id: a7c5059b-bf5f-4ad1-85d6-450a159c2117
+  name: TypeScript
+  evidenceIds: []
+  provenance: *ref_0
+- id: a578edcf-f03d-4dd0-901d-1c0c9684fc50
+  name: Metodologías ágiles
+  evidenceIds: []
+  provenance: *ref_0

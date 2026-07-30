@@ -1,0 +1,12 @@
+- id: 291c2e6a-40b5-459e-9c58-60e57ff93607
+  institution: Universidad de Cádiz
+  degree: formal reasoning
+  provenance: &ref_0
+    source: linkedin
+    importedAt: '2026-07-30T07:42:17.425Z'
+- id: 158ac14b-925b-4d92-a9ca-34d1ea42031d
+  institution: Universidad de Cádiz
+  degree: >-
+    working on mutation testing over WS-BPEL and exploring approaches to analyze
+    and improve complex systems.
+  provenance: *ref_0

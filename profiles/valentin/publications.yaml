@@ -1,0 +1,29 @@
+- id: b4dab87b-a583-4ea0-88c1-a2056cd6116a
+  title: ''
+  authors: []
+  url: medicine or census data
+  capabilityIds: []
+  evidenceIds: []
+  provenance: &ref_0
+    source: linkedin
+    importedAt: '2026-07-30T07:42:17.425Z'
+- id: d35cbfc5-8c6c-44f4-9ca4-edd35885bf54
+  title: ''
+  authors: []
+  url: >-
+    ya que va a permitir reducir el coste asociado a las tareas de prueba. En
+    este trabajo se aplica por primera vez a composiciones WS-BPEL 2.0 la
+    siembra automática
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0
+- id: e80c9071-4660-4808-ad99-1c200ef2cd24
+  title: ''
+  authors: []
+  url: >-
+    una técnica de prueba basada en fallos que requiere la definición de un
+    conjunto de operadores de mutación para realizar cambios sintácticos en el
+    programa que se desea probar.   En este trabajo se define implementa
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0

@@ -1,0 +1,131 @@
+- id: 822fcbb8-f7c8-40a7-bc7d-cb61092c5861
+  organization: Summa Networks
+  title: Senior Software Engineer
+  start: "2025-10"
+  location: "Cádiz, Andalusia, Spain · Remote"
+  summary: >-
+    I design internal systems that improve how engineering teams build, review, onboard, and deliver software.
+    My work combines software architecture, developer productivity, and AI-assisted engineering to reduce friction,
+    improve decision-making, and help teams work with more leverage.
+  achievements:
+    - "Designed a Clean Architecture proposal for the HSS backend — adopted as the foundation for a separate product (SMSC)"
+    - "Became the internal reference for AI-assisted engineering; the company's AI Lead shared experiments and sought input on internal training"
+    - "Evolved from ticket-based development to owning the product roadmap, driving architectural improvements in a legacy 4G network core"
+    - "Drove modernization of a critical telecom system without compromising stability"
+    - "Reduced team friction by improving maintainability, simplifying decisions, and accelerating delivery velocity"
+  technologies:
+    - "Java"
+    - "Spring"
+    - "Clean Architecture"
+    - "4G Network Core"
+    - "AI-Assisted Engineering"
+  capabilityIds: []
+  evidenceIds: []
+  provenance: &ref_0
+    source: linkedin
+    importedAt: '2026-07-30T07:42:17.425Z'
+- id: fbb1aa2d-a3ef-4f36-9edb-ecc18509ae03
+  organization: knowmad mood
+  title: Senior Software Engineer
+  start: "TBD"
+  end: "2025-09"
+  summary: >-
+    Consultoría de software en múltiples clientes y dominios. Construyó una base
+    sólida en sistemas distribuidos, microservicios y cloud, trabajando con
+    Spring Boot, Kafka, Kubernetes y Azure en entornos de producción reales.
+    Aprendió a adaptarse rápido a contextos distintos, entender sistemas ajenos
+    y aportar valor en entornos cambiantes. Etapa de crecimiento como ingeniero
+    "todoterreno": pasó de escribir código a entender sistemas completos — APIs,
+    mensajería, bases de datos, despliegues, CI/CD, operación. La comunicación
+    técnica en entornos de consultoría fue una escuela: alinear decisiones con
+    equipos distintos y asegurar que las soluciones fueran mantenibles por quienes
+    las recibían.
+  achievements:
+    - "Trabajó con arquitecturas distribuidas, microservicios y cloud (Spring Boot, Kafka, Docker, Kubernetes, Azure) en sistemas de producción reales"
+    - "Desarrolló capacidad de adaptación rápida a múltiples clientes, contextos y dominios distintos"
+    - "Evolucionó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, CI/CD, operación"
+    - "Aprendió a alinear decisiones técnicas con equipos y culturas de cliente distintas, asegurando mantenibilidad a largo plazo"
+    - "Construyó los cimientos técnicos que luego permitieron moverse hacia responsabilidades de arquitectura, productividad e IA"
+  technologies:
+    - "Java"
+    - "Spring Boot"
+    - "Apache Kafka"
+    - "Kubernetes"
+    - "Microsoft Azure"
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0
+- id: 406503ae-63be-46e4-b7a1-c22f1bc473a8
+  organization: VINCLE
+  title: Software Engineer
+  start: "2017-01"
+  end: "2021-06"
+  location: "Greater Cádiz Metropolitan Area"
+  summary: >-
+    Led the migration of a legacy CRM/SFA application toward a Spring Boot 
+    and Angular-based architecture, improving maintainability and preparing the 
+    platform for further evolution. Led a frontend team and participated in 
+    architecture decisions across backend systems, integrations, and 
+    business-critical functionality in a production environment.
+  achievements:
+    - "Led the migration of a legacy CRM/SFA to Spring Boot and Angular, improving maintainability and enabling future evolution"
+    - "Led a frontend team and participated in architecture decisions across backend, integrations, and business-critical functionality"
+  technologies:
+    - "Java"
+    - "Spring Boot"
+    - "Angular"
+    - "Legacy Migration"
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0
+- id: 7b6efa67-f0db-459c-a110-3ae58d6236a8
+  organization: Universidad de Cádiz
+  title: Research Assistant
+  start: "2014-06"
+  end: "2015-12"
+  location: "Cádiz, Spain"
+  summary: >-
+    Conducted research within the Department of Mathematics as part of the UCASE
+    research group, focusing on knowledge extraction, fuzzy logic, and computational
+    methods for discovering structure in complex information. Contributed to published
+    research while developing analytical and experimental approaches that continue to
+    influence engineering practice.
+  achievements:
+    - "Contributed to research published within the UCASE group"
+    - "Worked on knowledge extraction techniques from complex datasets"
+    - "Applied Fuzzy Formal Concept Analysis to knowledge representation problems"
+    - "Explored computational methods for pattern discovery and information structuring"
+    - "Developed an experimental and evidence-driven approach to technical problem solving"
+  technologies:
+    - "Fuzzy Logic"
+    - "Formal Concept Analysis"
+    - "Python"
+    - "Knowledge Extraction"
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0
+- id: 477ec0bc-1636-4f5e-9923-1bd2316efffc
+  organization: Universidad de Cádiz
+  title: Software Developer
+  start: "2013-10"
+  end: "2014-04"
+  location: "Cádiz, Spain"
+  summary: >-
+    Designed internal software for the University of Cádiz Research Transfer Office
+    while contributing to research on mutation testing and formal verification. This
+    role combined practical software engineering with academic research, laying the
+    foundations for a systematic approach to software quality and problem solving.
+  achievements:
+    - "Designed and implemented an internal management application for the University's Research Transfer Office"
+    - "Improved internal operational workflows through custom software development"
+    - "Contributed to research on mutation testing and formal verification"
+    - "Combined production software development with academic research activities"
+    - "Built the foundations of a rigorous engineering approach focused on software quality"
+  technologies:
+    - "Java"
+    - "Python"
+    - "Mutation Testing"
+    - "Formal Verification"
+  capabilityIds: []
+  evidenceIds: []
+  provenance: *ref_0

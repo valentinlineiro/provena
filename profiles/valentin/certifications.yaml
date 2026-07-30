@@ -1,0 +1,44 @@
+- id: 61957f6d-2921-46a4-9014-0ba478ceb315
+  name: 'Certificate of Completion: Al Fluency Framework & Foundations'
+  issuer: Anthropic
+  date: Apr 202
+  url: https://verify.skilljar.com/c/fftjskxaa45g
+  evidenceIds: []
+  provenance: &ref_0
+    source: linkedin
+    importedAt: '2026-07-30T07:42:17.425Z'
+- id: 84fca6ef-f350-4653-9494-39aa6ff77023
+  name: AI for App Building
+  issuer: Google
+  date: Jun 202
+  url: https://www.coursera.org/account/accomplishments/records/IIC0M9UN6GXH
+  evidenceIds: []
+  provenance: *ref_0
+- id: e818f6e0-ee8f-45ca-9042-83da5dcb90ab
+  name: Google AI Professional Certificate
+  issuer: Google
+  date: Jun 202
+  url: https://www.coursera.org/account/accomplishments/specialization/GBOYA2UG9TPS
+  evidenceIds: []
+  provenance: *ref_0
+- id: 6e508824-5a30-4b65-a46a-1040bdeab58e
+  name: Building with the Claude API
+  issuer: Anthropic
+  date: Jun 202
+  url: https://verify.skilljar.com/c/3zpcze52kjo6
+  evidenceIds: []
+  provenance: *ref_0
+- id: f0755282-8a01-4a66-a7b1-1d1cbd3164c2
+  name: 'Model Context Protocol: Advanced Topics'
+  issuer: Anthropic
+  date: Jun 202
+  url: https://verify.skilljar.com/c/az8hz77f8vj6
+  evidenceIds: []
+  provenance: *ref_0
+- id: 48f81c26-65ab-40c8-89e6-508484c6820d
+  name: Claude with Google Cloud's Vertex AI
+  issuer: Anthropic
+  date: Jun 202
+  url: https://verify.skilljar.com/c/wq5orj4fhey3
+  evidenceIds: []
+  provenance: *ref_0

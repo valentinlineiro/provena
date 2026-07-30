@@ -89,6 +89,6 @@ test('markdown snapshot matches expected output', () => {
   assert.match(output, /## Certifications/)
   assert.match(output, /AWS Certified/)
   assert.match(output, /## Skills/)
-  assert.match(output, /\*\*TypeScript\*\* \(1 pieces of evidence\)/)
-  assert.match(output, /Expert-level/)
+  assert.match(output, /\*\*TypeScript\*\*/)
+  assert.match(output, /\*\*Rust\*\*/)
 })

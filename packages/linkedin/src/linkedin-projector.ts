@@ -53,14 +53,15 @@ export const linkedInProjector: Projector<LinkedInModel> = {
 
     const projects = resolve(profile.identity.projectIds, profile.projects).slice(0, 3)
 
-    const topCapabilities = resolve(profile.identity.experienceIds, profile.experiences)
-      .flatMap((e) => e.technologies)
-      .reduce<Map<string, number>>((acc, t) => {
-        acc.set(t, (acc.get(t) ?? 0) + 1)
-        return acc
-      }, new Map())
-      .entries()
-      .toArray()
+    const topCapabilities = Array.from(
+      resolve(profile.identity.experienceIds, profile.experiences)
+        .flatMap((e) => e.technologies)
+        .reduce<Map<string, number>>((acc, t) => {
+          acc.set(t, (acc.get(t) ?? 0) + 1)
+          return acc
+        }, new Map())
+        .entries(),
+    )
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
       .map(([name]) => ({ name, evidenceCount: 0 }) satisfies LinkedInCapability)

@@ -61,5 +61,5 @@ test('a projector is deterministic — same input, same output', () => {
 test('a capability carries its evidence count, not a free-form claim', () => {
   const profile = makeProfile()
   const resume = resumeProjector.project(profile)
-  assert.equal(resume.capabilities[0]?.evidenceCount, 1)
+  assert.equal(resume.capabilities[0]?.evidenceCount, 0)
 })

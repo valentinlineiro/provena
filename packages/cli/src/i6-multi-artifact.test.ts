@@ -45,7 +45,7 @@ test('I6: one representation may have multiple artifacts — Markdown and HTML r
 
   assert.notEqual(markdown, html, 'the two artifacts are genuinely different formats')
 
-  for (const fact of ['Alex Chen', 'Acme Corp', 'Technical Lead', 'Reduced p99 latency by 40%', 'Distributed Systems']) {
+  for (const fact of ['Alex Chen', 'Acme Corp', 'Technical Lead', 'Reduced p99 latency by 40%', 'TypeScript']) {
     assert.ok(markdown.includes(fact), `markdown is missing "${fact}"`)
     assert.ok(html.includes(fact), `html is missing "${fact}"`)
   }

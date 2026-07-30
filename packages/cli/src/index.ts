@@ -1,14 +1,18 @@
 #!/usr/bin/env -S node --import tsx
-import { access, writeFile } from 'node:fs/promises'
+import { access, writeFile, mkdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { createInterface } from 'node:readline/promises'
+import { stdin as input, stdout as output } from 'node:process'
+import yaml from 'js-yaml'
 import { LinkedInImporter } from '@provena/linkedin-import'
-import { resumeProjector, validate, formatValidationErrors } from '@provena/core'
+import { resumeProjector, validate, formatValidationErrors, recruiterProjector } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
 import { linkedInProjector, linkedInRenderer } from '@provena/linkedin'
 import { YamlWorkspaceLoader, YamlWorkspaceWriter, merge } from '@provena/yaml'
-import { MarkdownResumeRenderer } from '@provena/markdown'
+import { MarkdownResumeRenderer, RecruiterBriefRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import { cmdInit } from './init.js'
+import { startServer } from './serve.js'
 import type { Profile } from '@provena/core'
 
 async function cmdImportLinkedin(
@@ -92,6 +96,11 @@ const FORMAT_REGISTRY: Record<string, FormatEntry> = {
     render: (m) => linkedInRenderer.render(m as never),
     ext: 'linkedin.md',
   },
+  recruiter: {
+    project: (p) => recruiterProjector.project(p),
+    render: (m) => new RecruiterBriefRenderer().render(m as never),
+    ext: 'recruiter.md',
+  },
 }
 
 const [, , command, ...args] = process.argv
@@ -103,6 +112,8 @@ Usage:
   provena render <workspace> [options]
   provena validate <workspace>
   provena init <workspace>
+  provena add [<text>] [--workspace <path>]
+  provena serve [--workspace <path>] [--port <number>]
   provena demo [options]
   provena import linkedin <export.zip> [options]
   provena --help
@@ -111,12 +122,15 @@ Commands:
   render    Generate output from a workspace
   validate  Check workspace integrity
   init      Guided setup of a new workspace
+  add       Capture something quickly
+  serve     Start capture web interface
   demo      See a sample profile rendered immediately
   import    Import data into a workspace from external sources
 
 Options:
   --format <format>  Output format: ${formatsList()}
   --stdout           Write to stdout instead of file
+  --workspace <path> Target workspace (default: .)
   --help             Show this message
 `)
 }
@@ -200,6 +214,43 @@ async function cmdValidate(path: string): Promise<void> {
   console.log('✓ Workspace is valid')
 }
 
+async function cmdAdd(path: string, text?: string): Promise<void> {
+  const capturesDir = join(path, 'captures')
+  await mkdir(capturesDir, { recursive: true })
+  const inboxPath = join(capturesDir, 'inbox.yaml')
+
+  let content: string
+  if (text) {
+    content = text
+  } else {
+    const rl = createInterface({ input, output })
+    console.log('')
+    content = (await rl.question('  ¿Qué ocurrió? ')).trim()
+    rl.close()
+    if (!content) {
+      console.log('  Nothing captured.')
+      return
+    }
+  }
+
+  const capture = {
+    id: `capture-${Date.now()}`,
+    content,
+    createdAt: new Date().toISOString().split('T')[0]!,
+    status: 'pending',
+  }
+
+  const existing = await readFile(inboxPath, 'utf-8').then(
+    (data) => yaml.load(data) as { inbox: unknown[] } | null,
+    () => null,
+  )
+  const inbox = existing?.inbox ?? []
+  inbox.push(capture)
+
+  await writeFile(inboxPath, yaml.dump({ inbox }))
+  console.log(`  ✓ Captured (${capture.id})`)
+}
+
 const DEMO_PROFILE: Profile = {
   identity: {
     person: { name: 'Alex Chen', title: 'Technical Lead', summary: 'Engineer focused on distributed systems and developer tooling.', urls: { github: 'https://github.com/alex', linkedin: 'https://linkedin.com/in/alex' } },
@@ -280,6 +331,24 @@ if (command === 'render') {
 } else if (command === 'demo') {
   const opts = parseArgs(args)
   try { await cmdDemo(opts.format) }
+  catch (e) { err(e instanceof Error ? e.message : String(e)) }
+} else if (command === 'add') {
+  let workspacePath = '.'
+  let text: string | undefined
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--workspace') workspacePath = args[++i] ?? '.'
+    else if (!args[i]?.startsWith('--')) text = args[i]
+  }
+  try { await cmdAdd(workspacePath, text) }
+  catch (e) { err(e instanceof Error ? e.message : String(e)) }
+} else if (command === 'serve') {
+  let workspacePath = '.'
+  let port = 3000
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--workspace') workspacePath = args[++i] ?? '.'
+    else if (args[i] === '--port') port = parseInt(args[++i] ?? '3000', 10)
+  }
+  try { await startServer(workspacePath, port) }
   catch (e) { err(e instanceof Error ? e.message : String(e)) }
 } else if (command === 'import') {
   const subcommand = args[0]

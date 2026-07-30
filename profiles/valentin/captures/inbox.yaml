@@ -1,0 +1,13 @@
+inbox:
+  - id: capture-1785417239211
+    content: Lideré la migración del módulo AAA hacia arquitectura hexagonal
+    createdAt: '2026-07-30'
+    status: pending
+  - id: capture-1785417251381
+    content: Segunda captura de prueba
+    createdAt: '2026-07-30'
+    status: pending
+  - id: capture-1785418853305
+    content: Lideré migración desde el móvil
+    createdAt: '2026-07-30'
+    status: pending

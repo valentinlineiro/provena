@@ -1,121 +1,218 @@
 # Product Roadmap
 
-Every epic exists because of a real friction event. No item enters this roadmap without an entry in `docs/dogfooding.md` or a decision in `docs/product-decisions.md`.
+Every epic exists because of a real friction event. Each epic has a structured format: friction → objective → observable result → minimum implementation.
 
-## Epic 1 — My professional profile exists
-
-**Goal:** Stop depending on memory to respond to an opportunity.
-
-**Origin:** Dogfooding — recruiter requested CV, had to reconstruct years of work.
-
-### P1.1 — Build my canonical profile
-
-**Problem:** No complete, up-to-date profile exists.
-
-**Deliverable:** A real workspace containing all experience, relevant projects, capabilities, and evidence where available.
-
-**Definition of done:** Can generate a complete CV without manual post-editing.
-
-### P1.2 — Generate first real CV
-
-Not the demo profile. My CV.
-
-**Validation:** Send that CV to a real recruiter.
-
-### P1.3 — Regeneration
-
-Modify one data point. Regenerate all projections. Verify consistency.
+**Rule:** Each epic must reduce an observable friction by at least 50%.
 
 ---
 
-## Epic 2 — Never rebuild again
+## Friction Backlog
 
-**Goal:** When an opportunity arrives, the profile already exists.
+| Friction | Objective | Possible solutions |
+|----------|-----------|-------------------|
+| Reconstructing CV | Generate an adapted CV in minutes | New projections, context selection, derived narrative |
+| Explaining the same to recruiters | First conversation starts where it adds value | Recruiter Brief, Career Brief, professional FAQ |
+| Losing achievements | Capture in seconds | Quick capture, drafts, curation flow |
+| Heavy forms | Replace structured editing with conversation | Guided curation, automatic relationship extraction |
+| Editing from different devices | Record knowledge from anywhere | Light web UI, Git sync, mobile capture |
 
-**Origin:** Repeated dogfooding — reconstruction from Git, Jira, memory, old CVs.
+---
 
-### P2.1 — Friction journal
+## CARD-000 — Define the Decision Model
 
-No code. For several weeks, record only:
+**Before any implementation.** This unblocks everything else.
 
+**Friction**
+The model represents identity (Profile) but not the decisions that communication exists to support. Without defining which decisions Provena helps make, every projection grows as a format variant rather than a view optimized for a purpose.
+
+**Design insight from dogfooding:**
+The architecture should move from:
 ```
-Event
-Friction
-Time lost
-What I missed
+Profile → Projection → Renderer
+```
+to:
+```
+Profile → Decision → Projection → Renderer
 ```
 
-This feeds the roadmap.
+A projection is a view optimized for a specific decision, not a format template. Decisions are more stable than channels (LinkedIn may not exist in 5 years, but the need for a recruiter to decide whether to contact will).
 
-### P2.2 — Classify frictions
+**Objective**
+Answer:
+- What decisions does Provena help make?
+- What information does each decision require from the profile?
+- What is the Decision Model — how does it select and prioritize facts?
+- How do preference/criteria fields (opportunity criteria, dealbreakers) fit without contaminating identity?
 
-Group by pattern (capture, reconstruction, search, adaptation, presentation).
+**Observable result**
+A written model in `docs/decision-model.md` that defines the canonical decisions, their information requirements, and how the Decision Model transforms Profile → Projection.
 
-### P2.3 — Find the dominant bottleneck
-
-Build the one thing that costs the most time.
-
----
-
-## Epic 3 — Capture
-
-**Goal:** Reduce the cost of recording professional achievements.
-
-**Origin:** Only if Epic 2 justifies it.
-
-### P3.1 — Design minimal capture
-
-Do not implement yet. Answer: what would have to happen for me to capture an achievement immediately after finishing a project?
-
-### P3.2 — Manual experiment
-
-Before writing code. For two weeks: open a note, write one line. Measure: do I actually do it?
-
-### P3.3 — Implement minimal capture
-
-Only if P3.2 works. No AI. No classification. Just record.
+All future communication epics reference this model instead of inventing their own semantics.
 
 ---
 
-## Epic 4 — Transform captures
+## Epic 1 — Recruiter Brief
 
-When enough captures exist. Convert notes, link evidence, associate experiences, enrich the model.
+**Friction**
+Always explaining the same thing. Evaluating opportunities that don't fit.
 
----
+**Objective**
+A recruiter understands the profile and criteria before talking to me.
 
-## Epic 5 — Automate
+**Observable result**
+The first call starts talking about the role, not the trajectory.
 
-Only when the manual workflow works. AI, importers, suggestions, sync.
-
----
-
-## Epic 6 — Export
-
-Find people similar to me (Staff Engineers, Tech Leads, senior freelancers). Ask: does your flow look like mine?
-
----
-
-## Immediate backlog
-
-| Priority | Task | Expected outcome |
-|----------|------|------------------|
-| P0 | Complete my real canonical profile | Provena represents my full career |
-| P0 | Generate and send my next CV with Provena | Validation in a real scenario |
-| P0 | Start `docs/dogfooding.md` | Evidence base for future decisions |
-| P1 | Log all frictions for 30 days | Discover the biggest bottleneck |
-| P1 | Review journal and group patterns | Identify the next capability to build |
-| P2 | Design a manual capture experiment | Validate the habit before the code |
+**Minimum implementation**
+A new projection: `provena render recruiter`.
+Output: who I am, what problems I solve, what I'm looking for, what I'm not looking for, important conditions, relevant technologies, short narrative.
 
 ---
 
-## DOG-001 — Live from Provena
+## CARD-002 — Personal Usage Loop
 
-**Goal:** From today, every change to my professional profile happens exclusively in Provena.
+### CARD-002A — Capture Core (✅ Validated)
 
-Examples:
-- Add a project → Provena.
-- Change LinkedIn About → first Provena, then render.
-- Update CV → never edit the PDF; regenerate the projection.
-- Change an experience description → only in the model.
+**Friction**
+Maintaining Provena requires too much conscious effort. Terminal → edit YAML → commit → render. Context switching out of flow.
 
-**Success criterion:** For several months, no direct editing of any derived artifact (CV, Markdown, HTML, reusable text). Every change originates in the canonical profile.
+**Implementation**
+```bash
+provena add
+```
+
+Prompts: What happened? Where? Why does it matter?
+Output: a draft YAML file in `captures/inbox.yaml`. Doesn't touch the canonical profile.
+
+**Status:** Conceptually validated. The capture concept works. The bottleneck is now physical access — the CLI requires being at a terminal with the tool installed.
+
+---
+
+### CARD-002B.1 — Mobile Capture Surface
+
+**Friction**
+Knowledge happens away from the terminal. Provena only exists where the CLI is installed.
+
+**Decision**
+Cloudflare Worker at `provena.dev/add` (or equivalent). Same minimal page: text field + save. Same capture format as local. This is a surface of Provena, not a satellite product.
+
+**Implementation**
+`packages/provena-web/` — Cloudflare Worker inside the Provena monorepo. Serves mobile-friendly HTML, stores captures in KV, ready for future sync to workspace.
+
+**Storage boundary**
+KV is a temporary dogfooding store, not a new source of truth. Future sync imports KV captures into the local workspace. The canonical profile remains the source of truth.
+
+**Status:** Code ready. Deployment blocked on Cloudflare account setup.
+
+---
+
+## Epic 2 — Career Narrative
+
+**Friction**
+CV looks like a list. Narrative must be built manually.
+
+**Objective**
+Automatically generate a coherent story.
+
+**Observable result**
+Do I need to edit it heavily?
+
+**Minimum implementation**
+Derive a professional summary from the profile. Rules, not AI.
+
+---
+
+## Epic 3 — Contextual Projections
+
+**Friction**
+One CV for everything.
+
+**Objective**
+Change the context. Not the profile.
+
+**Observable result**
+A single profile produces distinct representations for different audiences without manual editing.
+
+**Minimum implementation**
+```
+provena render cv --context recruiter
+provena render cv --context staff
+provena render cv --context architect
+```
+Even if initially they produce very similar results.
+
+---
+
+## Epic 4 — Opportunity Criteria
+
+**Friction**
+Wasting time on opportunities I'll never accept.
+
+**Objective**
+Explicitly represent criteria. Not experience. Criteria.
+
+**Observable result**
+Recruiters self-filter before contacting.
+
+**Minimum implementation**
+Add to the domain:
+```yaml
+opportunity:
+  salary:
+    min: 60000
+  remote: required
+  roles:
+    - staff
+    - principal
+  avoid:
+    - six interview rounds
+    - java maintenance
+```
+No UI yet.
+
+---
+
+## Epic 5 — Capture
+
+**Friction**
+Something happens away from the computer.
+
+**Objective**
+Record the fact in seconds.
+
+**Observable result**
+TBD.
+
+**Minimum implementation**
+Not yet defined. First, live the pain.
+
+---
+
+## Epic 6 — Curation
+
+**Friction**
+Editing YAML is costly.
+
+**Objective**
+Convert knowledge into structure.
+
+**Observable result**
+TBD.
+
+**Minimum implementation**
+Not yet defined. First, live the pain.
+
+---
+
+## Epic 7 — Ubiquity
+
+**Friction**
+Don't always have the laptop.
+
+**Objective**
+Keep using Provena from anywhere.
+
+**Observable result**
+TBD.
+
+**Minimum implementation**
+Not yet decided.

@@ -13,6 +13,8 @@ export type {
   Certification,
   Recommendation,
   Person,
+  Preferences,
+  Capture,
   Identity,
 } from './types.js'
 
@@ -24,8 +26,9 @@ export type {
   ResumeProject,
   ResumeSkill,
   ResumeModel,
+  RecruiterBriefModel,
 } from './projections.js'
-export { resumeProjector } from './projections.js'
+export { resumeProjector, recruiterProjector } from './projections.js'
 
 export type { Renderer } from './renderer.js'
 

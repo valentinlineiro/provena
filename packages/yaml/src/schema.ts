@@ -8,6 +8,7 @@ import type {
   Recommendation,
   Capability,
   Evidence,
+  Preferences,
 } from '@provena/core'
 
 type Check = readonly [field: string, ok: (v: unknown) => boolean]
@@ -130,4 +131,9 @@ export function parseEvidence(raw: unknown, file = 'evidence.yaml'): Evidence[] 
       ['description', isString],
     ]),
   )
+}
+
+export function parsePreferences(raw: unknown, _file = 'preferences.yaml'): Preferences | null {
+  if (!raw || typeof raw !== 'object') return null
+  return raw as Preferences
 }

@@ -8,6 +8,7 @@ import type {
   Recommendation,
   Capability,
   Evidence,
+  Preferences,
 } from './types.js'
 
 export interface Profile {
@@ -20,4 +21,5 @@ export interface Profile {
   readonly recommendations: readonly Recommendation[]
   readonly capabilities: readonly Capability[]
   readonly evidence: readonly Evidence[]
+  readonly preferences?: Preferences
 }

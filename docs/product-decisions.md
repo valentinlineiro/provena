@@ -45,3 +45,69 @@ Each entry links to a real event (the trigger), the friction observed, and the d
 **Evidence:** Dogfooding — the complete profile build from LinkedIn import through conversational reconstruction took one session. The import saved ~80% of data entry time but the remaining 20% (narrative, achievements, context) was where the profile became valuable.
 
 **Consequence:** Importers don't need to be perfect. They need to minimize the starting friction. The product's value is in the refinement workflow, not in the import accuracy.
+
+---
+
+## PD-004
+
+**Date:** 2026-07-30
+
+**Observation:** The process for deciding what to build was too heavy — hypotheses, preregistrations, formal validation cycles, and experimental framing. This risks turning Provena into a research project rather than a product. The methodology itself was introducing friction into product design, contradicting the product's own goal of reducing work.
+
+**Decision:** Replace the experimental methodology with a single friction-driven loop:
+
+**Friction → Change → Result**
+
+1. _I am annoyed that I have to do X._
+2. _Can I reduce this with a small change?_
+3. _Build it._
+4. _Use it for a few days._
+5. _Does it actually take less effort now?_
+
+The single rule for iteration planning: each iteration must eliminate or significantly reduce a repetitive task that is still done manually.
+
+The backlog is frictions, not features. Prioritization answers one question: _Does this reduce a friction I experience recurrently?_ If yes, go ahead. If "it would be nice...", probably not.
+
+**Evidence:** During the first product cycle, zero features were built and the methodology consumed more prose than the product itself. The experimental framing produced elaborate planning but no reduction in user friction.
+
+**Consequence:**
+
+- Language changes: hypothesis → friction, experiment → change, validation → result.
+- The roadmap is rebuilt as a list of frictions rather than features.
+- Every iteration starts with a real friction and ends with a measurable reduction in manual work.
+- The recruiter benefit is treated as a side effect of a better representation, not a design target. Optimizing for recruiters would lead to scope drift (CRM, messaging, pipelines).
+
+---
+
+## PD-005
+
+**Date:** 2026-07-30
+
+**Observation:** After building the canonical profile and the Recruiter Brief projection, the bottleneck is no longer about the model or the projections — it is about whether the user can sustain the profile over time. The current interaction model (open terminal, edit YAML, commit, render) requires context switching out of flow. The distance between "something happened" and "it is captured" is too large. The architecture was:
+
+```
+Profile → Decision Context → Projection → Renderer
+```
+
+But it is missing a prior layer:
+
+```
+User experience → Capture/Edit → Profile → Decision Context → Projection → Renderer
+```
+
+The model can be perfect, but if input is costly, knowledge never reaches the model.
+
+**Decision:** Usability is not a feature. It is the condition for the product to exist. Before expanding the model or adding new projections, Provena must guarantee that maintaining existing information has sufficiently low friction.
+
+**Evidence:** The Recruiter Brief vertical slice was built in one session. But for it to remain useful weeks from now, the profile must be kept alive. The capture friction (DF-001, DF-003) is the actual bottleneck. Dogfooding showed that terminal → YAML → commit is too heavy for daily use.
+
+**Consequence:**
+
+- Architecture gains a prior layer: User Experience → Capture → Profile → Decision → Projection → Renderer.
+- All work on new model fields or projections is deferred until the personal usage loop (CARD-002) is validated.
+- Criterion: if updating Provena costs more than not updating it, the system loses value. Every domain improvement must be accompanied by a viable usage experience.
+- The product is designed around three moments of use:
+  - **A — Just happened** (20 seconds available): capture a fact.
+  - **B — Quiet time** (15 minutes available): review what accumulated.
+  - **C — Need to communicate** (2 minutes available): generate a projection.
+  - If Provena works in these three moments, the rest makes sense. If it fails here, the architecture becomes a library of abandoned information.

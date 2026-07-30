@@ -1,5 +1,5 @@
 import type { Profile } from './profile.js'
-import type { Education, Publication, Certification } from './types.js'
+import type { Education, Publication, Certification, Experience } from './types.js'
 
 export interface Projector<TModel> {
   project(profile: Profile): TModel
@@ -8,6 +8,19 @@ export interface Projector<TModel> {
 function resolve<T extends { id: string }>(ids: readonly string[], items: readonly T[]): T[] {
   const map = new Map(items.map((i) => [i.id, i]))
   return ids.map((id) => map.get(id)).filter((x): x is T => x !== undefined)
+}
+
+function topTechnologies(experiences: readonly Experience[]): string[] {
+  const freq = new Map<string, number>()
+  for (const e of experiences) {
+    for (const t of e.technologies) {
+      freq.set(t, (freq.get(t) ?? 0) + 1)
+    }
+  }
+  return [...freq.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([name]) => name)
 }
 
 export interface ResumeExperience {
@@ -78,6 +91,48 @@ export const resumeProjector: Projector<ResumeModel> = {
       capabilities: [
         ...new Set(resolve(profile.identity.experienceIds, profile.experiences).flatMap((e) => e.technologies)),
       ].map((name) => ({ name, description: undefined, evidenceCount: 0 })),
+    }
+  },
+}
+
+export interface RecruiterBriefModel {
+  readonly name: string
+  readonly title?: string
+  readonly summary: string
+  readonly location?: string
+  readonly urls: Record<string, string>
+  readonly topTechnologies: string[]
+  readonly experiences: readonly {
+    readonly organization: string
+    readonly title: string
+    readonly technologies: readonly string[]
+  }[]
+  readonly roles?: readonly string[]
+  readonly remote?: string
+  readonly compensation?: { readonly minimum?: number; readonly currency?: string }
+  readonly avoid?: readonly string[]
+  readonly interests?: readonly string[]
+}
+
+export const recruiterProjector: Projector<RecruiterBriefModel> = {
+  project(profile: Profile): RecruiterBriefModel {
+    return {
+      name: profile.identity.person.name,
+      title: profile.identity.person.title,
+      summary: profile.identity.person.summary ?? '',
+      location: profile.identity.person.location,
+      urls: profile.identity.person.urls,
+      topTechnologies: topTechnologies(resolve(profile.identity.experienceIds, profile.experiences)),
+      experiences: resolve(profile.identity.experienceIds, profile.experiences).map((e) => ({
+        organization: e.organization,
+        title: e.title,
+        technologies: e.technologies,
+      })),
+      roles: profile.preferences?.roles,
+      remote: profile.preferences?.work?.remote,
+      compensation: profile.preferences?.compensation,
+      avoid: profile.preferences?.avoid,
+      interests: profile.preferences?.interests,
     }
   },
 }

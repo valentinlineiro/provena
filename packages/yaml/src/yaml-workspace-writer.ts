@@ -39,5 +39,9 @@ export class YamlWorkspaceWriter {
     for (const [filename, items] of entries) {
       await writeFile(join(path, filename), yaml.dump(items))
     }
+
+    if (profile.preferences) {
+      await writeFile(join(path, 'preferences.yaml'), yaml.dump(profile.preferences))
+    }
   }
 }

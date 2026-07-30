@@ -112,6 +112,26 @@ export interface Person {
   readonly provenance?: Provenance
 }
 
+export interface Capture {
+  readonly id: string
+  readonly content: string
+  readonly createdAt: string
+  readonly status: 'pending'
+}
+
+export interface Preferences {
+  readonly roles?: readonly string[]
+  readonly work?: {
+    readonly remote?: 'required' | 'hybrid' | 'optional'
+  }
+  readonly compensation?: {
+    readonly minimum?: number
+    readonly currency?: string
+  }
+  readonly avoid?: readonly string[]
+  readonly interests?: readonly string[]
+}
+
 export interface Identity {
   readonly person: Person
   readonly experienceIds: readonly string[]

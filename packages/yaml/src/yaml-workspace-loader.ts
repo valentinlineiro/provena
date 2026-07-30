@@ -13,6 +13,7 @@ import {
   parseRecommendations,
   parseCapabilities,
   parseEvidence,
+  parsePreferences,
 } from './schema.js'
 import { applyMigrations, type SchemaVersion, type Migration } from './migration-runner.js'
 
@@ -70,6 +71,7 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
     const recommendations = parseRecommendations((await loadYaml<unknown>(join(path, 'recommendations.yaml'))) ?? [])
     const capabilities = parseCapabilities((await loadYaml<unknown>(join(path, 'capabilities.yaml'))) ?? [])
     const evidence = parseEvidence((await loadYaml<unknown>(join(path, 'evidence.yaml'))) ?? [])
+    const preferences = parsePreferences(await loadYaml<unknown>(join(path, 'preferences.yaml')))
 
     const profile: Profile = {
       identity: {
@@ -90,6 +92,7 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
       recommendations,
       capabilities,
       evidence,
+      preferences: preferences ?? undefined,
     }
 
     const errors = validate(profile)

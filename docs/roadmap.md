@@ -87,21 +87,32 @@ Output: a draft YAML file in `captures/inbox.yaml`. Doesn't touch the canonical 
 
 ---
 
-### CARD-002B.1 — Mobile Capture Surface
+### CARD-002B.1 — Provena Home (Identity Timeline) ✅ Deployed
 
 **Friction**
 Knowledge happens away from the terminal. Provena only exists where the CLI is installed.
 
-**Decision**
-Cloudflare Worker at `provena.dev/add` (or equivalent). Same minimal page: text field + save. Same capture format as local. This is a surface of Provena, not a satellite product.
+**Design shift (2026-07-30)**
+The original concept was a capture form: text field + save. Dogfooding revealed a deeper friction:
 
-**Implementation**
-`packages/provena-web/` — Cloudflare Worker inside the Provena monorepo. Serves mobile-friendly HTML, stores captures in KV, ready for future sync to workspace.
+> A capture box validates information entry, not professional memory. Provena is not Evernote. Its value is in connection.
+
+The interface gravity shifts from:
+```
+Captura → Inbox
+```
+to:
+```
+Mi historia profesional → Añadir / Ver pendientes / Evolucionar
+```
+
+**Current state**
+`packages/provena-web/` deployed at `https://provena-capture.valentinlineiro.workers.dev`. Currently serves the original capture form. Next iteration (CARD-002C) will replace it with the Identity Timeline.
 
 **Storage boundary**
 KV is a temporary dogfooding store, not a new source of truth. Future sync imports KV captures into the local workspace. The canonical profile remains the source of truth.
 
-**Status:** Code ready. Deployment blocked on Cloudflare account setup.
+**Status:** Deployed. Interface pending redesign per CARD-002C.
 
 ---
 
@@ -135,6 +146,35 @@ npx wrangler kv namespace create CAPTURES
 **Operación diaria**: `git push` → Provena actualizado.
 
 **Result:** Infrastructure becomes invisible. The Worker is part of versioned product, not manual console actions.
+
+---
+
+### CARD-002C — Identity Timeline View
+
+**Friction**
+The isolated capture form doesn't generate a sense of progress or connection to professional history. The user sees a form, not their identity. Captures land in an invisible inbox instead of being placed in context.
+
+**Insight**
+> "I don't want a tray where I deposit things. I want to see how they fit into my story while I build that story."
+
+The action is not "capture." The action is **navigate identity**. Capture is a secondary action within that context.
+
+**Objective**
+Replace the capture form with a home screen showing the canonical profile (experiences, capabilities, pending captures) with "add" as a secondary action. Every capture has context: "I am adding something to my story."
+
+**Minimum implementation**
+A single view:
+- Profile header (name, title)
+- Experiences list (title, company, top capabilities)
+- Pending captures section
+- "Add capture" button
+
+No editing yet. The view is read-only identity exploration with entry points for new information.
+
+**Usability gate**
+The capture habit must work before adding consumers/projections (PD-005). Identity Timeline is the capture habit interface, not a new feature.
+
+**Status:** Design validated. Not implemented.
 
 ---
 

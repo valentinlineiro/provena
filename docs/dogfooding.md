@@ -13,10 +13,7 @@ The roadmap does not come from ideas. It comes from this table.
 | 2026-07-30 | Product direction conversation | Experimental methodology was heavier than building; model only represents past, not decision criteria | PD-004: friction-driven development; identified alignment loop as distinct from knowledge loop | ✅ |
 | 2026-07-30 | Recruiter Brief implementation | Implemented Recruiter Brief as first vertical slice — added preferences model, projector, renderer | Preferences + recuiter projection built into model and CLI | ✅ |
 | 2026-07-30 | Personal usage friction | Using Provena (terminal → YAML → commit → render) requires too much overhead for daily use | CARD-002: reduce personal usage friction; minimal capture interaction | 🔄 |
-
-
-
----
+| 2026-07-30 | Capture form revelation | Deployed Provena Web. Saw the capture screen. Realised: "I don't want a tray to deposit things. I want to see my story." | CARD-002C: Identity Timeline — capture is secondary to navigating identity | 🔄 |
 
 ## Session Notes — 2026-07-30
 

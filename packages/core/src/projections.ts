@@ -75,11 +75,9 @@ export const resumeProjector: Projector<ResumeModel> = {
       education: resolve(profile.identity.educationIds, profile.education),
       publications: resolve(profile.identity.publicationIds, profile.publications),
       certifications: resolve(profile.identity.certificationIds, profile.certifications),
-      capabilities: resolve(profile.identity.capabilityIds, profile.capabilities).map((c) => ({
-        name: c.name,
-        description: c.description,
-        evidenceCount: c.evidenceIds.length,
-      })),
+      capabilities: [
+        ...new Set(resolve(profile.identity.experienceIds, profile.experiences).flatMap((e) => e.technologies)),
+      ].map((name) => ({ name, description: undefined, evidenceCount: 0 })),
     }
   },
 }

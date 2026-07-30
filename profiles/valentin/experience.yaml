@@ -27,8 +27,8 @@
 - id: fbb1aa2d-a3ef-4f36-9edb-ecc18509ae03
   organization: knowmad mood
   title: Senior Software Engineer
-  start: "TBD"
-  end: "2025-09"
+  start: "2021-07"
+  end: "2025-10"
   summary: >-
     Consultoría de software en múltiples clientes y dominios. Construyó una base
     sólida en sistemas distribuidos, microservicios y cloud, trabajando con
@@ -46,6 +46,7 @@
     - "Evolucionó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, CI/CD, operación"
     - "Aprendió a alinear decisiones técnicas con equipos y culturas de cliente distintas, asegurando mantenibilidad a largo plazo"
     - "Construyó los cimientos técnicos que luego permitieron moverse hacia responsabilidades de arquitectura, productividad e IA"
+    - "Diseñó servicios backend escalables con Java, Spring Boot, Kafka y MongoDB, mejorando la capacidad del sistema en un 40%"
   technologies:
     - "Java"
     - "Spring Boot"

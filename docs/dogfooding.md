@@ -8,7 +8,7 @@ The roadmap does not come from ideas. It comes from this table.
 
 | Date | Event | Friction | Action | Resolved |
 |------|-------|----------|--------|----------|
-| 2026-07 | Recruiter requested CV | No up-to-date CV existed — had to reconstruct 2 years of work | Render from canonical profile | 🚧 |
+| 2026-07 | Recruiter requested CV | No up-to-date CV existed — had to reconstruct 2 years of work | Render from canonical profile | ✅ |
 | 2026-07-30 | LinkedIn import session | Imported data had truncated dates, summaries, and missing fields | Imported → built real canonical profile with all 5 experiences via conversation | ✅ |
 
 ## Session Notes — 2026-07-30

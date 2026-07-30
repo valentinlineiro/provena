@@ -31,3 +31,17 @@ Each entry links to a real event (the trigger), the friction observed, and the d
 **Evidence:** Dogfooding — the first real profile render showed the full skill list was overwhelming. The LinkedIn projection (limited to top 10) was far more readable.
 
 **Consequence:** No model change needed. The limit is enforced at projection time. This reinforces the principle that the model stores knowledge and projections tell a story.
+
+---
+
+## PD-003
+
+**Date:** 2026-07-30
+
+**Observation:** The LinkedIn import produced a usable skeleton but left corrupted dates, empty achievements, garbled education, broken publications, and 70+ flat skills. The canonical profile only became valid after walking through each experience conversationally and reconstructing the narrative from memory.
+
+**Decision:** Imported data is a draft, not the profile. An import should produce an editable first version that users refine through conversation and iteration. The canonical profile is created during that refinement, not during the import itself.
+
+**Evidence:** Dogfooding — the complete profile build from LinkedIn import through conversational reconstruction took one session. The import saved ~80% of data entry time but the remaining 20% (narrative, achievements, context) was where the profile became valuable.
+
+**Consequence:** Importers don't need to be perfect. They need to minimize the starting friction. The product's value is in the refinement workflow, not in the import accuracy.

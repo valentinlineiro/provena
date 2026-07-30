@@ -10,12 +10,9 @@ order:
     - 810fe6dd-05d5-4d8a-a534-5fa6c6d5bf94
     - 53797b09-5e5c-4d48-a5d5-c51c82875b88
   education:
-    - 291c2e6a-40b5-459e-9c58-60e57ff93607
-    - 158ac14b-925b-4d92-a9ca-34d1ea42031d
-  publications:
-    - b4dab87b-a583-4ea0-88c1-a2056cd6116a
-    - d35cbfc5-8c6c-44f4-9ca4-edd35885bf54
-    - e80c9071-4660-4808-ad99-1c200ef2cd24
+    - edu-1
+    - edu-2
+  publications: []
   certifications:
     - 61957f6d-2921-46a4-9014-0ba478ceb315
     - 84fca6ef-f350-4653-9494-39aa6ff77023

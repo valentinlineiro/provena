@@ -18,8 +18,8 @@ jobs:
         working-directory: packages/provena-web
       - name: Inject KV namespace ID
         run: |
-          if [ -n "${{ secrets.CAPTURES_KV_ID }}" ]; then
-            sed -i "s/TODO/${{ secrets.CAPTURES_KV_ID }}/" wrangler.jsonc
+          if [ -n "${{ secrets.PROVENA_KV_ID }}" ]; then
+            sed -i "s/TODO/${{ secrets.PROVENA_KV_ID }}/" wrangler.jsonc
           fi
         working-directory: packages/provena-web
       - run: npx wrangler deploy

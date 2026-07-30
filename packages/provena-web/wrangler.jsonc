@@ -5,8 +5,8 @@
   "compatibility_date": "2026-07-30",
   "kv_namespaces": [
     {
-      "binding": "CAPTURES",
-      "id": "TODO"
+      "binding": "PROVENA_KV",
+      "id": "b744bdf16241405ba38d35918e9b2b54"
     }
   ]
 }

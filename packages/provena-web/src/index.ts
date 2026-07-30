@@ -1,5 +1,5 @@
 interface Env {
-  CAPTURES: KVNamespace
+  PROVENA_KV: KVNamespace
 }
 
 interface Capture {
@@ -72,11 +72,11 @@ export default {
           status: 'pending',
         }
 
-        const raw = await env.CAPTURES.get('inbox', 'json')
+        const raw = await env.PROVENA_KV.get('inbox', 'json')
         const existing = raw as { inbox: Capture[] } | null
         const inbox = existing?.inbox ?? []
         inbox.push(capture)
-        await env.CAPTURES.put('inbox', JSON.stringify({ inbox }))
+        await env.PROVENA_KV.put('inbox', JSON.stringify({ inbox }))
 
         return new Response(JSON.stringify({ id: capture.id }), {
           headers: { 'Content-Type': 'application/json' },

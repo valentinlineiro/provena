@@ -105,6 +105,39 @@ KV is a temporary dogfooding store, not a new source of truth. Future sync impor
 
 ---
 
+### CARD-002B.2 — Automated Deployment (✅ Implemented)
+
+**Friction**
+Every change requires remembering infrastructure steps. Manual deploy is a chore that will be skipped.
+
+**Objective**
+Push to `main` deploys automatically.
+
+**Implementation**
+`.github/workflows/provena-web-deploy.yml` — GitHub Actions workflow:
+1. Checkout + setup Node
+2. `npm ci`
+3. Inject KV namespace ID from secret
+4. `npx wrangler deploy`
+
+**Secrets needed (GitHub → Settings → Actions):**
+- `CLOUDFLARE_API_TOKEN` — token with Workers:Edit + KV:Edit
+- `CLOUDFLARE_ACCOUNT_ID` — Cloudflare account ID
+- `CAPTURES_KV_ID` — KV namespace ID (from `wrangler kv namespace create`)
+
+**One-time setup:**
+```bash
+npx wrangler kv namespace create CAPTURES
+# → paste ID in GitHub secrets + wrangler.jsonc
+```
+
+**Setup inicial** (una vez): crear KV namespace, configurar secrets.
+**Operación diaria**: `git push` → Provena actualizado.
+
+**Result:** Infrastructure becomes invisible. The Worker is part of versioned product, not manual console actions.
+
+---
+
 ## Epic 2 — Career Narrative
 
 **Friction**

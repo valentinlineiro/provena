@@ -133,7 +133,7 @@ function buildCompass() {
     ? 'Your story is still developing toward ' + timeline.title + ' opportunities, with early strengths'
     : totalHitos < 15
     ? 'Based on your recorded experience, you\\'re well positioned for ' + timeline.title + ' opportunities, with clear strengths'
-    : 'You\\'re ready to explore the market. Your career currently supports a move to ' + timeline.title + ' opportunities, with clear strengths'
+    : 'Based on your recorded experience, you\\'re ready to explore the market. Your career currently supports a move to ' + timeline.title + ' opportunities, with clear strengths'
 
   const past = timeline.experiences.filter(e => e.end)
   const gap = (past.length ? past : timeline.experiences).slice().sort((a, b) => (a.hitos || 0) - (b.hitos || 0))[0]

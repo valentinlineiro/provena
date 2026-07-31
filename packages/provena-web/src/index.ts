@@ -12,6 +12,16 @@ interface Capture {
   status: 'pending'
 }
 
+const EVENTS = ['timeline_open', 'capture_created', 'capture_curated', 'current_chapter_clicked'] as const
+type EventName = (typeof EVENTS)[number]
+
+async function recordEvent(env: Env, name: EventName) {
+  const raw = await env.PROVENA_KV.get('events', 'json')
+  const events = (raw as { events: { name: EventName; at: string }[] } | null)?.events ?? []
+  events.push({ name, at: new Date().toISOString() })
+  await env.PROVENA_KV.put('events', JSON.stringify({ events }))
+}
+
 const PAGE = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Provena — Professional Journey</title>
@@ -125,7 +135,7 @@ document.getElementById('chapter').innerHTML =
   '<div class="role">' + current.title + '</div>' +
   '<div class="org">' + current.organization + '</div>' +
   '<div class="meta">' + (current.hitos || 0) + (current.hitos === 1 ? ' milestone' : ' milestones') + ' · Last evolution: <span id="last-evo">…</span></div>' +
-  '<button class="continue" onclick="showAdd()">Continue this story</button>'
+  '<button class="continue" onclick="chapterClick()">Continue this story</button>'
 
 document.getElementById('experiences').innerHTML = timeline.experiences.map(e => {
   const dates = e.end ? e.start + ' — ' + e.end : e.start + ' — present'
@@ -149,6 +159,19 @@ function setPrompt(p) {
 function showAdd() {
   document.getElementById('add-form').classList.remove('hidden')
   document.getElementById('add-btn').scrollIntoView({ behavior: 'smooth' })
+}
+
+function chapterClick() {
+  fire('current_chapter_clicked')
+  showAdd()
+}
+
+function fire(name) {
+  fetch('/api/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event: name }),
+  }).catch(() => {})
 }
 
 function daysSince(dateStr) {
@@ -186,6 +209,7 @@ async function save() {
   if (res.ok) {
     document.getElementById('status').textContent = '✓ Added to your story'
     document.getElementById('content').value = ''
+    fire('capture_created')
     loadCaptures()
   } else {
     document.getElementById('status').textContent = 'Error: ' + (await res.text())
@@ -193,6 +217,7 @@ async function save() {
 }
 
 loadCaptures()
+fire('timeline_open')
 </script>`
 
 export default {
@@ -211,6 +236,19 @@ export default {
       return new Response(JSON.stringify({ inbox }), {
         headers: { 'Content-Type': 'application/json' },
       })
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/event') {
+      try {
+        const body = (await request.json()) as { event?: string }
+        if (!body.event || !(EVENTS as readonly string[]).includes(body.event)) {
+          return new Response('Unknown event', { status: 400 })
+        }
+        await recordEvent(env, body.event as EventName)
+        return new Response('ok', { status: 200 })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
     }
 
     if (request.method === 'POST' && url.pathname === '/api/capture') {

@@ -32,6 +32,14 @@ export interface Recommendation {
   text: string
 }
 
+// CareerHint reserved: strategy layer (which action maximizes your goal), populated after
+// calibrating against diverse profiles — unlike nextBestImprovement (improvement layer).
+export interface CareerHint {
+  title: string
+  rationale: string
+  expectedImpact: 'low' | 'medium' | 'high'
+}
+
 export interface CareerCompass {
   positioning: Positioning
   readiness: Readiness
@@ -39,6 +47,7 @@ export interface CareerCompass {
   gaps: Gap[]
   nextBestImprovement: Recommendation
   confidence: number
+  careerHint?: CareerHint
 }
 
 // ponytail: evidence-volume tiers, tune thresholds once real dogfooding data disagrees

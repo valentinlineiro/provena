@@ -260,6 +260,14 @@ interface CareerCompass {
 }
 ```
 5. **Collect external evidence requirements** (not data yet). Define what future L2 will need: job offers, salary bands, demand by technology, role evolution. So when the habit is validated, we know which data is worth incorporating.
+6. **UX review during the freeze** (2026-07-31). Done now because the UX is frozen — the review finds frictions, not solutions, before breaking the experiment. Four levels:
+   - **Cognitive walkthrough** (most important): real tasks ("I just finished a big migration", "What did I do two years ago?", "Is my profile ready to job search?", "I haven't logged in for a week"), noting expectations vs. findings vs. confusion vs. missing.
+   - **Heuristic review** (Nielsen, adapted): visible state, real-world correspondence ("milestone"/"story"/"current chapter" natural?), consistency (all actions speak "story" or mixed vocabulary?), recognition, minimalism (does everything support Who am I? / How am I doing? / What's next?).
+   - **Story-first review** (Provena-specific): is there a protagonist? Is the current chapter clear? Do experiences look like chapters or CV entries? Is evolution perceivable at a glance? Does it invite continuing the story?
+   - **Decision review**: for each screen, "what decision does the user make better after seeing it?" If "none", the screen adds little.
+   - **Execution**: three profiles — the dogfooding user (deep frictions), a senior engineer (knows the career, not Provena), a product/UX person (observes experience). Merge and rank frictions.
+   - **Deliverable**: a friction table — `UX-001 | friction | severity | evidence | action`.
+   - **Second review after the freeze**: "what part of the interface have I never used?" — the best source of muda.
 
 **Guiding principle (PD-007):** Every new capability must answer a question the user is already asking when opening Provena. Who am I? → Timeline. How am I doing? / What's next? → Compass L1. Nothing else until those are answered.
 

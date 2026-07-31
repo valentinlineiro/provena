@@ -187,43 +187,46 @@ The capture habit must work before adding consumers/projections (PD-005). Identi
 
 ---
 
-### CARD-002D — Professional Pulse
+### CARD-002D — Career Compass
 
 **Friction**
-The Identity Timeline tells the user "this is your story" — useful but static. It doesn't say what the story *means* for the career. Returning is driven by observation of facts, not by a reason to act.
+The Identity Timeline tells the user "this is your story" — useful but static. It doesn't say what the story *means* for the market. Returning is driven by observation of facts, not by a reason to act.
 
 **Insight**
-> The habit loop is not "complete the profile". It is a feedback system.
+> The habit loop is not "complete the profile". It is a feedback system. And the first benefit a user cannot easily get by themselves is: "What does my story mean in the market?"
 
-The loop becomes:
-```
-Historia profesional → Modelo canónico → Análisis → Feedback accionable
-```
+The Timeline answers "Who am I?". The career decision needs "What does that mean in the market?". That answer is costly because it combines many signals: real experience (not just years), evidence (milestones), technologies, depth vs. breadth, market trends, expected level (Senior/Staff/Principal), observed compensation, compatible opportunities.
 
-The user returns not to fill fields but to answer questions:
-- Am I growing?
-- Is my positioning still competitive?
-- What evidence is missing to reach the next level?
-- Does it make sense to start listening to offers?
+The canonical model has an advantage: it already holds the structured context.
+
+**Reframing (2026-07-31):** Pulse is not a dashboard — it is a **Career Compass**. Salary is not the product. The product answers: Am I underpaid? Am I growing? Should I change companies? What companies look for me? What evidence is missing to reach the next level?
 
 **Design relationship to CARD-000**
-The profile feeds a **Decision Context**; the Pulse is a decision surface for the **Self** context. It is feedback for the user, not a projection for an external consumer. This is what keeps it inside the personal usage loop (PD-005) rather than an external projection.
+The profile feeds a **Decision Context**; the Compass is a decision surface for the **Self** context. It is feedback for the user, not a projection for an external consumer. This is what keeps it inside the personal usage loop (PD-005) rather than an external projection.
 
-**Minimum implementation**
-A "Pulso profesional" section derived from existing data, no new fields:
-- **Posicionamiento**: title + dominant capabilities
-- **Última evolución**: days since most recent capture
-- **Cobertura de historia**: hitos per experience vs. their dates (recent well-covered, early sparse)
-- **Preparación**: ready to generate CV / LinkedIn / Recruiter Brief (computed from data availability)
-- **Siguiente mejora con mayor impacto**: the gap with highest value (e.g., "document last quarter of Summa Networks")
+**Structured by levels — MVP is Level 1 only**
+
+- **Level 1 (own data only, buildable now):** positioning, story coverage, last evolution, strengths, documentary gaps, readiness for Recruiter Brief.
+- **Level 2 (adds external data):** technology demand, market trends, compatible roles, observed salaries.
+- **Level 3 (requires user history over time):** "Your market value increased vs. 6 months ago", "You now match the typical Staff Engineer pattern", "Your story supports a higher salary negotiation", "You are aligning with Principal opportunities". This level is the sustainable differentiator — it is what a spreadsheet, CV, or LinkedIn cannot produce alone.
+
+**Minimum implementation (Level 1)**
+A "Career Compass" section derived from existing data, no new fields:
+- **Positioning**: title + dominant capabilities
+- **Last evolution**: days since most recent capture
+- **Story coverage**: hitos per experience vs. their dates (recent well-covered, early sparse)
+- **Strengths**: strongest differentiators
+- **Documentary gaps**: the gap with highest value (e.g., "document the architectural outcomes from your current role")
+- **Readiness**: ready to generate CV / LinkedIn / Recruiter Brief
 
 **Deferred (needs sufficient information)**
-- **Valor de mercado estimado** — an evidence-based inference, not a magic number: years of experience, technology depth, leadership, registered achievements, market demand, recent market evolution. Result shape: "Staff Software Engineer / Alta demanda / Preparación 92% / Salario observado 80–95k € / Siguiente mejora…". Only when the data supports it.
+- Level 2: market demand, trends, compatible roles, observed salaries.
+- Level 3: longitudinal value/pattern inferences. Only when the data supports it.
 
 **Usability gate**
-PD-005 still applies: the capture/observation habit (CARD-002C) is being validated over 2-3 weeks. The Pulse is the reason to keep returning — but it must be built from real data, so the validation period also accumulates the evidence it needs.
+PD-005 still applies: the capture/observation habit (CARD-002C) is being validated over 2-3 weeks. The Compass is the reason to keep returning — but it must be built from real data, so the validation period also accumulates the evidence it needs.
 
-**Status:** Design validated. Not implemented.
+**Status:** Design validated. Not implemented. Implementation deferred until the Timeline habit is confirmed.
 
 ---
 

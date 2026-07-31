@@ -43,6 +43,21 @@ async function recordEvent(env: Env, name: EventName) {
   await env.PROVENA_KV.put('events', JSON.stringify({ events }))
 }
 
+export function siteNav(section: 'story' | 'prepare'): string {
+  const link = (label: string, href: string, active: boolean) =>
+    '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
+  const sections = [
+    { label: 'Story', href: '/', id: 'story' as const },
+    { label: 'Prepare', href: '/cv', id: 'prepare' as const },
+  ]
+  return (
+    '<nav class="site">' +
+    '<a class="brand" href="/">Provena</a>' +
+    sections.map(s => link(s.label, s.href, s.id === section)).join('') +
+    '</nav>'
+  )
+}
+
 const PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

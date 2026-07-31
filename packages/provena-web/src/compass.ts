@@ -1,31 +1,13 @@
-export interface CareerExperience {
-  organization: string
-  title: string
-  start: string
-  end: string | null
-  hitos?: number
-  capabilities: string[]
-}
+/// <reference types="@cloudflare/workers-types" />
+import { deriveStrengths, deriveEvidenceCount, findEvidenceGaps } from '@provena/core'
+import type { Profile } from '@provena/core'
+import type { CareerTimeline, Strength, Gap } from '@provena/core'
 
-export interface CareerTimeline {
-  title: string
-  updatedAt: string
-  experiences: CareerExperience[]
-}
+export type { Strength, Gap } from '@provena/core'
+export type { CareerExperience, CareerTimeline } from '@provena/core'
 
 export type Positioning = 'insufficient-evidence' | 'developing' | 'positioned' | 'market-ready'
 export type Readiness = 'unknown' | 'building' | 'ready'
-
-export interface Strength {
-  name: string
-  count: number
-}
-
-export interface Gap {
-  organization: string
-  dates: string
-  milestones: number
-}
 
 export interface Recommendation {
   target: string
@@ -54,21 +36,14 @@ export interface CareerCompass {
 const HITOS_DEVELOPING = 5
 const HITOS_POSITIONED = 15
 
-export function computeCareerCompass(timeline: CareerTimeline): CareerCompass {
-  if (timeline.experiences.length === 0) {
+export function computeCareerCompass(profile: Profile): CareerCompass {
+  if (profile.identity.experienceIds.length === 0) {
     throw new Error('CareerCompass requires at least one experience')
   }
 
-  const capFreq: Record<string, number> = {}
-  for (const e of timeline.experiences) for (const c of e.capabilities) capFreq[c] = (capFreq[c] || 0) + 1
-  const strengths = Object.entries(capFreq)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 3)
+  const strengths = deriveStrengths(profile).slice(0, 3)
+  const totalHitos = deriveEvidenceCount(profile)
 
-  const totalHitos = timeline.experiences.reduce((sum, e) => sum + (e.hitos || 0), 0)
-
-  // 0 hitos = the engine has evaluated almost nothing, so any verdict would be noise
   const positioning: Positioning = totalHitos === 0
     ? 'insufficient-evidence'
     : totalHitos < HITOS_DEVELOPING
@@ -79,18 +54,10 @@ export function computeCareerCompass(timeline: CareerTimeline): CareerCompass {
     : totalHitos < HITOS_POSITIONED ? 'building' : 'ready'
   const confidence = Math.min(1, totalHitos / HITOS_POSITIONED)
 
-  const past = timeline.experiences.filter(e => e.end)
-  const weakest = (past.length ? past : timeline.experiences)
-    .slice()
-    .sort((a, b) => (a.hitos || 0) - (b.hitos || 0))[0]!
-  const gaps: Gap[] = [{
-    organization: weakest.organization,
-    dates: weakest.start + (weakest.end ? ' — ' + weakest.end : ' — present'),
-    milestones: weakest.hitos || 0,
-  }]
-
+  const gap = findEvidenceGaps(profile)[0]!
+  const gaps: Gap[] = [gap]
   const nextBestImprovement: Recommendation = {
-    target: weakest.organization,
+    target: gap.organization,
     text: 'document one high-impact milestone from that period, or one demonstrating cross-team impact',
   }
 

@@ -1,10 +1,13 @@
 /// <reference types="@cloudflare/workers-types" />
-import timeline from './timeline.js'
 import { computeCareerCompass, narrateCompass } from './compass.js'
+import { profileToTimeline } from '@provena/core'
+import profile, { updatedAt } from './profile.js'
+
+const TIMELINE = profileToTimeline(profile, updatedAt)
 
 const COMPASS_HTML = (() => {
-  const compass = computeCareerCompass(timeline)
-  const n = narrateCompass(compass, timeline)
+  const compass = computeCareerCompass(profile)
+  const n = narrateCompass(compass, TIMELINE)
   const sections = [
     '<div class="status ' + (compass.readiness === 'ready' ? 'ok' : compass.readiness === 'unknown' ? 'neutral' : 'warn') + '">' + n.status + '</div>',
     '<p class="headline">' + n.headline + '</p>',
@@ -133,9 +136,10 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 </section>
 </main>
 <script>
-const timeline = ${JSON.stringify(timeline)}
+const profile = ${JSON.stringify(profile)}
+const timeline = ${JSON.stringify(TIMELINE)}
 
-document.getElementById('name').textContent = timeline.name
+document.getElementById('name').textContent = profile.identity.person.name
 document.getElementById('title').textContent = timeline.title
 
 const current = timeline.experiences.find(e => !e.end)

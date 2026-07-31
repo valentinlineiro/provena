@@ -125,3 +125,19 @@ The model can be perfect, but if input is costly, knowledge never reaches the mo
 **Evidence:** The Timeline redesign (CARD-002C) — translating the UI to English required no model change, only a projection change. Confirms language is a presentation concern.
 
 **Consequence:** The UI and all future projections default to English. Spanish is a possible future projection, not an MVP concern. The canonical profile remains language-neutral.
+
+## PD-007
+
+**Date:** 2026-07-31
+
+**Observation:** The product evolution is now a chain: Canonical Identity → Timeline (Who am I?) → Habit (Do I come back?) → Career Compass L1 (How am I doing? / What's next?) → L2 (How does the market see me?) → L3 (What decision should I make?). Each stage must not skip the habit. Every feature should answer a question the user is already asking when they open Provena.
+
+**Decision:** Every new capability must answer a question the user is already asking when opening Provena.
+
+**Evidence:** The Timeline answers "Who am I?" (confirmed). "How am I doing?" is next. "What's next?" after that. Features that answer no user question are not introduced.
+
+**Consequence:** Success is no longer "having a complete profile". It is:
+
+> After using Provena, the user has more clarity about their next professional step than before opening it.
+
+---

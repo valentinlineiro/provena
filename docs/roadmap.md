@@ -243,6 +243,28 @@ PD-005 still applies: the capture/observation habit (CARD-002C) is being validat
 
 ---
 
+### Execution plan (2026-07-31) — during habit validation
+
+1. **Freeze the Timeline UX (2-3 weeks).** No new sections. Only fix evident frictions from daily use. Single question: "Do I open Provena spontaneously?" Observations are documented as part of the experiment, not as new features.
+2. **Instrument the dogfooding.** Minimal events in the Worker: `timeline_open`, `capture_created`, `capture_curated`, `current_chapter_clicked`. Not for optimization now — to contrast perception with actual use.
+3. **Design (not implement) Career Compass L1.** Define which metrics are useful, how they compute from own data only, and which recommendations are explainable. Example formulas: Story Coverage = f(experiences with milestones, last update, undocumented periods); Readiness = f(evidence vs target role); Strengths = aggregation of repeated capabilities.
+4. **Define the Compass contract** — a stable interface, so L2/L3 only add data providers without changing it:
+```ts
+interface CareerCompass {
+  positioning: Positioning;
+  health: StoryHealth;
+  readiness: Readiness;
+  strengths: Strength[];
+  gaps: Gap[];
+  nextBestImprovement: Recommendation;
+}
+```
+5. **Collect external evidence requirements** (not data yet). Define what future L2 will need: job offers, salary bands, demand by technology, role evolution. So when the habit is validated, we know which data is worth incorporating.
+
+**Guiding principle (PD-007):** Every new capability must answer a question the user is already asking when opening Provena. Who am I? → Timeline. How am I doing? / What's next? → Compass L1. Nothing else until those are answered.
+
+---
+
 ## Epic 2 — Career Narrative
 
 **Friction**

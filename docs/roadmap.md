@@ -183,7 +183,7 @@ The loop starts with **observation** (seeing your story), not with **entry** (ad
 **Usability gate**
 The capture habit must work before adding consumers/projections (PD-005). Identity Timeline is the capture habit interface, not a new feature.
 
-**Status:** Design validated. Not implemented.
+**Status:** Implemented (2026-07-30). Home screen shows identity: name, title, focus, stats (experiences/capabilities/captures), experiences with capability tags, pending captures, and a contextual "+ Añadir evolución" with quick prompts. Capture always returns to the story.
 
 ---
 

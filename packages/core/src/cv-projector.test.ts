@@ -20,12 +20,38 @@ function makeProfile(): Profile {
     projects: [{ id: 'proj-1', name: 'Provena', description: 'A framework.', technologies: ['TypeScript'], capabilityIds: [], evidenceIds: [] }],
     education: [], publications: [], certifications: [], recommendations: [],
     capabilities: [], evidence: [],
+    preferences: {
+      interests: ['Software Architecture', 'Developer Productivity', 'AI-Assisted Engineering', 'Distributed Systems'],
+    },
   }
 }
 
-test('cvProjector without context is byte-identical to resumeProjector', () => {
+test('cvProjector without context is byte-identical to resumeProjector apart from the snapshot', () => {
   const profile = makeProfile()
-  assert.deepEqual(cvProjector(profile).model, resumeProjector.project(profile))
+  const { snapshot, ...rest } = cvProjector(profile).model
+  assert.deepEqual(rest, resumeProjector.project(profile))
+  assert.ok(snapshot)
+})
+
+test('cvProjector derives a career snapshot from context and profile', () => {
+  const p = makeProfile()
+  const { model } = cvProjector(p, { targetRole: 'Principal Engineer' })
+  assert.equal(model.snapshot!.targetRole, 'Principal Engineer')
+  assert.deepEqual(model.snapshot!.coreExpertise, ['Software Architecture', 'Developer Productivity', 'AI-Assisted Engineering', 'Distributed Systems'])
+  assert.ok(model.snapshot!.highlights.length >= 2)
+  assert.match(model.snapshot!.highlights[0]!, /\+\s+years of software engineering experience/)
+})
+
+test('snapshot targetRole falls back to the first title segment', () => {
+  const { model } = cvProjector(makeProfile())
+  assert.equal(model.snapshot!.targetRole, 'Staff Software Engineer')
+})
+
+test('snapshot primary technologies are frequency-ordered and exclude core expertise', () => {
+  const p = makeProfile()
+  const { model } = cvProjector(p)
+  assert.equal(model.snapshot!.primaryTechnologies[0], 'Java')
+  assert.ok(!model.snapshot!.primaryTechnologies.some(t => model.snapshot!.coreExpertise.includes(t)))
 })
 
 test('excludeExperienceIds removes experiences and reports them in metadata', () => {

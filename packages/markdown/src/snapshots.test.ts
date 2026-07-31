@@ -92,3 +92,26 @@ test('markdown snapshot matches expected output', () => {
   assert.match(output, /\*\*TypeScript\*\*/)
   assert.match(output, /\*\*Rust\*\*/)
 })
+
+test('markdown renders the career snapshot and skills split when present', () => {
+  const profile = makeProfile()
+  const base = resumeProjector.project(profile)
+  const model = {
+    ...base,
+    snapshot: {
+      targetRole: 'Staff Software Engineer',
+      coreExpertise: ['Software Architecture', 'Developer Productivity'],
+      primaryTechnologies: ['TypeScript', 'Rust'],
+      highlights: ['12+ years of software engineering experience', 'Strong expertise in TypeScript, Rust'],
+    },
+  }
+  const output = new MarkdownResumeRenderer().render(model)
+  assert.match(output, /## Career Snapshot/)
+  assert.match(output, /\*\*Target role:\*\* Staff Software Engineer/)
+  assert.match(output, /## Core expertise/)
+  assert.match(output, /- \*\*Software Architecture\*\*/)
+  assert.match(output, /## Primary technologies/)
+  assert.match(output, /- \*\*TypeScript\*\*/)
+  assert.doesNotMatch(output, /## Skills/)
+  assert.match(output, /12\+ years of software engineering experience/)
+})

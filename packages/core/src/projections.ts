@@ -59,6 +59,14 @@ export interface ResumeModel {
   readonly publications: readonly Publication[]
   readonly certifications: readonly Certification[]
   readonly capabilities: readonly ResumeSkill[]
+  readonly snapshot?: CareerSnapshot
+}
+
+export interface CareerSnapshot {
+  readonly targetRole: string
+  readonly coreExpertise: readonly string[]
+  readonly primaryTechnologies: readonly string[]
+  readonly highlights: readonly string[]
 }
 
 export interface ResumeBuildOptions {

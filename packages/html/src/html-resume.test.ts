@@ -67,3 +67,24 @@ test('HTML renderer escapes special characters', () => {
   assert.match(html, /Alex &amp; &lt;Co&gt;/)
   assert.doesNotMatch(html, /<Co>/)
 })
+
+test('HTML renderer renders the career snapshot and skills split when present', () => {
+  const profile = makeProfile()
+  const base = resumeProjector.project(profile)
+  const model = {
+    ...base,
+    snapshot: {
+      targetRole: 'Staff Software Engineer',
+      coreExpertise: ['Software Architecture'],
+      primaryTechnologies: ['TypeScript'],
+      highlights: ['12+ years of software engineering experience'],
+    },
+  }
+  const html = new HtmlResumeRenderer().render(model)
+  assert.match(html, /Career Snapshot/)
+  assert.match(html, /Staff Software Engineer/)
+  assert.match(html, /Core expertise/)
+  assert.match(html, /Primary technologies/)
+  assert.match(html, /Software Architecture/)
+  assert.doesNotMatch(html, /<h2>Skills<\/h2>/)
+})

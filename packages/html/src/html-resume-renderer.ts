@@ -49,6 +49,25 @@ export class HtmlResumeRenderer implements Renderer<ResumeModel> {
     if (model.summary) parts.push('<p>' + esc(model.summary) + '</p>')
     parts.push('</header>')
 
+    if (model.snapshot) {
+      parts.push('<section>')
+      parts.push('<h2>Career Snapshot</h2>')
+      parts.push('<p><strong>Target role:</strong> ' + esc(model.snapshot.targetRole) + '</p>')
+      if (model.snapshot.coreExpertise.length > 0) {
+        parts.push('<p><strong>Strongest evidence</strong></p>')
+        parts.push('<ul>')
+        for (const area of model.snapshot.coreExpertise) parts.push('<li>' + esc(area) + '</li>')
+        parts.push('</ul>')
+      }
+      if (model.snapshot.highlights.length > 0) {
+        parts.push('<p><strong>Career highlights</strong></p>')
+        parts.push('<ul>')
+        for (const h of model.snapshot.highlights) parts.push('<li>' + esc(h) + '</li>')
+        parts.push('</ul>')
+      }
+      parts.push('</section>')
+    }
+
     if (model.experiences.length > 0) {
       parts.push('<section>')
       parts.push('<h2>Experience</h2>')
@@ -124,7 +143,24 @@ export class HtmlResumeRenderer implements Renderer<ResumeModel> {
       parts.push('</section>')
     }
 
-    if (model.capabilities.length > 0) {
+    if (model.snapshot) {
+      if (model.snapshot.coreExpertise.length > 0) {
+        parts.push('<section>')
+        parts.push('<h2>Core expertise</h2>')
+        parts.push('<ul>')
+        for (const area of model.snapshot.coreExpertise) parts.push('<li><strong>' + esc(area) + '</strong></li>')
+        parts.push('</ul>')
+        parts.push('</section>')
+      }
+      if (model.snapshot.primaryTechnologies.length > 0) {
+        parts.push('<section>')
+        parts.push('<h2>Primary technologies</h2>')
+        parts.push('<ul>')
+        for (const t of model.snapshot.primaryTechnologies) parts.push('<li><strong>' + esc(t) + '</strong></li>')
+        parts.push('</ul>')
+        parts.push('</section>')
+      }
+    } else if (model.capabilities.length > 0) {
       parts.push('<section>')
       parts.push('<h2>Skills</h2>')
       parts.push('<ul>')

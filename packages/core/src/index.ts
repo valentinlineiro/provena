@@ -26,6 +26,7 @@ export type {
   ResumeProject,
   ResumeSkill,
   ResumeModel,
+  CareerSnapshot,
   RecruiterBriefModel,
 } from './projections.js'
 export { resumeProjector, recruiterProjector } from './projections.js'

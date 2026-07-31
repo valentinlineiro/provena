@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { computeCareerCompass, narrateCompass } from './compass.js'
+import { computeCareerCompass, narrateCompass, cvReadiness } from './compass.js'
 import { profileToTimeline, cvProjector } from '@provena/core'
 import type { CVContext, CVProjection } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
@@ -320,6 +320,7 @@ a.home { color: #1a1a1a; font-size: 0.8125rem; font-weight: 600; text-decoration
 </section>
 
 <div class="meta" id="meta"></div>
+<div class="meta" id="readiness"></div>
 
 <button onclick="preview()">Preview CV</button>
 <div class="row">
@@ -378,6 +379,9 @@ async function preview() {
   const meta = document.getElementById('meta')
   meta.textContent = parts.join(' ')
   meta.style.display = parts.length ? 'block' : 'none'
+  const readiness = document.getElementById('readiness')
+  readiness.textContent = lastResult.readiness ? '⚠ ' + lastResult.readiness : ''
+  readiness.style.display = lastResult.readiness ? 'block' : 'none'
 }
 
 function exportMd() {
@@ -490,6 +494,7 @@ export default {
         return new Response(JSON.stringify({
           model,
           metadata,
+          readiness: cvReadiness(context, compassForPage),
           markdown: markdownRenderer.render(model),
           html: htmlRenderer.render(model),
         }), {

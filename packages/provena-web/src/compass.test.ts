@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { computeCareerCompass, narrateCompass } from './compass.js'
+import { computeCareerCompass, narrateCompass, cvReadiness } from './compass.js'
 import { profileToTimeline } from '@provena/core'
 import profile, { updatedAt } from './profile.js'
 import type { Profile } from '@provena/core'
@@ -113,4 +113,11 @@ test('insufficient evidence refuses to judge instead of saying "developing"', ()
   assert.equal(n.nextStep, 'Document your first career milestones to unlock the Career Compass.')
   assert.equal(n.why[0], '0 documented milestones')
   assert.match(n.why[1]!, /^Story updated /)
+})
+
+test('cvReadiness surfaces the compass gap as a strengthening suggestion', () => {
+  const text = cvReadiness({ targetRole: 'Staff Software Engineer' }, COMPASS)
+  assert.match(text, /This CV is good/)
+  assert.match(text, /One more milestone from VINCLE/)
+  assert.match(text, /for Staff Software Engineer opportunities/)
 })

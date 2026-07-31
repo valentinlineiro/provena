@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import { deriveStrengths, deriveEvidenceCount, findEvidenceGaps } from '@provena/core'
-import type { Profile } from '@provena/core'
+import type { Profile, CVContext } from '@provena/core'
 import type { CareerTimeline, Strength, Gap } from '@provena/core'
 
 export type { Strength, Gap } from '@provena/core'
@@ -64,6 +64,18 @@ export function computeCareerCompass(profile: Profile): CareerCompass {
   return { positioning, readiness, strengths, gaps, nextBestImprovement, confidence }
 }
 
+// ponytail: single-gap message; a second gap would need "gaps" ranked by leverage, not effort
+export function cvReadiness(context: CVContext, compass: CareerCompass): string {
+  const gap = compass.gaps[0]
+  const role = context.targetRole ?? ''
+  if (!gap) return ''
+  const goal = role ? ' for ' + role + ' opportunities' : ''
+  const opening = compass.positioning === 'market-ready' || compass.positioning === 'positioned'
+    ? 'This CV is good.'
+    : 'This CV is still developing.'
+  return opening + ' One more milestone from ' + gap.organization + ' would strengthen it' + goal + '.'
+}
+
 export interface CompassNarrative {
   status: string
   headline: string
@@ -71,9 +83,7 @@ export interface CompassNarrative {
   gapLabel: string
   nextStep: string
   why: string[]
-}
-
-function daysSince(dateStr: string): string {
+}function daysSince(dateStr: string): string {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
   if (days <= 0) return 'today'
   return days + (days === 1 ? ' day ago' : ' days ago')

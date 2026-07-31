@@ -17,6 +17,21 @@ export class MarkdownResumeRenderer implements Renderer<ResumeModel> {
 
     lines.push(`# ${model.name}`, '')
 
+    if (model.snapshot) {
+      lines.push('## Career Snapshot', '')
+      lines.push(`**Target role:** ${model.snapshot.targetRole}`, '')
+      if (model.snapshot.coreExpertise.length > 0) {
+        lines.push('**Strongest evidence**', '')
+        for (const area of model.snapshot.coreExpertise) lines.push(`- ${area}`)
+        lines.push('')
+      }
+      if (model.snapshot.highlights.length > 0) {
+        lines.push('**Career highlights**', '')
+        for (const h of model.snapshot.highlights) lines.push(`- ${h}`)
+        lines.push('')
+      }
+    }
+
     if (model.summary) {
       lines.push('## About', '', model.summary, '')
     }
@@ -75,7 +90,18 @@ export class MarkdownResumeRenderer implements Renderer<ResumeModel> {
       }
     }
 
-    if (model.capabilities.length > 0) {
+    if (model.snapshot) {
+      if (model.snapshot.coreExpertise.length > 0) {
+        lines.push('## Core expertise', '')
+        for (const area of model.snapshot.coreExpertise) lines.push(`- **${area}**`)
+        lines.push('')
+      }
+      if (model.snapshot.primaryTechnologies.length > 0) {
+        lines.push('## Primary technologies', '')
+        for (const t of model.snapshot.primaryTechnologies) lines.push(`- **${t}**`)
+        lines.push('')
+      }
+    } else if (model.capabilities.length > 0) {
       lines.push('## Skills', '')
       for (const cap of model.capabilities) {
         const evidence = cap.evidenceCount > 0 ? ` (${cap.evidenceCount} pieces of evidence)` : ''

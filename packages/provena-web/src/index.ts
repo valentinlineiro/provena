@@ -1,6 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 import { computeCareerCompass, narrateCompass } from './compass.js'
-import { profileToTimeline } from '@provena/core'
+import { profileToTimeline, cvProjector } from '@provena/core'
+import type { CVContext, CVProjection } from '@provena/core'
+import { MarkdownResumeRenderer } from '@provena/markdown'
+import { HtmlResumeRenderer } from '@provena/html'
 import profile, { updatedAt } from './profile.js'
 
 const TIMELINE = profileToTimeline(profile, updatedAt)
@@ -243,6 +246,171 @@ loadCaptures()
 fire('timeline_open')
 </script>`
 
+const markdownRenderer = new MarkdownResumeRenderer()
+const htmlRenderer = new HtmlResumeRenderer()
+
+const compassForPage = computeCareerCompass(profile)
+const SUGGESTIONS = {
+  strengths: compassForPage.strengths.map(s => s.name),
+  gapLabel: compassForPage.gaps[0] ? compassForPage.gaps[0]!.organization + ' (' + compassForPage.gaps[0]!.milestones + ' milestone(s))' : '',
+}
+
+const CV_PAGE = `<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provena — Prepare CV</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
+main { max-width: 40rem; margin: 2rem auto; }
+h1 { font-size: 1.125rem; font-weight: 700; }
+.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
+input, select { width: 100%; padding: 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.375rem; font-family: inherit; }
+.check { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+.check label { display: flex; align-items: center; gap: 0.25rem; text-transform: none; letter-spacing: 0; color: #333; font-size: 0.8125rem; background: #efefef; border-radius: 999px; padding: 0.25rem 0.625rem; margin: 0; }
+.check input { width: auto; }
+button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; font-size: 0.8125rem; white-space: pre-wrap; margin-top: 0.75rem; max-height: 24rem; overflow: auto; }
+.meta { background: #fffbe6; border: 1px solid #e6d98a; border-radius: 0.5rem; padding: 0.625rem; font-size: 0.8125rem; color: #6b5b00; margin-top: 1rem; display: none; }
+.row { display: flex; gap: 0.5rem; }
+.row button { flex: 1; }
+</style>
+<main>
+<h1>Prepare CV</h1>
+<p class="subtitle">Target a role, review suggestions, export.</p>
+
+<section>
+  <label for="role">Target role</label>
+  <input id="role" list="roles" placeholder="Staff Software Engineer">
+  <datalist id="roles">
+    <option value="Senior Software Engineer">
+    <option value="Staff Software Engineer">
+    <option value="Principal Software Engineer">
+  </datalist>
+</section>
+
+<section>
+  <label for="audience">Audience</label>
+  <select id="audience">
+    <option value="hiring-manager">Hiring manager</option>
+    <option value="recruiter">Recruiter</option>
+  </select>
+</section>
+
+<section>
+  <label>Generate summary automatically</label>
+  <div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>
+</section>
+
+<section>
+  <label>Experiences (uncheck to exclude)</label>
+  <div class="check" id="experiences"></div>
+</section>
+
+<section>
+  <label>Suggested emphasis (from your strengths — edit freely)</label>
+  <div class="check" id="caps"></div>
+</section>
+
+<div class="meta" id="meta"></div>
+
+<button onclick="preview()">Preview CV</button>
+<div class="row">
+  <button onclick="exportMd()">Download .md</button>
+  <button onclick="exportHtml()">Open HTML / Print PDF</button>
+</div>
+
+<pre id="preview"></pre>
+</main>
+<script>
+const profile = ${JSON.stringify(profile)}
+const suggestions = ${JSON.stringify(SUGGESTIONS)}
+
+document.getElementById('experiences').innerHTML = profile.identity.experienceIds.map(id => {
+  const e = profile.experiences.find(x => x.id === id)
+  if (!e) return ''
+  return '<label><input type="checkbox" data-exp="' + id + '" checked> ' + e.organization + '</label>'
+}).join('')
+
+document.getElementById('caps').innerHTML = suggestions.strengths.map(s =>
+  '<label><input type="checkbox" data-cap="' + s + '" checked> ' + s + '</label>'
+).join('')
+
+function buildContext() {
+  const role = document.getElementById('role').value.trim()
+  const audience = document.getElementById('audience').value
+  const excludeExperienceIds = [...document.querySelectorAll('[data-exp]')]
+    .filter(el => !el.checked).map(el => el.dataset.exp)
+  const emphasize = [...document.querySelectorAll('[data-cap]')]
+    .filter(el => el.checked).map(el => el.dataset.cap)
+  return {
+    targetRole: role || undefined,
+    audience,
+    excludeExperienceIds,
+    emphasize,
+    generateSummary: document.getElementById('autoSummary').checked ? true : undefined,
+  }
+}
+
+let lastResult = null
+
+async function preview() {
+  const res = await fetch('/api/cv/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(buildContext()),
+  })
+  if (!res.ok) { document.getElementById('preview').textContent = 'Error: ' + await res.text(); return }
+  lastResult = await res.json()
+  document.getElementById('preview').textContent = lastResult.markdown
+  const m = lastResult.metadata
+  const parts = []
+  parts.push('Included ' + m.selectedExperienceIds.length + ' of ' + profile.identity.experienceIds.length + ' experiences.')
+  if (m.generatedSummary) parts.push('Summary generated automatically.')
+  if (m.emphasizedCapabilities.length) parts.push(m.emphasizedCapabilities.length + ' capabilities emphasized.')
+  const meta = document.getElementById('meta')
+  meta.textContent = parts.join(' ')
+  meta.style.display = parts.length ? 'block' : 'none'
+}
+
+function exportMd() {
+  if (!lastResult) return
+  const blob = new Blob([lastResult.markdown], { type: 'text/markdown' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'cv.md'
+  a.click()
+}
+
+function exportHtml() {
+  if (!lastResult) return
+  const w = window.open('', '_blank')
+  if (w) { w.document.write(lastResult.html); w.document.close(); w.focus() }
+}
+
+preview()
+</script>
+`
+
+async function renderCV(context: CVContext): Promise<CVProjection> {
+  return cvProjector(profile, context)
+}
+
+function cvContextFromBody(body: unknown): CVContext {
+  const b = body as Record<string, unknown>
+  const list = (v: unknown): string[] => Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+  return {
+    targetRole: typeof b.targetRole === 'string' ? b.targetRole : undefined,
+    audience: b.audience === 'recruiter' || b.audience === 'hiring-manager' ? b.audience : undefined,
+    emphasize: list(b.emphasize),
+    omit: list(b.omit),
+    includeExperienceIds: list(b.includeExperienceIds),
+    excludeExperienceIds: list(b.excludeExperienceIds),
+    generateSummary: b.generateSummary === true ? true : undefined,
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
@@ -295,6 +463,30 @@ export default {
         await env.PROVENA_KV.put('inbox', JSON.stringify({ inbox }))
 
         return new Response(JSON.stringify({ id: capture.id }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
+    if (request.method === 'GET' && url.pathname === '/cv') {
+      return new Response(CV_PAGE, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/cv/preview') {
+      try {
+        const body = await request.json()
+        const context = cvContextFromBody(body)
+        const { model, metadata } = await renderCV(context)
+        return new Response(JSON.stringify({
+          model,
+          metadata,
+          markdown: markdownRenderer.render(model),
+          html: htmlRenderer.render(model),
+        }), {
           headers: { 'Content-Type': 'application/json' },
         })
       } catch (e) {

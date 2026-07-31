@@ -1,5 +1,12 @@
 /// <reference types="@cloudflare/workers-types" />
 import timeline from './timeline.js'
+import { computeCareerCompass, narrateCompass } from './compass.js'
+
+const COMPASS_HTML = (() => {
+  const compass = computeCareerCompass(timeline)
+  const { judgment, evidence, action } = narrateCompass(compass, timeline)
+  return [judgment, evidence, action].map(l => '<p>' + l + '</p>').join('')
+})()
 
 interface Env {
   PROVENA_KV: KVNamespace
@@ -121,32 +128,7 @@ document.getElementById('chapter-meta').innerHTML =
 document.getElementById('experiences-summary').textContent =
   'See full story (' + timeline.experiences.length + ' experiences)'
 
-function buildCompass() {
-  const capFreq = {}
-  for (const e of timeline.experiences) for (const c of e.capabilities) capFreq[c] = (capFreq[c] || 0) + 1
-  const strengths = Object.entries(capFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c]) => c)
-
-  const totalHitos = timeline.experiences.reduce((sum, e) => sum + (e.hitos || 0), 0)
-
-  // ponytail: evidence-volume tiers, tune thresholds once real dogfooding data disagrees
-  const opener = totalHitos < 5
-    ? 'Your story is still developing toward ' + timeline.title + ' opportunities, with early strengths'
-    : totalHitos < 15
-    ? 'Based on your recorded experience, you\\'re well positioned for ' + timeline.title + ' opportunities, with clear strengths'
-    : 'Based on your recorded experience, you\\'re ready to explore the market. Your career currently supports a move to ' + timeline.title + ' opportunities, with clear strengths'
-
-  const past = timeline.experiences.filter(e => e.end)
-  const gap = (past.length ? past : timeline.experiences).slice().sort((a, b) => (a.hitos || 0) - (b.hitos || 0))[0]
-  const gapDates = gap.start + (gap.end ? ' — ' + gap.end : ' — present')
-
-  const judgment = '<strong>' + opener + ' in ' + strengths[0] + ' and ' + strengths[1] + '.</strong>'
-  const evidence = 'Your recent work reinforces that positioning, but your story has limited evidence from your time at ' +
-    gap.organization + ' (' + gapDates + ') — currently ' + (gap.hitos || 0) + (gap.hitos === 1 ? ' milestone.' : ' milestones.')
-  const action = '<strong>Next best improvement:</strong> document a milestone from that period, or one that shows impact beyond your immediate team.'
-
-  document.getElementById('compass').innerHTML = [judgment, evidence, action].map(l => '<p>' + l + '</p>').join('')
-}
-buildCompass()
+document.getElementById('compass').innerHTML = ${JSON.stringify(COMPASS_HTML)}
 
 document.getElementById('experiences').innerHTML = timeline.experiences.map(e => {
   const dates = e.end ? e.start + ' — ' + e.end : e.start + ' — present'

@@ -14,17 +14,26 @@ interface Capture {
 
 const PAGE = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Provena</title>
+<title>Provena — Professional Journey</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
 main { max-width: 34rem; margin: 2rem auto; }
-h1 { font-size: 1.5rem; font-weight: 700; }
-.subtitle { color: #555; margin-top: 0.25rem; }
-.focus { color: #777; font-size: 0.875rem; margin-top: 0.25rem; }
-.current { color: #1a1a1a; font-size: 1rem; margin-top: 0.75rem; padding: 0.75rem; background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; }
+.hero { text-align: center; padding: 1.5rem 0; }
+h1 { font-size: 1.75rem; font-weight: 700; }
+.subtitle { color: #444; font-weight: 600; margin-top: 0.25rem; }
+.focus { color: #666; font-size: 1rem; margin-top: 0.75rem; max-width: 26rem; margin-left: auto; margin-right: auto; }
+.timeline-strip { display: flex; justify-content: center; align-items: center; gap: 0.25rem; color: #999; font-size: 0.75rem; margin-top: 1rem; }
+.timeline-strip b { color: #555; }
+.timeline-strip .sep { color: #ccc; }
 section { margin-top: 2rem; }
 h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 0.5rem; }
+.chapter { background: #1a1a1a; color: #fff; border-radius: 0.75rem; padding: 1.25rem; }
+.chapter .kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; }
+.chapter .role { font-size: 1.25rem; font-weight: 700; margin-top: 0.25rem; }
+.chapter .org { color: #ccc; font-size: 0.875rem; }
+.chapter .meta { color: #aaa; font-size: 0.875rem; margin-top: 0.5rem; }
+.chapter .continue { margin-top: 1rem; width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #fff; color: #1a1a1a; border: none; border-radius: 0.5rem; cursor: pointer; }
 .experience { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-bottom: 0.5rem; }
 .experience .role { font-weight: 600; font-size: 1rem; }
 .experience .org { color: #555; font-size: 0.875rem; }
@@ -49,34 +58,41 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 .hidden { display: none; }
 </style>
 <main>
-<h1 id="name"></h1>
-<p class="subtitle" id="title"></p>
-<p class="focus" id="focus"></p>
-<p class="current" id="current"></p>
+<div class="hero">
+  <h1 id="name"></h1>
+  <p class="subtitle" id="title"></p>
+  <p class="focus" id="focus"></p>
+  <div class="timeline-strip" id="strip"></div>
+</div>
 
 <section>
-  <h2>Resumen</h2>
+  <h2>Current chapter</h2>
+  <div class="chapter" id="chapter"></div>
+</section>
+
+<section>
+  <h2>Story</h2>
   <div class="stats" id="stats"></div>
 </section>
 
 <section>
-  <h2>Experiencias</h2>
+  <h2>Experiences</h2>
   <div id="experiences"></div>
 </section>
 
 <section>
-  <h2>Capturas pendientes</h2>
+  <h2>Latest updates</h2>
   <div id="captures"></div>
-  <p id="captures-empty" class="hidden ok">✓ Historia al día. Todo incorporado.</p>
+  <p id="captures-empty" class="hidden ok">✓ Story is up to date. Nothing pending.</p>
 </section>
 
-<button id="add-btn" onclick="showAdd()">+ Añadir evolución</button>
+<button id="add-btn" onclick="showAdd()">+ Add an update</button>
 
 <section id="add-form" class="hidden">
-  <h2>¿Qué ha pasado?</h2>
+  <h2>What happened?</h2>
   <div class="quick" id="quick"></div>
-  <textarea id="content" placeholder="Acabo de..."></textarea>
-  <button onclick="save()">Añadir a mi historia</button>
+  <textarea id="content" placeholder="I just..."></textarea>
+  <button onclick="save()">Add to my story</button>
   <p id="status"></p>
 </section>
 </main>
@@ -85,28 +101,42 @@ const timeline = ${JSON.stringify(timeline)}
 
 document.getElementById('name').textContent = timeline.name
 document.getElementById('title').textContent = timeline.title
-document.getElementById('focus').textContent = timeline.focus
-document.getElementById('current').textContent = '· ' + timeline.current
+document.getElementById('focus').textContent = timeline.current
+
+const years = [...new Set(timeline.experiences.map(e => e.start.slice(0, 4)))]
+document.getElementById('strip').innerHTML = years.map((y, i) =>
+  '<b>' + y + '</b>' + (i < years.length - 1 ? '<span class="sep"> ── </span>' : '')
+).join('') + '<span class="sep"> ── </span><b>Today</b>'
 
 const caps = new Set()
-for (const e of timeline.experiences) for (const c of e.capabilities) caps.add(c)
+let totalHitos = 0
+for (const e of timeline.experiences) { for (const c of e.capabilities) caps.add(c); totalHitos += e.hitos || 0 }
 
 document.getElementById('stats').innerHTML = [
-  ['Experiencias', timeline.experiences.length],
-  ['Capacidades', caps.size],
-  ['Capturas', '<span id="capture-count">…</span>'],
-].map(([label, value]) => '<div class="stat"><b id="stat-' + label.toLowerCase() + '">' + value + '</b><span>' + label + '</span></div>').join('')
+  ['Milestones', totalHitos],
+  ['Experiences', timeline.experiences.length],
+  ['Capabilities', caps.size],
+  ['Updated', '<span id="updated">…</span>'],
+].map(([label, value]) => '<div class="stat"><b>' + value + '</b><span>' + label + '</span></div>').join('')
+
+const current = timeline.experiences.find(e => !e.end)
+document.getElementById('chapter').innerHTML =
+  '<div class="kicker">Now</div>' +
+  '<div class="role">' + current.title + '</div>' +
+  '<div class="org">' + current.organization + '</div>' +
+  '<div class="meta">' + (current.hitos || 0) + (current.hitos === 1 ? ' milestone' : ' milestones') + ' · Last evolution: <span id="last-evo">…</span></div>' +
+  '<button class="continue" onclick="showAdd()">Continue this story</button>'
 
 document.getElementById('experiences').innerHTML = timeline.experiences.map(e => {
-  const dates = e.end ? e.start + ' — ' + e.end : e.start + ' — presente'
+  const dates = e.end ? e.start + ' — ' + e.end : e.start + ' — present'
   return '<div class="experience"><div class="role">' + e.title + '</div>' +
     '<div class="org">' + e.organization + '</div>' +
     '<div class="dates">' + dates + '</div>' +
-    (e.hitos ? '<div class="hitos">' + e.hitos + (e.hitos === 1 ? ' hito registrado' : ' hitos registrados') + '</div>' : '') +
+    (e.hitos ? '<div class="hitos">' + e.hitos + (e.hitos === 1 ? ' milestone' : ' milestones') + '</div>' : '') +
     '<div class="caps">' + e.capabilities.map(c => '<span class="tag">' + c + '</span>').join('') + '</div></div>'
 }).join('')
 
-const PROMPTS = ['Acabo de terminar…', 'He aprendido…', 'He conseguido…', 'Estoy trabajando en…']
+const PROMPTS = ['I just finished…', 'I learned…', 'I achieved…', 'I am working on…']
 document.getElementById('quick').innerHTML = PROMPTS.map(p => '<button onclick="setPrompt(\\'' + p + '\\')">' + p.replace('…', '') + '</button>').join('')
 
 function setPrompt(p) {
@@ -121,11 +151,20 @@ function showAdd() {
   document.getElementById('add-btn').scrollIntoView({ behavior: 'smooth' })
 }
 
+function daysSince(dateStr) {
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+  if (days <= 0) return 'today'
+  return days + (days === 1 ? ' day ago' : ' days ago')
+}
+
 async function loadCaptures() {
   const res = await fetch('/api/captures')
   if (!res.ok) return
   const { inbox } = await res.json()
-  document.getElementById('capture-count').textContent = inbox.length
+  const dates = inbox.map(c => c.createdAt)
+  const lastEvo = dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : timeline.updatedAt
+  document.getElementById('last-evo').textContent = daysSince(lastEvo)
+  document.getElementById('updated').textContent = daysSince(lastEvo)
   if (inbox.length === 0) {
     document.getElementById('captures-empty').classList.remove('hidden')
   } else {
@@ -138,14 +177,14 @@ async function loadCaptures() {
 async function save() {
   const content = document.getElementById('content').value.trim()
   if (!content) return
-  document.getElementById('status').textContent = 'Guardando...'
+  document.getElementById('status').textContent = 'Saving...'
   const res = await fetch('/api/capture', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content }),
   })
   if (res.ok) {
-    document.getElementById('status').textContent = '✓ Añadido a tu historia'
+    document.getElementById('status').textContent = '✓ Added to your story'
     document.getElementById('content').value = ''
     loadCaptures()
   } else {

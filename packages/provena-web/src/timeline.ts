@@ -2,7 +2,8 @@ export default {
   "name": "Valentín Liñeiro Barea",
   "title": "Staff Software Engineer",
   "focus": "AI-Assisted Engineering · Software Architecture · Developer Productivity",
-  "current": "Construyendo herramientas que reducen la fricción del desarrollo de software mediante IA y arquitectura.",
+  "current": "Building tools that reduce the friction of software development through AI and architecture.",
+  "updatedAt": "2026-07-30",
   "experiences": [
     {
       "organization": "Summa Networks",
@@ -18,7 +19,7 @@ export default {
       "title": "Senior Software Engineer",
       "start": "2021-07",
       "end": "2025-10",
-      "summary": "Consultoría de software en múltiples clientes y dominios: sistemas distribuidos, microservicios y cloud.",
+      "summary": "Software consulting across multiple clients and domains: distributed systems, microservices and cloud.",
       "hitos": 6,
       "capabilities": ["Java", "Spring Boot", "Apache Kafka", "Kubernetes", "Microsoft Azure"]
     },

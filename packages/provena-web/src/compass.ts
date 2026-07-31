@@ -9,6 +9,7 @@ export interface CareerExperience {
 
 export interface CareerTimeline {
   title: string
+  updatedAt: string
   experiences: CareerExperience[]
 }
 
@@ -76,34 +77,51 @@ export function computeCareerCompass(timeline: CareerTimeline): CareerCompass {
 
   const nextBestImprovement: Recommendation = {
     target: weakest.organization,
-    text: 'document a milestone from that period, or one that shows impact beyond your immediate team',
+    text: 'document one high-impact milestone from that period, or one demonstrating cross-team impact',
   }
 
   return { positioning, readiness, strengths, gaps, nextBestImprovement, confidence }
 }
 
 export interface CompassNarrative {
-  judgment: string
-  evidence: string
-  action: string
+  status: string
+  headline: string
+  strengths: string[]
+  gapLabel: string
+  nextStep: string
+  why: string[]
+}
+
+function daysSince(dateStr: string): string {
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+  if (days <= 0) return 'today'
+  return days + (days === 1 ? ' day ago' : ' days ago')
 }
 
 export function narrateCompass(compass: CareerCompass, timeline: CareerTimeline): CompassNarrative {
-  const strengths = compass.strengths.map(s => s.name)
-  const opener = compass.positioning === 'developing'
-    ? 'Your story is still developing toward ' + timeline.title + ' opportunities, with early strengths'
-    : compass.positioning === 'positioned'
-    ? 'Based on your recorded experience, you\'re well positioned for ' + timeline.title + ' opportunities, with clear strengths'
-    : 'Based on your recorded experience, you\'re ready to explore the market. Your career currently supports a move to ' + timeline.title + ' opportunities, with clear strengths'
+  const strengthNames = compass.strengths.map(s => s.name)
+  const totalHitos = timeline.experiences.reduce((sum, e) => sum + (e.hitos || 0), 0)
 
-  const judgment = '<strong>' + opener + ' in ' + strengths[0] + ' and ' + strengths[1] + '.</strong>'
+  const status = compass.positioning === 'market-ready'
+    ? 'Ready to explore the market'
+    : compass.positioning === 'positioned' ? 'Well positioned' : 'Still developing'
+  const headline = compass.positioning === 'developing'
+    ? 'Your story is still developing toward ' + timeline.title + ' opportunities.'
+    : compass.positioning === 'positioned'
+    ? 'Based on your recorded experience, you\'re well positioned for ' + timeline.title + ' opportunities.'
+    : 'Your recorded experience supports a move to ' + timeline.title + ' opportunities.'
 
   // ponytail: engine guarantees at least one gap (empty input throws above)
   const gap = compass.gaps[0]!
-  const evidence = 'Your recent work reinforces that positioning, but your story has limited evidence from your time at ' +
-    gap.organization + ' (' + gap.dates + ') — currently ' + gap.milestones + (gap.milestones === 1 ? ' milestone.' : ' milestones.')
+  const gapLabel = gap.organization + ' (' + gap.milestones + (gap.milestones === 1 ? ' milestone' : ' milestones') + ')'
+  const nextStep = compass.nextBestImprovement.text.charAt(0).toUpperCase() + compass.nextBestImprovement.text.slice(1) + '.'
 
-  const action = '<strong>Next best improvement:</strong> ' + compass.nextBestImprovement.text + '.'
+  const why = [
+    totalHitos + ' documented milestones',
+    'Story updated ' + daysSince(timeline.updatedAt),
+    'Current ' + timeline.title + ' positioning',
+    'Consistent strengths in ' + strengthNames.join(', '),
+  ]
 
-  return { judgment, evidence, action }
+  return { status, headline, strengths: strengthNames, gapLabel, nextStep, why }
 }

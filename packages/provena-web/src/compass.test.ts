@@ -17,29 +17,28 @@ test('engine derives facts from the real timeline', () => {
   assert.equal(COMPASS.nextBestImprovement.target, 'VINCLE')
 })
 
-test('narrator renders the market-ready judgment', () => {
-  const { judgment, evidence, action } = narrateCompass(COMPASS, timeline)
-  assert.equal(
-    judgment,
-    '<strong>Based on your recorded experience, you\'re ready to explore the market. ' +
-    'Your career currently supports a move to Staff Software Engineer opportunities, ' +
-    'with clear strengths in Java and Spring Boot.</strong>'
-  )
-  assert.equal(
-    evidence,
-    'Your recent work reinforces that positioning, but your story has limited evidence ' +
-    'from your time at VINCLE (2017-01 — 2021-06) — currently 2 milestones.'
-  )
-  assert.equal(
-    action,
-    '<strong>Next best improvement:</strong> document a milestone from that period, ' +
-    'or one that shows impact beyond your immediate team.'
-  )
+test('narrator renders the market-ready compass', () => {
+  const n = narrateCompass(COMPASS, timeline)
+  assert.equal(n.status, 'Ready to explore the market')
+  assert.equal(n.headline, 'Your recorded experience supports a move to Staff Software Engineer opportunities.')
+  assert.deepEqual(n.strengths, ['Java', 'Spring Boot', 'Python'])
+  assert.equal(n.gapLabel, 'VINCLE (2 milestones)')
+  assert.equal(n.nextStep, 'Document one high-impact milestone from that period, or one demonstrating cross-team impact.')
+  assert.match(n.why[1]!, /^Story updated /)
+})
+
+test('narrator exposes concrete evidence for every claim', () => {
+  const n = narrateCompass(COMPASS, timeline)
+  assert.equal(n.why[0], '23 documented milestones')
+  assert.match(n.why[1]!, /^Story updated (today|\d+ (day|days) ago)$/)
+  assert.equal(n.why[2], 'Current Staff Software Engineer positioning')
+  assert.equal(n.why[3], 'Consistent strengths in Java, Spring Boot, Python')
 })
 
 test('low-evidence profile produces developing positioning', () => {
   const sparse: CareerTimeline = {
     title: 'Senior Software Engineer',
+    updatedAt: '2026-07-30',
     experiences: [{
       organization: 'Acme',
       title: 'Engineer',
@@ -53,6 +52,9 @@ test('low-evidence profile produces developing positioning', () => {
   assert.equal(compass.positioning, 'developing')
   assert.equal(compass.readiness, 'building')
   assert.equal(compass.confidence, 2 / 15)
-  const { judgment } = narrateCompass(compass, sparse)
-  assert.match(judgment, /Your story is still developing toward Senior Software Engineer opportunities, with early strengths in Java/)
+  const n = narrateCompass(compass, sparse)
+  assert.equal(n.status, 'Still developing')
+  assert.equal(n.headline, 'Your story is still developing toward Senior Software Engineer opportunities.')
+  assert.deepEqual(n.strengths, ['Java'])
+  assert.equal(n.nextStep, 'Document one high-impact milestone from that period, or one demonstrating cross-team impact.')
 })

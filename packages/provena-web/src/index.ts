@@ -4,8 +4,15 @@ import { computeCareerCompass, narrateCompass } from './compass.js'
 
 const COMPASS_HTML = (() => {
   const compass = computeCareerCompass(timeline)
-  const { judgment, evidence, action } = narrateCompass(compass, timeline)
-  return [judgment, evidence, action].map(l => '<p>' + l + '</p>').join('')
+  const n = narrateCompass(compass, timeline)
+  return [
+    '<div class="status ' + (compass.readiness === 'ready' ? 'ok' : 'warn') + '">' + n.status + '</div>',
+    '<p class="headline">' + n.headline + '</p>',
+    '<div class="fact"><span class="label">Strengths</span><ul>' + n.strengths.map(s => '<li>' + s + '</li>').join('') + '</ul></div>',
+    '<div class="fact"><span class="label">Evidence gap</span><ul><li>' + n.gapLabel + '</li></ul></div>',
+    '<div class="fact"><span class="label">Next step</span><p>' + n.nextStep + '</p></div>',
+    '<details class="why"><summary>Why this conclusion</summary><ul>' + n.why.map(l => '<li>' + l + '</li>').join('') + '</ul></details>',
+  ].join('')
 })()
 
 interface Env {
@@ -49,8 +56,18 @@ h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; colo
 .chapter .meta { color: #aaa; font-size: 0.875rem; margin-top: 0.5rem; }
 .chapter .continue { margin-top: 1rem; width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #fff; color: #1a1a1a; border: none; border-radius: 0.5rem; cursor: pointer; }
 .compass { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
-.compass p { font-size: 0.9rem; line-height: 1.6; color: #333; margin-bottom: 0.625rem; }
-.compass p:last-child { margin-bottom: 0; }
+.compass .status { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.375rem; }
+.compass .status::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2e7d32; flex: 0 0 auto; }
+.compass .status.warn::before { background: #b26a00; }
+.compass .headline { font-size: 0.9rem; line-height: 1.6; color: #333; margin-top: 0.375rem; }
+.compass .fact { margin-top: 0.75rem; }
+.compass .label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; }
+.compass ul { margin: 0.25rem 0 0 1.125rem; }
+.compass li { font-size: 0.875rem; color: #333; }
+.compass .fact p { font-size: 0.875rem; color: #333; margin-top: 0.25rem; }
+.compass details { margin-top: 0.75rem; }
+.compass details summary { font-size: 0.8125rem; color: #666; }
+.compass details ul { margin: 0.5rem 0 0 1.125rem; }
 .experience { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-bottom: 0.5rem; }
 .experience .role { font-weight: 600; font-size: 1rem; }
 .experience .org { color: #555; font-size: 0.875rem; }

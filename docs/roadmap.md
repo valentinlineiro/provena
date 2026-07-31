@@ -183,7 +183,7 @@ The loop starts with **observation** (seeing your story), not with **entry** (ad
 **Usability gate**
 The capture habit must work before adding consumers/projections (PD-005). Identity Timeline is the capture habit interface, not a new feature.
 
-**Status:** Implemented (2026-07-30). Home screen shows identity: name, title, focus, stats (experiences/capabilities/captures), experiences with capability tags, pending captures, and a contextual "+ Añadir evolución" with quick prompts. Capture always returns to the story.
+**Status:** Implemented (2026-07-30). Superseded (2026-07-31) by the Compass L1 redesign below — see freeze note in the execution plan.
 
 ---
 
@@ -239,13 +239,15 @@ A "Career Compass" section derived from existing data, no new fields — answeri
 **Usability gate**
 PD-005 still applies: the capture/observation habit (CARD-002C) is being validated over 2-3 weeks. The Compass is the reason to keep returning — but it must be built from real data, so the validation period also accumulates the evidence it needs.
 
-**Status:** Design validated. Not implemented. Implementation deferred until the Timeline habit is confirmed.
+**Status:** Level 1 implemented (2026-07-31), ahead of schedule — see freeze note below.
 
 ---
 
 ### Execution plan (2026-07-31) — during habit validation
 
-1. **Freeze the Timeline UX (2-3 weeks).** No new sections. Only fix evident frictions from daily use. Single question: "Do I open Provena spontaneously?" Observations are documented as part of the experiment, not as new features.
+**Freeze broken deliberately (2026-07-31, same day).** A structured UX review (staff-designer framing, not a quick pass) surfaced three concrete frictions the freeze was meant to postpone diagnosing: capture living outside the current-chapter context, no "how am I doing" layer between Who-am-I and the raw inbox, and a stats grid that is the exact vanity-metric pattern PD-007 rules out. Rather than log the frictions and wait 2-3 weeks, Compass L1 (already fully specified below, buildable from existing data with no new fields) was implemented immediately and folded into the Home redesign: capture now hangs off "Current chapter", the stats grid is replaced by three narrative Compass sentences (positioning, story coverage, next best improvement), and the full experience list collapses behind a disclosure instead of dominating the first screen. The habit-validation clock restarts from this version rather than the 2026-07-30 one.
+
+1. ~~Freeze the Timeline UX (2-3 weeks).~~ No new sections. Only fix evident frictions from daily use. Single question: "Do I open Provena spontaneously?" Observations are documented as part of the experiment, not as new features.
 2. **Instrument the dogfooding.** Minimal events in the Worker: `timeline_open`, `capture_created`, `capture_curated`, `current_chapter_clicked`. Not for optimization now — to contrast perception with actual use.
 3. **Design (not implement) Career Compass L1.** Define which metrics are useful, how they compute from own data only, and which recommendations are explainable. Example formulas: Story Coverage = f(experiences with milestones, last update, undocumented periods); Readiness = f(evidence vs target role); Strengths = aggregation of repeated capabilities.
 4. **Define the Compass contract** — a stable interface, so L2/L3 only add data providers without changing it:

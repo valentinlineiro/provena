@@ -23,20 +23,17 @@ async function recordEvent(env: Env, name: EventName) {
 }
 
 const PAGE = `<!DOCTYPE html>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Provena — Professional Journey</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
 main { max-width: 34rem; margin: 2rem auto; }
-.hero { text-align: center; padding: 1.5rem 0; }
-h1 { font-size: 1.75rem; font-weight: 700; }
-.subtitle { color: #444; font-weight: 600; margin-top: 0.25rem; }
-.focus { color: #666; font-size: 1rem; margin-top: 0.75rem; max-width: 26rem; margin-left: auto; margin-right: auto; }
-.timeline-strip { display: flex; justify-content: center; align-items: center; gap: 0.25rem; color: #999; font-size: 0.75rem; margin-top: 1rem; }
-.timeline-strip b { color: #555; }
-.timeline-strip .sep { color: #ccc; }
-section { margin-top: 2rem; }
+.hero { padding: 0.5rem 0 1rem; }
+h1 { font-size: 1.125rem; font-weight: 700; }
+.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+section { margin-top: 1.5rem; }
 h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 0.5rem; }
 .chapter { background: #1a1a1a; color: #fff; border-radius: 0.75rem; padding: 1.25rem; }
 .chapter .kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; }
@@ -44,6 +41,9 @@ h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; colo
 .chapter .org { color: #ccc; font-size: 0.875rem; }
 .chapter .meta { color: #aaa; font-size: 0.875rem; margin-top: 0.5rem; }
 .chapter .continue { margin-top: 1rem; width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #fff; color: #1a1a1a; border: none; border-radius: 0.5rem; cursor: pointer; }
+.compass { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
+.compass p { font-size: 0.9rem; line-height: 1.6; color: #333; margin-bottom: 0.625rem; }
+.compass p:last-child { margin-bottom: 0; }
 .experience { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-bottom: 0.5rem; }
 .experience .role { font-weight: 600; font-size: 1rem; }
 .experience .org { color: #555; font-size: 0.875rem; }
@@ -52,10 +52,7 @@ h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; colo
 .experience .caps { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem; }
 .tag { background: #efefef; color: #333; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 999px; }
 .ok { color: #2e7d32; font-size: 0.875rem; }
-.stats { display: flex; gap: 1rem; background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
-.stat { flex: 1; text-align: center; }
-.stat b { display: block; font-size: 1.25rem; }
-.stat span { font-size: 0.75rem; color: #777; }
+details summary { cursor: pointer; font-size: 0.8125rem; color: #666; padding: 0.25rem 0; }
 .capture { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; }
 .capture p { font-size: 0.875rem; }
 .capture time { color: #999; font-size: 0.75rem; }
@@ -71,39 +68,42 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 <div class="hero">
   <h1 id="name"></h1>
   <p class="subtitle" id="title"></p>
-  <p class="focus" id="focus"></p>
-  <div class="timeline-strip" id="strip"></div>
 </div>
 
 <section>
   <h2>Current chapter</h2>
-  <div class="chapter" id="chapter"></div>
+  <div class="chapter" id="chapter">
+    <div class="kicker">Now</div>
+    <div class="role" id="chapter-role"></div>
+    <div class="org" id="chapter-org"></div>
+    <div class="meta" id="chapter-meta"></div>
+    <button class="continue" onclick="chapterClick()">Continue this story</button>
+  </div>
 </section>
-
-<section>
-  <h2>Story</h2>
-  <div class="stats" id="stats"></div>
-</section>
-
-<section>
-  <h2>Experiences</h2>
-  <div id="experiences"></div>
-</section>
-
-<section>
-  <h2>Latest updates</h2>
-  <div id="captures"></div>
-  <p id="captures-empty" class="hidden ok">✓ Story is up to date. Nothing pending.</p>
-</section>
-
-<button id="add-btn" onclick="showAdd()">+ Add an update</button>
 
 <section id="add-form" class="hidden">
-  <h2>What happened?</h2>
   <div class="quick" id="quick"></div>
   <textarea id="content" placeholder="I just..."></textarea>
   <button onclick="save()">Add to my story</button>
   <p id="status"></p>
+</section>
+
+<section>
+  <h2>How am I doing</h2>
+  <div class="compass" id="compass"></div>
+</section>
+
+<section>
+  <h2>Recent evidence</h2>
+  <div id="captures"></div>
+  <p id="captures-empty" class="hidden ok">✓ Story is up to date. Nothing pending.</p>
+</section>
+
+<section>
+  <details>
+    <summary id="experiences-summary"></summary>
+    <div id="experiences"></div>
+  </details>
 </section>
 </main>
 <script>
@@ -111,31 +111,42 @@ const timeline = ${JSON.stringify(timeline)}
 
 document.getElementById('name').textContent = timeline.name
 document.getElementById('title').textContent = timeline.title
-document.getElementById('focus').textContent = timeline.current
-
-const years = [...new Set(timeline.experiences.map(e => e.start.slice(0, 4)))]
-document.getElementById('strip').innerHTML = years.map((y, i) =>
-  '<b>' + y + '</b>' + (i < years.length - 1 ? '<span class="sep"> ── </span>' : '')
-).join('') + '<span class="sep"> ── </span><b>Today</b>'
-
-const caps = new Set()
-let totalHitos = 0
-for (const e of timeline.experiences) { for (const c of e.capabilities) caps.add(c); totalHitos += e.hitos || 0 }
-
-document.getElementById('stats').innerHTML = [
-  ['Milestones', totalHitos],
-  ['Experiences', timeline.experiences.length],
-  ['Capabilities', caps.size],
-  ['Updated', '<span id="updated">…</span>'],
-].map(([label, value]) => '<div class="stat"><b>' + value + '</b><span>' + label + '</span></div>').join('')
 
 const current = timeline.experiences.find(e => !e.end)
-document.getElementById('chapter').innerHTML =
-  '<div class="kicker">Now</div>' +
-  '<div class="role">' + current.title + '</div>' +
-  '<div class="org">' + current.organization + '</div>' +
-  '<div class="meta">' + (current.hitos || 0) + (current.hitos === 1 ? ' milestone' : ' milestones') + ' · Last evolution: <span id="last-evo">…</span></div>' +
-  '<button class="continue" onclick="chapterClick()">Continue this story</button>'
+document.getElementById('chapter-role').textContent = current.title
+document.getElementById('chapter-org').textContent = current.organization
+document.getElementById('chapter-meta').innerHTML =
+  (current.hitos || 0) + (current.hitos === 1 ? ' milestone' : ' milestones') + ' · Last evolution: <span id="last-evo">…</span>'
+
+document.getElementById('experiences-summary').textContent =
+  'See full story (' + timeline.experiences.length + ' experiences)'
+
+function buildCompass() {
+  const capFreq = {}
+  for (const e of timeline.experiences) for (const c of e.capabilities) capFreq[c] = (capFreq[c] || 0) + 1
+  const strengths = Object.entries(capFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c]) => c)
+
+  const totalHitos = timeline.experiences.reduce((sum, e) => sum + (e.hitos || 0), 0)
+
+  // ponytail: evidence-volume tiers, tune thresholds once real dogfooding data disagrees
+  const opener = totalHitos < 5
+    ? 'Your story suggests you\\'re developing toward a ' + timeline.title + ' profile'
+    : totalHitos < 15
+    ? 'Based on your recorded experience, you\\'re building toward a ' + timeline.title + ' profile'
+    : 'You\\'re building a strong ' + timeline.title + ' profile'
+
+  const past = timeline.experiences.filter(e => e.end)
+  const gap = (past.length ? past : timeline.experiences).slice().sort((a, b) => (a.hitos || 0) - (b.hitos || 0))[0]
+  const gapDates = gap.start + (gap.end ? ' — ' + gap.end : ' — present')
+
+  const judgment = '<strong>' + opener + ', with clear strengths in ' + strengths[0] + ' and ' + strengths[1] + '.</strong>'
+  const evidence = 'Your recent work reinforces that positioning, but your story has limited evidence from your time at ' +
+    gap.organization + ' (' + gapDates + ') — currently ' + (gap.hitos || 0) + (gap.hitos === 1 ? ' milestone.' : ' milestones.')
+  const action = '<strong>Next best improvement:</strong> document a milestone from that period, or one that shows impact beyond your immediate team.'
+
+  document.getElementById('compass').innerHTML = [judgment, evidence, action].map(l => '<p>' + l + '</p>').join('')
+}
+buildCompass()
 
 document.getElementById('experiences').innerHTML = timeline.experiences.map(e => {
   const dates = e.end ? e.start + ' — ' + e.end : e.start + ' — present'
@@ -158,7 +169,7 @@ function setPrompt(p) {
 
 function showAdd() {
   document.getElementById('add-form').classList.remove('hidden')
-  document.getElementById('add-btn').scrollIntoView({ behavior: 'smooth' })
+  document.getElementById('add-form').scrollIntoView({ behavior: 'smooth' })
 }
 
 function chapterClick() {
@@ -181,13 +192,20 @@ function daysSince(dateStr) {
 }
 
 async function loadCaptures() {
-  const res = await fetch('/api/captures')
-  if (!res.ok) return
-  const { inbox } = await res.json()
+  let inbox = []
+  try {
+    const res = await fetch('/api/captures')
+    if (!res.ok) throw new Error('bad response')
+    inbox = (await res.json()).inbox
+  } catch {
+    document.getElementById('last-evo').textContent = daysSince(timeline.updatedAt)
+    document.getElementById('captures-empty').textContent = "Couldn't load recent evidence — try reopening."
+    document.getElementById('captures-empty').classList.remove('hidden', 'ok')
+    return
+  }
   const dates = inbox.map(c => c.createdAt)
   const lastEvo = dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : timeline.updatedAt
   document.getElementById('last-evo').textContent = daysSince(lastEvo)
-  document.getElementById('updated').textContent = daysSince(lastEvo)
   if (inbox.length === 0) {
     document.getElementById('captures-empty').classList.remove('hidden')
   } else {

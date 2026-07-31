@@ -89,7 +89,7 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 </section>
 
 <section>
-  <h2>How am I doing</h2>
+  <h2>Career Compass</h2>
   <div class="compass" id="compass"></div>
 </section>
 
@@ -130,16 +130,16 @@ function buildCompass() {
 
   // ponytail: evidence-volume tiers, tune thresholds once real dogfooding data disagrees
   const opener = totalHitos < 5
-    ? 'Your story suggests you\\'re developing toward a ' + timeline.title + ' profile'
+    ? 'Your story is still developing toward ' + timeline.title + ' opportunities, with early strengths'
     : totalHitos < 15
-    ? 'Based on your recorded experience, you\\'re building toward a ' + timeline.title + ' profile'
-    : 'You\\'re building a strong ' + timeline.title + ' profile'
+    ? 'Based on your recorded experience, you\\'re well positioned for ' + timeline.title + ' opportunities, with clear strengths'
+    : 'You\\'re ready to explore the market. Your career currently supports a move to ' + timeline.title + ' opportunities, with clear strengths'
 
   const past = timeline.experiences.filter(e => e.end)
   const gap = (past.length ? past : timeline.experiences).slice().sort((a, b) => (a.hitos || 0) - (b.hitos || 0))[0]
   const gapDates = gap.start + (gap.end ? ' — ' + gap.end : ' — present')
 
-  const judgment = '<strong>' + opener + ', with clear strengths in ' + strengths[0] + ' and ' + strengths[1] + '.</strong>'
+  const judgment = '<strong>' + opener + ' in ' + strengths[0] + ' and ' + strengths[1] + '.</strong>'
   const evidence = 'Your recent work reinforces that positioning, but your story has limited evidence from your time at ' +
     gap.organization + ' (' + gapDates + ') — currently ' + (gap.hitos || 0) + (gap.hitos === 1 ? ' milestone.' : ' milestones.')
   const action = '<strong>Next best improvement:</strong> document a milestone from that period, or one that shows impact beyond your immediate team.'

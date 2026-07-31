@@ -14,6 +14,7 @@ The roadmap does not come from ideas. It comes from this table.
 | 2026-07-30 | Recruiter Brief implementation | Implemented Recruiter Brief as first vertical slice — added preferences model, projector, renderer | Preferences + recuiter projection built into model and CLI | ✅ |
 | 2026-07-30 | Personal usage friction | Using Provena (terminal → YAML → commit → render) requires too much overhead for daily use | CARD-002: reduce personal usage friction; minimal capture interaction | 🔄 |
 | 2026-07-30 | Capture form revelation | Deployed Provena Web. Saw the capture screen. Realised: "I don't want a tray to deposit things. I want to see my story." | CARD-002C: Identity Timeline — capture is secondary to navigating identity | 🔄 |
+| 2026-07-30 | Timeline feedback session | "This is your story" is static. What creates habit is: "this is what your story means for your career." | CARD-002D: Professional Pulse — feedback system, not profile completion | 🔄 |
 
 ## Session Notes — 2026-07-30
 

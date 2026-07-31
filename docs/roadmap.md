@@ -187,6 +187,46 @@ The capture habit must work before adding consumers/projections (PD-005). Identi
 
 ---
 
+### CARD-002D — Professional Pulse
+
+**Friction**
+The Identity Timeline tells the user "this is your story" — useful but static. It doesn't say what the story *means* for the career. Returning is driven by observation of facts, not by a reason to act.
+
+**Insight**
+> The habit loop is not "complete the profile". It is a feedback system.
+
+The loop becomes:
+```
+Historia profesional → Modelo canónico → Análisis → Feedback accionable
+```
+
+The user returns not to fill fields but to answer questions:
+- Am I growing?
+- Is my positioning still competitive?
+- What evidence is missing to reach the next level?
+- Does it make sense to start listening to offers?
+
+**Design relationship to CARD-000**
+The profile feeds a **Decision Context**; the Pulse is a decision surface for the **Self** context. It is feedback for the user, not a projection for an external consumer. This is what keeps it inside the personal usage loop (PD-005) rather than an external projection.
+
+**Minimum implementation**
+A "Pulso profesional" section derived from existing data, no new fields:
+- **Posicionamiento**: title + dominant capabilities
+- **Última evolución**: days since most recent capture
+- **Cobertura de historia**: hitos per experience vs. their dates (recent well-covered, early sparse)
+- **Preparación**: ready to generate CV / LinkedIn / Recruiter Brief (computed from data availability)
+- **Siguiente mejora con mayor impacto**: the gap with highest value (e.g., "document last quarter of Summa Networks")
+
+**Deferred (needs sufficient information)**
+- **Valor de mercado estimado** — an evidence-based inference, not a magic number: years of experience, technology depth, leadership, registered achievements, market demand, recent market evolution. Result shape: "Staff Software Engineer / Alta demanda / Preparación 92% / Salario observado 80–95k € / Siguiente mejora…". Only when the data supports it.
+
+**Usability gate**
+PD-005 still applies: the capture/observation habit (CARD-002C) is being validated over 2-3 weeks. The Pulse is the reason to keep returning — but it must be built from real data, so the validation period also accumulates the evidence it needs.
+
+**Status:** Design validated. Not implemented.
+
+---
+
 ## Epic 2 — Career Narrative
 
 **Friction**

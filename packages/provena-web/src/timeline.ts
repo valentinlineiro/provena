@@ -2,6 +2,7 @@ export default {
   "name": "Valentín Liñeiro Barea",
   "title": "Staff Software Engineer",
   "focus": "AI-Assisted Engineering · Software Architecture · Developer Productivity",
+  "current": "Construyendo herramientas que reducen la fricción del desarrollo de software mediante IA y arquitectura.",
   "experiences": [
     {
       "organization": "Summa Networks",
@@ -9,6 +10,7 @@ export default {
       "start": "2025-10",
       "end": null,
       "summary": "I design internal systems that improve how engineering teams build, review, onboard, and deliver software.",
+      "hitos": 5,
       "capabilities": ["AI-Assisted Engineering", "Clean Architecture", "Java", "Spring", "4G Network Core"]
     },
     {
@@ -17,6 +19,7 @@ export default {
       "start": "2021-07",
       "end": "2025-10",
       "summary": "Consultoría de software en múltiples clientes y dominios: sistemas distribuidos, microservicios y cloud.",
+      "hitos": 6,
       "capabilities": ["Java", "Spring Boot", "Apache Kafka", "Kubernetes", "Microsoft Azure"]
     },
     {
@@ -25,6 +28,7 @@ export default {
       "start": "2017-01",
       "end": "2021-06",
       "summary": "Led the migration of a legacy CRM/SFA application toward Spring Boot and Angular.",
+      "hitos": 2,
       "capabilities": ["Java", "Spring Boot", "Angular", "Legacy Migration"]
     },
     {
@@ -33,6 +37,7 @@ export default {
       "start": "2014-06",
       "end": "2015-12",
       "summary": "Knowledge extraction, fuzzy logic, and computational methods for discovering structure in complex information.",
+      "hitos": 5,
       "capabilities": ["Fuzzy Logic", "Formal Concept Analysis", "Python", "Knowledge Extraction"]
     },
     {
@@ -41,6 +46,7 @@ export default {
       "start": "2013-10",
       "end": "2014-04",
       "summary": "Internal software for the Research Transfer Office; research on mutation testing and formal verification.",
+      "hitos": 5,
       "capabilities": ["Java", "Python", "Mutation Testing", "Formal Verification"]
     }
   ],

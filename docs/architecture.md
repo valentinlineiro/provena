@@ -98,3 +98,22 @@ Everything except the domain model is a plugin. A plugin:
 - Adds zero cost when not installed
 
 This keeps the core stable while allowing the ecosystem to grow without architectural drift.
+
+### Projection principle
+
+A projection is `Profile → TModel` with phases executed in order:
+`Selection → Presentation → Summary → Rendering`. Selection decides which
+experiences are included (explicit, or later derived from the target role);
+Presentation orders and filters capabilities; Summary generates the narrative
+(Explicit → Auto → none); Rendering serializes a representation. The `Profile`
+is never adapted — only the projections change.
+
+### I7 — Selection is explicit or target-role-derived
+A technology list can never remove an experience. Experience selection is a
+high-level decision with its own rule.
+
+### I8 — Projectors share primitives, never results
+The Career Compass and the CV projector both consume `career.ts` primitives
+(`deriveStrengths`, `deriveEvidenceCount`, `findEvidenceGaps`). Neither calls
+the other. If the Compass's weighting changes, the CV does not change unless
+the underlying primitive changes.

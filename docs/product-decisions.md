@@ -111,3 +111,17 @@ The model can be perfect, but if input is costly, knowledge never reaches the mo
   - **B — Quiet time** (15 minutes available): review what accumulated.
   - **C — Need to communicate** (2 minutes available): generate a projection.
   - If Provena works in these three moments, the rest makes sense. If it fails here, the architecture becomes a library of abandoned information.
+
+## PD-006
+
+**Date:** 2026-07-31
+
+**Observation:** The Timeline is a projection of a professional profile with two audiences: the user and the market. The technology market is predominantly English-speaking. The profile already lives in the canonical model; the Timeline was rendered in Spanish because the author's language is Spanish, not because the audience required it.
+
+**Decision:** English-first. Language belongs to the projection, not to the data. A single canonical profile produces projections in whatever language the audience needs. Localization is added only when there is demonstrated user value:
+
+> English-first. Localization only when there is demonstrated user value.
+
+**Evidence:** The Timeline redesign (CARD-002C) — translating the UI to English required no model change, only a projection change. Confirms language is a presentation concern.
+
+**Consequence:** The UI and all future projections default to English. Spanish is a possible future projection, not an MVP concern. The canonical profile remains language-neutral.

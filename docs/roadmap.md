@@ -201,6 +201,18 @@ The canonical model has an advantage: it already holds the structured context.
 
 **Reframing (2026-07-31):** Pulse is not a dashboard — it is a **Career Compass**. Salary is not the product. The product answers: Am I underpaid? Am I growing? Should I change companies? What companies look for me? What evidence is missing to reach the next level?
 
+**The screen should answer three questions (2026-07-31):**
+1. **Who am I?** — Timeline already does this well (Current chapter, Story, Experiences).
+2. **How am I doing?** — Career Pulse derived from existing data: position, story coverage, market readiness, last meaningful growth.
+3. **What's next?** — The real value: "Next best improvement" with estimated impact, or "Your profile is ready for X / Missing evidence: Y". This changes behavior.
+
+The loop is not a timeline — it is a cycle:
+```
+Story → Understanding → Decision → New evidence → Story
+```
+
+**Framing:** "Recordar" is solved. The next problem is "interpretar". LinkedIn answers "how others see you"; Provena answers "with your whole trajectory, what does this mean for your next professional decision?"
+
 **Design relationship to CARD-000**
 The profile feeds a **Decision Context**; the Compass is a decision surface for the **Self** context. It is feedback for the user, not a projection for an external consumer. This is what keeps it inside the personal usage loop (PD-005) rather than an external projection.
 
@@ -211,13 +223,14 @@ The profile feeds a **Decision Context**; the Compass is a decision surface for 
 - **Level 3 (requires user history over time):** "Your market value increased vs. 6 months ago", "You now match the typical Staff Engineer pattern", "Your story supports a higher salary negotiation", "You are aligning with Principal opportunities". This level is the sustainable differentiator — it is what a spreadsheet, CV, or LinkedIn cannot produce alone.
 
 **Minimum implementation (Level 1)**
-A "Career Compass" section derived from existing data, no new fields:
+A "Career Compass" section derived from existing data, no new fields — answering questions 2 and 3 above:
+- **Career Pulse**: position, story coverage, market readiness, last meaningful growth
 - **Positioning**: title + dominant capabilities
 - **Last evolution**: days since most recent capture
 - **Story coverage**: hitos per experience vs. their dates (recent well-covered, early sparse)
 - **Strengths**: strongest differentiators
-- **Documentary gaps**: the gap with highest value (e.g., "document the architectural outcomes from your current role")
-- **Readiness**: ready to generate CV / LinkedIn / Recruiter Brief
+- **Next best improvement**: the gap with highest value (e.g., "document the architectural outcomes from your current role") with estimated impact
+- **Readiness**: what the profile is ready for (Staff Engineer, Principal interview) and the missing evidence
 
 **Deferred (needs sufficient information)**
 - Level 2: market demand, trends, compatible roles, observed salaries.

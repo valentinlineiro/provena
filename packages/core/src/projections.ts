@@ -61,38 +61,65 @@ export interface ResumeModel {
   readonly capabilities: readonly ResumeSkill[]
 }
 
+export interface ResumeBuildOptions {
+  includeExperienceIds?: readonly string[]
+  excludeExperienceIds?: readonly string[]
+  emphasize?: readonly string[]
+  omit?: readonly string[]
+}
+
+function resolveExperiences(profile: Profile, opts: ResumeBuildOptions = {}): Experience[] {
+  const map = new Map(profile.experiences.map(e => [e.id, e]))
+  const all = profile.identity.experienceIds.map(id => map.get(id)).filter((e): e is Experience => e !== undefined)
+  const included = opts.includeExperienceIds !== undefined
+    ? all.filter(e => opts.includeExperienceIds!.includes(e.id))
+    : all
+  return included.filter(e => !(opts.excludeExperienceIds ?? []).includes(e.id))
+}
+
+function reorderTechnologies(techs: readonly string[], emphasize: readonly string[], omit: readonly string[]): string[] {
+  const present = techs.filter(t => !omit.includes(t))
+  const [moved, rest] = [present.filter(t => emphasize.includes(t)), present.filter(t => !emphasize.includes(t))]
+  return [...moved, ...rest]
+}
+
+export function buildResumeModel(profile: Profile, opts: ResumeBuildOptions = {}): ResumeModel {
+  const experiences = resolveExperiences(profile, opts)
+  const emphasize = opts.emphasize ?? []
+  const omit = opts.omit ?? []
+  return {
+    name: profile.identity.person.name,
+    email: profile.identity.person.email,
+    location: profile.identity.person.location,
+    urls: profile.identity.person.urls,
+    summary: profile.identity.person.summary ?? '',
+    experiences: experiences.map(e => ({
+      organization: e.organization,
+      title: e.title,
+      start: e.start,
+      end: e.end,
+      summary: e.summary,
+      achievements: e.achievements,
+      technologies: reorderTechnologies(e.technologies, emphasize, omit),
+    })),
+    projects: resolve(profile.identity.projectIds, profile.projects).map(p => ({
+      name: p.name,
+      role: p.role,
+      description: p.description,
+      url: p.url,
+      technologies: p.technologies,
+    })),
+    education: resolve(profile.identity.educationIds, profile.education),
+    publications: resolve(profile.identity.publicationIds, profile.publications),
+    certifications: resolve(profile.identity.certificationIds, profile.certifications),
+    capabilities: [...new Set(experiences.flatMap(e => e.technologies))]
+      .filter(t => !omit.includes(t))
+      .map(name => ({ name: reorderTechnologies([name], emphasize, [])[0]!, description: undefined, evidenceCount: 0 })),
+  }
+}
+
 export const resumeProjector: Projector<ResumeModel> = {
-  project(profile: Profile): ResumeModel {
-    return {
-      name: profile.identity.person.name,
-      email: profile.identity.person.email,
-      location: profile.identity.person.location,
-      urls: profile.identity.person.urls,
-      summary: profile.identity.person.summary ?? '',
-      experiences: resolve(profile.identity.experienceIds, profile.experiences).map((e) => ({
-        organization: e.organization,
-        title: e.title,
-        start: e.start,
-        end: e.end,
-        summary: e.summary,
-        achievements: e.achievements,
-        technologies: e.technologies,
-      })),
-      projects: resolve(profile.identity.projectIds, profile.projects).map((p) => ({
-        name: p.name,
-        role: p.role,
-        description: p.description,
-        url: p.url,
-        technologies: p.technologies,
-      })),
-      education: resolve(profile.identity.educationIds, profile.education),
-      publications: resolve(profile.identity.publicationIds, profile.publications),
-      certifications: resolve(profile.identity.certificationIds, profile.certifications),
-      capabilities: [
-        ...new Set(resolve(profile.identity.experienceIds, profile.experiences).flatMap((e) => e.technologies)),
-      ].map((name) => ({ name, description: undefined, evidenceCount: 0 })),
-    }
-  },
+  project: (profile: Profile): ResumeModel => buildResumeModel(profile),
 }
 
 export interface RecruiterBriefModel {

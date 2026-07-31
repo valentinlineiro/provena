@@ -30,6 +30,12 @@ export type {
 } from './projections.js'
 export { resumeProjector, recruiterProjector } from './projections.js'
 
+export type { ResumeBuildOptions } from './projections.js'
+export { buildResumeModel } from './projections.js'
+
+export type { DecisionContext, CVContext, ProjectionMetadata, CVProjection } from './cv-projector.js'
+export { cvProjector } from './cv-projector.js'
+
 export type { CareerExperience, CareerTimeline, Strength, Gap } from './career.js'
 export { deriveStrengths, deriveEvidenceCount, findEvidenceGaps, profileToTimeline } from './career.js'
 

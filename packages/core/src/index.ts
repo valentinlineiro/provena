@@ -30,6 +30,9 @@ export type {
 } from './projections.js'
 export { resumeProjector, recruiterProjector } from './projections.js'
 
+export type { CareerExperience, CareerTimeline, Strength, Gap } from './career.js'
+export { deriveStrengths, deriveEvidenceCount, findEvidenceGaps, profileToTimeline } from './career.js'
+
 export type { Renderer } from './renderer.js'
 
 export type { WorkspaceLoader } from './workspace.js'

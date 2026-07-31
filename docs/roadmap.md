@@ -112,6 +112,10 @@ Mi historia profesional → Añadir / Ver pendientes / Evolucionar
 **Storage boundary**
 KV is a temporary dogfooding store, not a new source of truth. Future sync imports KV captures into the local workspace. The canonical profile remains the source of truth.
 
+**Friction before/after**
+- Before: "Something important → Where do I save it? → Do I have time? → Open tool"
+- After: "Open Provena → See who I am → Update a piece"
+
 **Status:** Deployed. Interface pending redesign per CARD-002C.
 
 ---
@@ -170,6 +174,11 @@ A single view:
 - "Add capture" button
 
 No editing yet. The view is read-only identity exploration with entry points for new information.
+
+**Design question**
+> What view makes a user want to come back tomorrow?
+
+The loop starts with **observation** (seeing your story), not with **entry** (adding to it). The natural human loop: open → see → detect evolution/gaps → add → the story improves. Capture is a contextual action within identity maintenance, not the entry point to the product.
 
 **Usability gate**
 The capture habit must work before adding consumers/projections (PD-005). Identity Timeline is the capture habit interface, not a new feature.

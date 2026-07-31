@@ -95,11 +95,15 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 .quick button { width: auto; padding: 0.375rem 0.75rem; font-size: 0.875rem; background: #fff; color: #1a1a1a; border: 1px solid #ccc; margin: 0; }
 #status { margin-top: 0.75rem; font-size: 0.875rem; color: #666; }
 .hidden { display: none; }
+.nav { margin-top: 0.75rem; }
+.nav a { color: #1a1a1a; font-size: 0.875rem; font-weight: 600; text-decoration: none; border: 1px solid #ccc; border-radius: 0.375rem; padding: 0.25rem 0.625rem; }
+.nav a:hover { background: #efefef; }
 </style>
 <main>
 <div class="hero">
   <h1 id="name"></h1>
   <p class="subtitle" id="title"></p>
+  <p class="nav"><a href="/cv">Prepare CV</a></p>
 </div>
 
 <section>
@@ -275,8 +279,10 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 .meta { background: #fffbe6; border: 1px solid #e6d98a; border-radius: 0.5rem; padding: 0.625rem; font-size: 0.8125rem; color: #6b5b00; margin-top: 1rem; display: none; }
 .row { display: flex; gap: 0.5rem; }
 .row button { flex: 1; }
+a.home { color: #1a1a1a; font-size: 0.8125rem; font-weight: 600; text-decoration: none; }
 </style>
 <main>
+<p><a class="home" href="/">← Home</a></p>
 <h1>Prepare CV</h1>
 <p class="subtitle">Target a role, review suggestions, export.</p>
 

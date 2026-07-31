@@ -5,14 +5,15 @@ import { computeCareerCompass, narrateCompass } from './compass.js'
 const COMPASS_HTML = (() => {
   const compass = computeCareerCompass(timeline)
   const n = narrateCompass(compass, timeline)
-  return [
-    '<div class="status ' + (compass.readiness === 'ready' ? 'ok' : 'warn') + '">' + n.status + '</div>',
+  const sections = [
+    '<div class="status ' + (compass.readiness === 'ready' ? 'ok' : compass.readiness === 'unknown' ? 'neutral' : 'warn') + '">' + n.status + '</div>',
     '<p class="headline">' + n.headline + '</p>',
-    '<div class="fact"><span class="label">Strengths</span><ul>' + n.strengths.map(s => '<li>' + s + '</li>').join('') + '</ul></div>',
-    '<div class="fact"><span class="label">Evidence gap</span><ul><li>' + n.gapLabel + '</li></ul></div>',
+    n.strengths.length ? '<div class="fact"><span class="label">Strengths</span><ul>' + n.strengths.map(s => '<li>' + s + '</li>').join('') + '</ul></div>' : '',
+    n.gapLabel ? '<div class="fact"><span class="label">Evidence gap</span><ul><li>' + n.gapLabel + '</li></ul></div>' : '',
     '<div class="fact"><span class="label">Next step</span><p>' + n.nextStep + '</p></div>',
     '<details class="why"><summary>Why this conclusion</summary><ul>' + n.why.map(l => '<li>' + l + '</li>').join('') + '</ul></details>',
-  ].join('')
+  ].filter(Boolean).join('')
+  return sections
 })()
 
 interface Env {
@@ -59,6 +60,7 @@ h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; colo
 .compass .status { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.375rem; }
 .compass .status::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2e7d32; flex: 0 0 auto; }
 .compass .status.warn::before { background: #b26a00; }
+.compass .status.neutral::before { background: #999; }
 .compass .headline { font-size: 0.9rem; line-height: 1.6; color: #333; margin-top: 0.375rem; }
 .compass .fact { margin-top: 0.75rem; }
 .compass .label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; }

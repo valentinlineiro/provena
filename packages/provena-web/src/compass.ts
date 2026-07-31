@@ -13,8 +13,8 @@ export interface CareerTimeline {
   experiences: CareerExperience[]
 }
 
-export type Positioning = 'developing' | 'positioned' | 'market-ready'
-export type Readiness = 'building' | 'ready'
+export type Positioning = 'insufficient-evidence' | 'developing' | 'positioned' | 'market-ready'
+export type Readiness = 'unknown' | 'building' | 'ready'
 
 export interface Strength {
   name: string
@@ -59,10 +59,15 @@ export function computeCareerCompass(timeline: CareerTimeline): CareerCompass {
 
   const totalHitos = timeline.experiences.reduce((sum, e) => sum + (e.hitos || 0), 0)
 
-  const positioning: Positioning = totalHitos < HITOS_DEVELOPING
+  // 0 hitos = the engine has evaluated almost nothing, so any verdict would be noise
+  const positioning: Positioning = totalHitos === 0
+    ? 'insufficient-evidence'
+    : totalHitos < HITOS_DEVELOPING
     ? 'developing'
     : totalHitos < HITOS_POSITIONED ? 'positioned' : 'market-ready'
-  const readiness: Readiness = totalHitos < HITOS_POSITIONED ? 'building' : 'ready'
+  const readiness: Readiness = totalHitos === 0
+    ? 'unknown'
+    : totalHitos < HITOS_POSITIONED ? 'building' : 'ready'
   const confidence = Math.min(1, totalHitos / HITOS_POSITIONED)
 
   const past = timeline.experiences.filter(e => e.end)
@@ -101,6 +106,20 @@ function daysSince(dateStr: string): string {
 export function narrateCompass(compass: CareerCompass, timeline: CareerTimeline): CompassNarrative {
   const strengthNames = compass.strengths.map(s => s.name)
   const totalHitos = timeline.experiences.reduce((sum, e) => sum + (e.hitos || 0), 0)
+
+  if (compass.positioning === 'insufficient-evidence') {
+    return {
+      status: 'Insufficient evidence',
+      headline: 'Not enough recorded milestones to assess your career positioning yet.',
+      strengths: [],
+      gapLabel: '',
+      nextStep: 'Document your first career milestones to unlock the Career Compass.',
+      why: [
+        totalHitos + ' documented milestones',
+        'Story updated ' + daysSince(timeline.updatedAt),
+      ],
+    }
+  }
 
   const status = compass.positioning === 'market-ready'
     ? 'Ready to explore the market'

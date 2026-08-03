@@ -2,6 +2,23 @@
 
 All notable changes to Provena are documented here.
 
+## v0.5.0 — Use it, then interpret it (2026-08-03)
+
+**From a capture form to a decision surface.** The web becomes the place
+where a career story is visibly maintained and interpreted, not stored.
+
+- Story `/`: Identity Timeline — observation-first home, English-first,
+  dogfooding events in KV
+- Career Compass `/`: deterministic (no LLM), narrative
+  Assessment → Evidence → Improvement, `insufficient evidence` vs negative
+- Prepare `/cv`: web CV prep over a decision context, `cvProjector`,
+  Career Snapshot, Core vs Primary skills, CV Readiness
+- Navigation: shared `siteNav`, Story | Prepare (Career reserved);
+  menu changes section, buttons perform actions
+- Preview auto-updates; `Your CV` is passive; mobile nav spacing
+
+[Full release notes](docs/releases/v0.5.0.md)
+
 ## v0.4.0 — Adoption (2026-07-23)
 
 **From architecture to adoption.** A developer can go from `git clone` to

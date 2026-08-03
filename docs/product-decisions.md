@@ -140,4 +140,36 @@ The model can be perfect, but if input is costly, knowledge never reaches the mo
 
 > After using Provena, the user has more clarity about their next professional step than before opening it.
 
+## PD-008
+
+**Date:** 2026-08-03
+
+**Observation:** As soon as a second screen existed (`/cv`), the Home started
+creating ad-hoc navigation: a "Prepare CV" hero button, then a "← Home" back
+link. Three different patterns for the same action. And the preview interaction
+was redundant: the CV rendered below but was still triggered by a `Preview CV`
+button.
+
+**Decision:** Two permanent rules.
+
+1. **The menu changes section; buttons perform actions.** No button ever
+   navigates between sections. That removes, up front, the class of futute
+   "Go to Career" / "Back to Story" buttons. Navigation is one shared
+   component (`siteNav(section)`); buttons in a section start the section's
+   actions (Download .md, Open HTML / Print PDF, Continue this story).
+2. **A preview that is already visible is not an action.** If the output
+   renders live, the control that "updates" it is redundant. So it updates
+   automatically on any context change and the action button becomes a
+   passive heading (`Your CV`).
+
+**Evidence:** The compressed shell and the redundant `Preview CV` button were
+the two visible frictions after deployment. Both were fixed without touching
+domain architecture or projection logic.
+
+**Consequence:** Navigation stays honest: only `Story | Prepare` render
+(Career is reserved until it has its own entity). The next cycle is usage —
+dogfooding Story + Compass + Prepare with real profiles to observe where
+interpretation/projection breaks, before calibrating Compass thresholds or
+building `careerHint`. No new functionality opens now.
+
 ---

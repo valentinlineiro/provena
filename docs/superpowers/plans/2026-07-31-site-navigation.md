@@ -190,7 +190,7 @@ with:
 
 ```html
 <main>
-<nav class="site">${siteNav('story')}</nav>
+${siteNav('story')}
 <div class="hero">
   <h1 id="name"></h1>
   <p class="subtitle" id="title"></p>
@@ -239,7 +239,7 @@ with:
 
 ```html
 <main>
-<nav class="site">${siteNav('prepare')}</nav>
+${siteNav('prepare')}
 <h1>Prepare</h1>
 <p class="subtitle">Target a role, review suggestions, export.</p>
 ```

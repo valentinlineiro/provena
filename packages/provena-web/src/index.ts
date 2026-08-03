@@ -116,7 +116,7 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 .site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
 </style>
 <main>
-<nav class="site">${siteNav('story')}</nav>
+${siteNav('story')}
 <div class="hero">
   <h1 id="name"></h1>
   <p class="subtitle" id="title"></p>
@@ -301,7 +301,7 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 .site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
 </style>
 <main>
-<nav class="site">${siteNav('prepare')}</nav>
+${siteNav('prepare')}
 <h1>Prepare</h1>
 <p class="subtitle">Target a role, review suggestions, export.</p>
 

@@ -7,12 +7,7 @@
     I design internal systems that improve how engineering teams build, review, onboard, and deliver software.
     My work combines software architecture, developer productivity, and AI-assisted engineering to reduce friction,
     improve decision-making, and help teams work with more leverage.
-  achievements:
-    - "Designed a Clean Architecture proposal for the HSS backend — adopted as the foundation for a separate product (SMSC)"
-    - "Became the internal reference for AI-assisted engineering; the company's AI Lead shared experiments and sought input on internal training"
-    - "Evolved from ticket-based development to owning the product roadmap, driving architectural improvements in a legacy 4G network core"
-    - "Drove modernization of a critical telecom system without compromising stability"
-    - "Reduced team friction by improving maintainability, simplifying decisions, and accelerating delivery velocity"
+  achievements: []
   technologies:
     - "Java"
     - "Spring"

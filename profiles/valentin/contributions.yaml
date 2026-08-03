@@ -1,0 +1,16 @@
+- id: summa-clean-architecture
+  experienceRef: 822fcbb8-f7c8-40a7-bc7d-cb61092c5861
+  summary: >
+    Designed a Clean Architecture proposal for the HSS backend.
+  outcome:
+    summary: >
+      Adopted as the architectural foundation of the SMSC product.
+  scope:
+    level: product
+    role: initiator
+  capabilityIds:
+    - 420b07b6-c49e-43ee-a409-f569e60378ab
+  technologies:
+    - java
+    - spring
+  evidenceIds: []

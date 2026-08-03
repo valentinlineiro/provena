@@ -548,7 +548,7 @@ test('CVProjector renders Contribution summaries with Outcome when linked contri
       {
         id: 'c2',
         experienceRef: 'exp-1',
-        summary: 'Drove technical initiative without explicit outcome.',
+        summary: 'Drove architecture initiative without explicit outcome.',
         capabilityIds: [],
         evidenceIds: [],
       },
@@ -558,7 +558,7 @@ test('CVProjector renders Contribution summaries with Outcome when linked contri
   const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
   assert.ok(exp1)
   assert.ok(exp1.achievements.includes('Designed a Clean Architecture proposal for HSS backend. (Outcome: Adopted as SMSC architecture foundation.)'))
-  assert.ok(exp1.achievements.includes('Drove technical initiative without explicit outcome.'))
+  assert.ok(exp1.achievements.includes('Drove architecture initiative without explicit outcome.'))
 })
 
 test('CVProjector falls back to legacy achievements when zero linked Contribution records exist', () => {
@@ -680,4 +680,67 @@ test('evaluateContribution resolves capabilityIds to Capability names for semant
   const evalResult = evaluateContribution(contrib, activeVocab, capabilitiesMap)
   assert.equal(evalResult.hits, 1)
   assert.equal(evalResult.semanticClass, 'Supporting')
+})
+
+test('derives experience contribution level from maximum contribution rank before budget cap and excludes Historical contributions', () => {
+  const p = makeProfile()
+  const profileWithContribs: Profile = {
+    ...p,
+    preferences: {
+      interests: ['Software Architecture', 'Technical Leadership'],
+    },
+    contributions: [
+      {
+        id: 'c1',
+        experienceRef: 'exp-1',
+        summary: 'Architected distributed systems proposal with technical leadership',
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+      {
+        id: 'c2',
+        experienceRef: 'exp-1',
+        summary: 'Designed architecture proposal',
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+      {
+        id: 'c3',
+        experienceRef: 'exp-1',
+        summary: 'Routine ticket triaging',
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+    ],
+  }
+  const cv = cvProjector(profileWithContribs)
+  const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
+  assert.equal(exp1.contribution, 'Core')
+  assert.equal(exp1.achievements.length, 2)
+  assert.ok(exp1.achievements.includes('Architected distributed systems proposal with technical leadership'))
+  assert.ok(exp1.achievements.includes('Designed architecture proposal'))
+  assert.ok(!exp1.achievements.some(a => a.includes('Routine ticket triaging')))
+})
+
+test('terminal formatting occurs only AFTER selection and budgeting', () => {
+  const p = makeProfile()
+  const profileWithContribs: Profile = {
+    ...p,
+    preferences: {
+      interests: ['Software Architecture', 'Technical Leadership'],
+    },
+    contributions: [
+      {
+        id: 'c1',
+        experienceRef: 'exp-1',
+        summary: 'Architected distributed systems proposal with technical leadership',
+        outcome: { summary: 'Adopted across all teams' },
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+    ],
+  }
+  const cv = cvProjector(profileWithContribs)
+  const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
+  assert.equal(exp1.achievements[0], 'Architected distributed systems proposal with technical leadership (Outcome: Adopted across all teams)')
 })

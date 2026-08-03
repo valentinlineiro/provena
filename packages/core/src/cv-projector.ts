@@ -573,14 +573,36 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
         ? (profile.contributions ?? []).filter(c => c.experienceRef === targetExp.id)
         : []
 
-      const rawBullets = expContributions.length > 0
-        ? expContributions.map(c => c.outcome?.summary ? `${c.summary} (Outcome: ${c.outcome.summary})` : c.summary)
-        : e.achievements
+      if (expContributions.length > 0) {
+        const ranked = rankContributions(expContributions, relevanceVocab, profile.capabilities ?? [])
+        const contribution: ExperienceContribution = ranked[0]?.evaluation.semanticClass ?? 'Historical'
+        const budget = CONTRIBUTION_BUDGET[contribution]
+        const nonHistorical = ranked.filter(item => item.evaluation.semanticClass !== 'Historical')
+        const candidatePool = nonHistorical.length > 0 ? nonHistorical : ranked
+        const selectedContribs = candidatePool.slice(0, budget)
+        const achievements = selectedContribs.map(item =>
+          item.contribution.outcome?.summary
+            ? `${item.contribution.summary} (Outcome: ${item.contribution.outcome.summary})`
+            : item.contribution.summary
+        )
+        const bulletSignals = achievements.flatMap(significantSignals)
+        const decoSummary = e.summary ? redundantSummary(e.summary, bulletSignals) : ''
+        return {
+          organization: e.organization,
+          title: e.title,
+          start: e.start,
+          end: e.end,
+          summary: decoSummary || undefined,
+          achievements,
+          technologies: e.technologies,
+          contribution,
+        }
+      }
 
       // R5b — budget follows contribution; the survivor is still picked by
       // R2→R3, so this only reduces the allowance Historical may consume.
-      const contribution = experienceContribution(rawBullets, relevanceVocab)
-      const achievements = capEvidence(rawBullets, CONTRIBUTION_BUDGET[contribution])
+      const contribution = experienceContribution(e.achievements, relevanceVocab)
+      const achievements = capEvidence(e.achievements, CONTRIBUTION_BUDGET[contribution])
       // R4 — suppress an experience summary that only re-enunciates, in prose,
       // signals already carried by the experience's own surviving bullets.
       const bulletSignals = achievements.flatMap(significantSignals)

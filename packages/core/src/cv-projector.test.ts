@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary } from './cv-projector.js'
+import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution } from './cv-projector.js'
 import type { Profile } from './profile.js'
 
 function makeProfile(): Profile {
@@ -251,6 +251,68 @@ test('R2: cvProjector threads the vocabulary by default (interests + leadership)
   assert.equal(bullets[0], KNOWMAD_ACHIEVEMENTS[0])
   assert.equal(bullets[1], KNOWMAD_ACHIEVEMENTS[4])
   assert.ok(bullets.includes(KNOWMAD_ACHIEVEMENTS[5]!), 'the quantified 40% survives the budget cap')
+})
+
+// R5a — experience contribution classification. Metadata only: derived from
+// observable relevance to the decision context, never age. Core → Supporting →
+// Historical; nothing is removed or re-budgeted yet.
+
+const SUMMA_ACHIEVEMENTS = [
+  'Designed a Clean Architecture proposal for the HSS backend — adopted as the foundation for a separate product (SMSC)',
+  "Became the internal reference for AI-assisted engineering; the company's AI Lead shared experiments and sought input on internal training",
+  'Evolved from ticket-based development to owning the product roadmap, driving architectural improvements in a legacy 4G network core',
+  'Drove modernization of a critical telecom system without compromising stability',
+  'Reduced team friction by improving maintainability, simplifying decisions, and accelerating delivery velocity',
+]
+const VINCLE_ACHIEVEMENTS = [
+  'Led the migration of a legacy CRM/SFA to Spring Boot and Angular, improving maintainability and enabling future evolution',
+  'Led a frontend team and participated in architecture decisions across backend, integrations, and business-critical functionality',
+]
+const UCASE_ACHIEVEMENTS = [
+  'Contributed to research published within the UCASE group',
+  'Worked on knowledge extraction techniques from complex datasets',
+  'Applied Fuzzy Formal Concept Analysis to knowledge representation problems',
+  'Explored computational methods for pattern discovery and information structuring',
+  'Developed an experimental and evidence-driven approach to technical problem solving',
+]
+const UCA_ACHIEVEMENTS = [
+  'Designed and implemented an internal management application for the University\'s Research Transfer Office',
+  'Improved internal operational workflows through custom software development',
+  'Contributed to research on mutation testing and formal verification',
+  'Combined production software development with academic research activities',
+  'Built the foundations of a rigorous engineering approach focused on software quality',
+]
+
+test('R5a: real CV classification under Staff — Summa and knowmad Core, VINCLE Supporting, UCAD Historical', () => {
+  assert.equal(experienceContribution(SUMMA_ACHIEVEMENTS, STAFF_VOCAB), 'Core')
+  assert.equal(experienceContribution(KNOWMAD_ACHIEVEMENTS, STAFF_VOCAB), 'Core')
+  assert.equal(experienceContribution(VINCLE_ACHIEVEMENTS, STAFF_VOCAB), 'Supporting')
+  assert.equal(experienceContribution(UCASE_ACHIEVEMENTS, STAFF_VOCAB), 'Historical')
+  assert.equal(experienceContribution(UCA_ACHIEVEMENTS, STAFF_VOCAB), 'Historical')
+})
+
+test('R5a: contribution derives from relevance to the decision, never age', () => {
+  const oldRelevant = ['Architected distributed systems and led a team of engineers']
+  const recentIrrelevant = ['Answered tickets and fixed reported bugs in a legacy codebase']
+  assert.equal(experienceContribution(oldRelevant, STAFF_VOCAB), 'Core')
+  assert.equal(experienceContribution(recentIrrelevant, STAFF_VOCAB), 'Historical')
+})
+
+test('R5a: the same experience is Core for one decision and Historical for another', () => {
+  const systems = ['Trabajó con arquitecturas distribuidas y microservicios en sistemas de producción']
+  assert.equal(experienceContribution(systems, STAFF_VOCAB), 'Core')
+  assert.equal(experienceContribution(systems, ['Developer Productivity']), 'Historical')
+})
+
+test('R5a: contribution is metadata — the projection renders the same CV it did before', () => {
+  const p: Profile = {
+    ...makeProfile(),
+    preferences: { interests: STAFF_VOCAB },
+  }
+  const withMeta = cvProjector(p)
+  const contributions = withMeta.experiences.map(e => e.contribution)
+  assert.ok(contributions.every(c => c === 'Core' || c === 'Supporting' || c === 'Historical'))
+  assert.equal(withMeta.experiences.length, makeProfile().experiences.length)
 })
 
 // R4 — semantic redundancy suppression: never emit a summary that only

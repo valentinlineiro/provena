@@ -58,6 +58,20 @@ export interface CvIdentity {
   readonly urls: Record<string, string>
 }
 
+// R5a — an experience's contribution to the current decision, classified from
+// observable relevance only (never age). Core touches the target narrative on
+// multiple dimensions; Supporting touches it at least once; Historical does
+// not touch it at all. Metadata-only: selection and budgets are untouched.
+export type ExperienceContribution = 'Core' | 'Supporting' | 'Historical'
+
+export function experienceContribution(achievements: readonly string[], vocab: readonly string[]): ExperienceContribution {
+  const active = activatedGroups(vocab)
+  let max = 0
+  for (const a of achievements) max = Math.max(max, relevanceScore(a, active))
+  if (max === 0) return 'Historical'
+  return max >= 2 ? 'Core' : 'Supporting'
+}
+
 export interface CvExperience {
   readonly organization: string
   readonly title: string
@@ -66,6 +80,7 @@ export interface CvExperience {
   readonly summary?: string
   readonly achievements: readonly string[]
   readonly technologies: readonly string[]
+  readonly contribution: ExperienceContribution
 }
 
 export interface CvProject {
@@ -124,13 +139,14 @@ export function classifyEvidence(achievement: string): EvidenceClass {
 // achievement signals: an English interest matches a Spanish signal when both
 // share a stem group. Groups are cheap; only those activated by the
 // vocabulary participate, so ubiquitous terms alone never inflate a score.
+// (Bare "engineering" is deliberately not a bridge: a single generic token
+// must never signal target relevance, mirroring R4b's domain stopwords.)
 const RELEVANCE_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
   ['archit', 'arquitect'],     // software architecture
   ['distribut', 'distribuid'], // distributed systems
   ['sistem', 'system'],        // systems
   ['plataform', 'platform'],   // platform engineering
   ['productiv'],               // developer productivity
-  ['ingenier', 'engineer'],    // engineering
   ['assist', 'asist'],         // AI-assisted
   ['lider', 'lead'],           // technical leadership
   ['equip', 'team'],           // teams
@@ -355,6 +371,7 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
         summary: decoSummary || undefined,
         achievements,
         technologies: e.technologies,
+        contribution: experienceContribution(e.achievements, relevanceVocab),
       }
     }),
     projects: projects.map((p: ResumeProject): CvProject => ({

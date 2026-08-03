@@ -3,7 +3,7 @@ import type {
   ResumeExperience,
   ResumeProject,
 } from './projections.js'
-import type { Education, Certification, Experience } from './types.js'
+import type { Education, Certification, Experience, Contribution, Capability, ScopeLevel, ContributionRole } from './types.js'
 import { buildResumeModel } from './projections.js'
 import { deriveStrengths } from './career.js'
 
@@ -213,7 +213,7 @@ const RELEVANCE_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
   ['test'],                    // software testing / test generation
 ]
 
-function activatedGroups(vocab: readonly string[]): ReadonlySet<number> {
+export function activatedGroups(vocab: readonly string[]): ReadonlySet<number> {
   const active = new Set<number>()
   for (const term of vocab) {
     const tokens = significantSignals(term)
@@ -222,6 +222,143 @@ function activatedGroups(vocab: readonly string[]): ReadonlySet<number> {
     })
   }
   return active
+}
+
+export function scopeLevelRank(level?: ScopeLevel): number {
+  switch (level) {
+    case 'organization': return 4
+    case 'product': return 3
+    case 'multi-team': return 2
+    case 'team': return 1
+    case 'individual': return 0
+    default: return -1
+  }
+}
+
+export function roleRank(role?: ContributionRole): number {
+  switch (role) {
+    case 'initiator': return 2
+    case 'lead': return 1
+    case 'contributor': return 0
+    default: return -1
+  }
+}
+
+export function semanticClassRank(cls: ExperienceContribution): number {
+  switch (cls) {
+    case 'Core': return 2
+    case 'Supporting': return 1
+    case 'Historical': return 0
+  }
+}
+
+export type ContributionSortTuple = readonly [
+  semanticClassRank: number,
+  hits: number,
+  scopeLevelRank: number,
+  roleRank: number,
+  evidenceClassRank: number,
+  canonicalIndex: number,
+]
+
+export interface ContributionEvaluation {
+  readonly contrib: Contribution
+  readonly hits: number
+  readonly semanticClass: ExperienceContribution
+  readonly semanticClassRank: number
+  readonly scopeLevelRank: number
+  readonly roleRank: number
+  readonly evidenceClassRank: number
+}
+
+export interface EvaluatedContribution {
+  readonly contribution: Contribution
+  readonly evaluation: ContributionEvaluation
+  readonly canonicalIndex: number
+}
+
+export function evaluateContribution(
+  contrib: Contribution,
+  activeVocab: ReadonlySet<number>,
+  capabilitiesMap: Map<string, Capability>,
+): ContributionEvaluation {
+  const capNames = (contrib.capabilityIds ?? [])
+    .map(id => capabilitiesMap.get(id)?.name)
+    .filter((name): name is string => Boolean(name))
+
+  const textSources = [
+    contrib.summary,
+    contrib.outcome?.summary ?? '',
+    ...(contrib.technologies ?? []),
+    ...capNames,
+  ]
+
+  const matchedGroups = new Set<number>()
+  for (const text of textSources) {
+    for (const sig of significantSignals(text)) {
+      for (const gi of activeVocab) {
+        if (RELEVANCE_GROUPS[gi]!.some(stem => sig.startsWith(stem))) {
+          matchedGroups.add(gi)
+        }
+      }
+    }
+  }
+
+  const hits = matchedGroups.size
+  const semanticClass: ExperienceContribution = hits >= 2 ? 'Core' : hits === 1 ? 'Supporting' : 'Historical'
+  const semRank = semanticClassRank(semanticClass)
+  const sLevelRank = scopeLevelRank(contrib.scope?.level)
+  const rRank = roleRank(contrib.scope?.role)
+  const evRank = classifyEvidence(contrib.outcome?.summary ?? contrib.summary).valueOf()
+
+  return {
+    contrib,
+    hits,
+    semanticClass,
+    semanticClassRank: semRank,
+    scopeLevelRank: sLevelRank,
+    roleRank: rRank,
+    evidenceClassRank: evRank,
+  }
+}
+
+export function rankContributions(
+  contribs: readonly Contribution[],
+  vocab: readonly string[],
+  capabilities: readonly Capability[],
+): EvaluatedContribution[] {
+  const activeVocab = activatedGroups(vocab)
+  const capabilitiesMap = new Map(capabilities.map(c => [c.id, c]))
+
+  const evaluated: EvaluatedContribution[] = contribs.map((contrib, i) => ({
+    contribution: contrib,
+    evaluation: evaluateContribution(contrib, activeVocab, capabilitiesMap),
+    canonicalIndex: i,
+  }))
+
+  evaluated.sort((a, b) => {
+    const evA = a.evaluation
+    const evB = b.evaluation
+
+    if (evA.semanticClassRank !== evB.semanticClassRank) {
+      return evB.semanticClassRank - evA.semanticClassRank
+    }
+    if (evA.hits !== evB.hits) {
+      return evB.hits - evA.hits
+    }
+    if (evA.scopeLevelRank !== evB.scopeLevelRank) {
+      return evB.scopeLevelRank - evA.scopeLevelRank
+    }
+    if (evA.roleRank !== evB.roleRank) {
+      return evB.roleRank - evA.roleRank
+    }
+    if (evA.evidenceClassRank !== evB.evidenceClassRank) {
+      return evB.evidenceClassRank - evA.evidenceClassRank
+    }
+    return a.canonicalIndex - b.canonicalIndex
+  })
+
+  return evaluated
 }
 
 function relevanceScore(achievement: string, active: ReadonlySet<number>): number {

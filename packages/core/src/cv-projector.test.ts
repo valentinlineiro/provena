@@ -1,7 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution, CONTRIBUTION_BUDGET, projectContribution } from './cv-projector.js'
+import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution, CONTRIBUTION_BUDGET, projectContribution, evaluateContribution, rankContributions, activatedGroups } from './cv-projector.js'
 import type { Profile } from './profile.js'
+import type { Contribution, Capability } from './types.js'
 
 function makeProfile(): Profile {
   return {
@@ -597,4 +598,86 @@ test('budget constraints (maxBulletsPerExperience) limit total bullets rendered 
   const cv = cvProjector(profileWithManyContribs)
   const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
   assert.equal(exp1.achievements.length, DEFAULT_CV_BUDGET.maxBulletsPerExperience)
+})
+
+test('evaluateContribution classifies H=0 as Historical regardless of Scope', () => {
+  const contrib: Contribution = {
+    id: 'c1',
+    experienceRef: 'exp-1',
+    summary: 'Routine maintenance and ticket triaging',
+    scope: { level: 'organization', role: 'initiator' },
+    capabilityIds: [],
+    evidenceIds: [],
+  }
+  const activeVocab = activatedGroups(['Software Architecture', 'Technical Leadership'])
+  const evalResult = evaluateContribution(contrib, activeVocab, new Map())
+  assert.equal(evalResult.hits, 0)
+  assert.equal(evalResult.semanticClass, 'Historical')
+  assert.equal(evalResult.semanticClassRank, 0)
+})
+
+test('rankContributions ranks Core over Supporting regardless of Scope', () => {
+  const cCoreTeam: Contribution = {
+    id: 'c-core',
+    experienceRef: 'exp-1',
+    summary: 'Architected distributed systems proposal with technical leadership',
+    scope: { level: 'team', role: 'contributor' },
+    capabilityIds: [],
+    evidenceIds: [],
+  }
+  const cSupportingOrg: Contribution = {
+    id: 'c-supp',
+    experienceRef: 'exp-1',
+    summary: 'Designed architecture proposal',
+    scope: { level: 'organization', role: 'initiator' },
+    capabilityIds: [],
+    evidenceIds: [],
+  }
+  const vocab = ['Software Architecture', 'Technical Leadership']
+  const ranked = rankContributions([cSupportingOrg, cCoreTeam], vocab, [])
+  assert.equal(ranked[0]!.contribution.id, 'c-core')
+  assert.equal(ranked[1]!.contribution.id, 'c-supp')
+})
+
+test('rankContributions ranks higher Scope level and Role when semantic class and H are equal', () => {
+  const cOrgInitiator: Contribution = {
+    id: 'c-org-init',
+    experienceRef: 'exp-1',
+    summary: 'Architected distributed systems with technical leadership',
+    scope: { level: 'organization', role: 'initiator' },
+    capabilityIds: [],
+    evidenceIds: [],
+  }
+  const cTeamContrib: Contribution = {
+    id: 'c-team-contrib',
+    experienceRef: 'exp-1',
+    summary: 'Architected distributed systems with technical leadership',
+    scope: { level: 'team', role: 'contributor' },
+    capabilityIds: [],
+    evidenceIds: [],
+  }
+  const vocab = ['Software Architecture', 'Technical Leadership']
+  const ranked = rankContributions([cTeamContrib, cOrgInitiator], vocab, [])
+  assert.equal(ranked[0]!.contribution.id, 'c-org-init')
+  assert.equal(ranked[1]!.contribution.id, 'c-team-contrib')
+})
+
+test('evaluateContribution resolves capabilityIds to Capability names for semantic matching', () => {
+  const cap: Capability = {
+    id: 'cap-arch',
+    name: 'Software Architecture',
+    evidenceIds: [],
+  }
+  const contrib: Contribution = {
+    id: 'c-cap',
+    experienceRef: 'exp-1',
+    summary: 'Routine task execution',
+    capabilityIds: ['cap-arch'],
+    evidenceIds: [],
+  }
+  const activeVocab = activatedGroups(['Software Architecture'])
+  const capabilitiesMap = new Map([['cap-arch', cap]])
+  const evalResult = evaluateContribution(contrib, activeVocab, capabilitiesMap)
+  assert.equal(evalResult.hits, 1)
+  assert.equal(evalResult.semanticClass, 'Supporting')
 })

@@ -10,8 +10,9 @@
     "build:all": "npm run build -w packages/cli",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test packages/*/src/*.test.ts packages/*/src/*/*.test.ts",
-    "demo": "tsx packages/cli/src/index.ts render examples/valen --stdout",
-    "provena": "tsx packages/cli/src/index.ts"
+    "demo": "tsx packages/cli/src/index.ts render profiles/valentin --stdout",
+    "provena": "tsx packages/cli/src/index.ts",
+    "lint:no-legacy-examples": "node -e \"const fs=require('fs'), path=require('path'), forbidden='examples/'+'valen'; const grep = (dir) => { fs.readdirSync(dir).forEach(f => { const p = path.join(dir, f); if (f.startsWith('.')||f==='node_modules'||f==='dist'||f==='docs') return; if (fs.statSync(p).isDirectory()) grep(p); else if (fs.readFileSync(p, 'utf8').includes(forbidden)) { console.error('Forbidden reference to ' + forbidden + ' in ' + p); process.exit(1); } }); }; grep('.'); console.log('Zero legacy ' + forbidden + ' references found.');\""
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

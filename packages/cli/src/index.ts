@@ -153,7 +153,7 @@ Options:
 
 Examples:
   provena render .
-  provena render examples/valen --format jsonresume
+  provena render profiles/valentin --format jsonresume
   provena render my-profile --stdout > resume.json
 `)
 }

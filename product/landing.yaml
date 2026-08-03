@@ -1,0 +1,31 @@
+identity:
+  name: Provena
+  tagline: "Your professional identity, canonically yours."
+
+narrative:
+  problem:
+    - "Your professional history is fragmented across platforms."
+    - "LinkedIn is a platform, not your source of truth."
+  principles:
+    - local-first
+    - provenance-aware
+    - selective-projections
+
+capabilities:
+  continuous-capture:
+    presentation: primary
+    priority: 70
+    title: "Capture as you work"
+    summary: "Capture professional evidence when it happens, without restructuring your profile."
+
+  linkedin-bootstrap:
+    presentation: secondary
+    priority: 50
+    title: "Bootstrap from LinkedIn"
+    summary: "Export your profile zip and seed your canonical history in seconds."
+
+  cv-projection:
+    presentation: primary
+    priority: 80
+    title: "Targeted CV Projections"
+    summary: "Select relevant signals based on context and budget."

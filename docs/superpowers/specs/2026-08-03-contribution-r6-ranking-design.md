@@ -57,7 +57,7 @@ $$\text{SortTuple}(C) = \left\langle \text{semanticClassRank}(C),\, H(C),\, \tex
 - **`evidenceClassRank`**: Preserved existing regex taxonomy (`Quantified` (5) > `Adopted` (4) > `Artifact` (3) > `Owned` (2) > `Generic` (1)).
 - **`canonicalIndex`**: Preserves original profile array index (lower index wins ties).
 
-**Invariant 2**: `Core + team` ($2, H, 1$) strictly outranks `Supporting + organization` ($1, H, 4$). Between two `Core` contributions, `organization + initiator` outranks `team + contributor`.
+**Invariant 2**: `Core + team` ($2, H, 1$) strictly outranks `Supporting + organization` ($1, H, 4$). Between two contributions with equal semantic class and equal $H$, `organization + initiator` outranks `team + contributor`.
 
 ---
 

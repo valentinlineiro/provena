@@ -110,15 +110,16 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 .quick button { width: auto; padding: 0.375rem 0.75rem; font-size: 0.875rem; background: #fff; color: #1a1a1a; border: 1px solid #ccc; margin: 0; }
 #status { margin-top: 0.75rem; font-size: 0.875rem; color: #666; }
 .hidden { display: none; }
-.nav { margin-top: 0.75rem; }
-.nav a { color: #1a1a1a; font-size: 0.875rem; font-weight: 600; text-decoration: none; border: 1px solid #ccc; border-radius: 0.375rem; padding: 0.25rem 0.625rem; }
-.nav a:hover { background: #efefef; }
+.site { margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e5e5; }
+.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; }
+.site a:not(.brand) { display: inline-block; margin: 0.375rem 1rem 0 0; font-size: 0.875rem; color: #999; text-decoration: none; }
+.site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
 </style>
 <main>
+<nav class="site">${siteNav('story')}</nav>
 <div class="hero">
   <h1 id="name"></h1>
   <p class="subtitle" id="title"></p>
-  <p class="nav"><a href="/cv">Prepare CV</a></p>
 </div>
 
 <section>
@@ -277,7 +278,7 @@ const SUGGESTIONS = {
 const CV_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Provena — Prepare CV</title>
+<title>Provena — Prepare</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
@@ -294,11 +295,14 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 .meta { background: #fffbe6; border: 1px solid #e6d98a; border-radius: 0.5rem; padding: 0.625rem; font-size: 0.8125rem; color: #6b5b00; margin-top: 1rem; display: none; }
 .row { display: flex; gap: 0.5rem; }
 .row button { flex: 1; }
-a.home { color: #1a1a1a; font-size: 0.8125rem; font-weight: 600; text-decoration: none; }
+.site { margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e5e5; }
+.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; }
+.site a:not(.brand) { display: inline-block; margin: 0.375rem 1rem 0 0; font-size: 0.875rem; color: #999; text-decoration: none; }
+.site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
 </style>
 <main>
-<p><a class="home" href="/">← Home</a></p>
-<h1>Prepare CV</h1>
+<nav class="site">${siteNav('prepare')}</nav>
+<h1>Prepare</h1>
 <p class="subtitle">Target a role, review suggestions, export.</p>
 
 <section>

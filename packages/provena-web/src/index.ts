@@ -17,7 +17,7 @@ const COMPASS_HTML = (() => {
     n.strengths.length ? '<div class="fact"><span class="label">Strengths</span><ul>' + n.strengths.map(s => '<li>' + s + '</li>').join('') + '</ul></div>' : '',
     n.gapLabel ? '<div class="fact"><span class="label">Evidence gap</span><ul><li>' + n.gapLabel + '</li></ul></div>' : '',
     '<div class="fact"><span class="label">Next step</span><p>' + n.nextStep + '</p></div>',
-    '<details class="why"><summary>Why this conclusion</summary><ul>' + n.why.map(l => '<li>' + l + '</li>').join('') + '</ul></details>',
+    n.why.length ? '<details class="why"><summary>Why this conclusion</summary><ul>' + n.why.map(l => '<li>' + l + '</li>').join('') + '</ul></details>' : '',
   ].filter(Boolean).join('')
   return sections
 })()
@@ -53,7 +53,7 @@ export function siteNav(section: 'story' | 'prepare'): string {
   return (
     '<nav class="site">' +
     '<a class="brand" href="/">Provena</a>' +
-    sections.map(s => link(s.label, s.href, s.id === section)).join('') +
+    '<div class="links">' + sections.map(s => link(s.label, s.href, s.id === section)).join('') + '</div>' +
     '</nav>'
   )
 }
@@ -65,6 +65,7 @@ const PAGE = `<!DOCTYPE html>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
+@media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }
 main { max-width: 34rem; margin: 2rem auto; }
 .hero { padding: 0.5rem 0 1rem; }
 h1 { font-size: 1.125rem; font-weight: 700; }
@@ -112,8 +113,9 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 .hidden { display: none; }
 .site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
 .site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
-.site a:not(.brand) { display: inline-block; margin-right: 1.25rem; font-size: 0.875rem; color: #999; text-decoration: none; }
-.site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
+.site .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
+.site .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
+.site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 </style>
 <main>
 ${siteNav('story')}
@@ -282,6 +284,7 @@ const CV_PAGE = `<!DOCTYPE html>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
+@media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }
 main { max-width: 40rem; margin: 2rem auto; }
 h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
@@ -297,10 +300,9 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 .row button { flex: 1; }
 .site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
 .site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
-.site a:not(.brand) { display: inline-block; margin-right: 1.25rem; font-size: 0.875rem; color: #999; text-decoration: none; }
-.site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
-.section { margin-top: 1.5rem; }
-.site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
+.site .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
+.site .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
+.site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 .your-cv { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
 </style>
 <main>

@@ -395,11 +395,9 @@ async function preview() {
   if (!res.ok) { document.getElementById('preview').textContent = 'Error: ' + await res.text(); return }
   lastResult = await res.json()
   document.getElementById('preview').textContent = lastResult.markdown
-  const m = lastResult.metadata
+  const cv = lastResult.cv
   const parts = []
-  parts.push('Included ' + m.selectedExperienceIds.length + ' of ' + profile.identity.experienceIds.length + ' experiences.')
-  if (m.generatedSummary) parts.push('Summary generated automatically.')
-  if (m.emphasizedCapabilities.length) parts.push(m.emphasizedCapabilities.length + ' capabilities emphasized.')
+  parts.push('Included ' + cv.experiences.length + ' of ' + profile.identity.experienceIds.length + ' experiences.')
   const meta = document.getElementById('meta')
   meta.textContent = parts.join(' ')
   meta.style.display = parts.length ? 'block' : 'none'
@@ -520,13 +518,12 @@ export default {
       try {
         const body = await request.json()
         const context = cvContextFromBody(body)
-        const { model, metadata } = await renderCV(context)
+        const cv = await renderCV(context)
         return new Response(JSON.stringify({
-          model,
-          metadata,
+          cv,
           readiness: cvReadiness(context, compassForPage),
-          markdown: markdownRenderer.render(model),
-          html: htmlRenderer.render(model),
+          markdown: markdownRenderer.render(cv),
+          html: htmlRenderer.render(cv),
         }), {
           headers: { 'Content-Type': 'application/json' },
         })

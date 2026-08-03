@@ -1,4 +1,4 @@
-import type { Renderer, ResumeModel } from '@provena/core'
+import type { Renderer, CVProjection } from '@provena/core'
 
 function fmtDate(d: string): string {
   const [y, m] = d.split('-')
@@ -14,14 +14,15 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-export class HtmlResumeRenderer implements Renderer<ResumeModel> {
-  render(model: ResumeModel): string {
+// R10 — renderer never reasons; it serialises the editorialised CvProjection.
+export class HtmlCvRenderer implements Renderer<CVProjection> {
+  render(model: CVProjection): string {
     const head = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(model.name)}</title>
+<title>${esc(model.identity.name)}</title>
 <style>
   :root { --c-text: #111; --c-muted: #555; --c-border: #ddd; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,28 +46,10 @@ export class HtmlResumeRenderer implements Renderer<ResumeModel> {
 
     parts.push('<article>')
     parts.push('<header>')
-    parts.push('<h1>' + esc(model.name) + '</h1>')
+    parts.push('<h1>' + esc(model.identity.name) + '</h1>')
+    if (model.headline) parts.push('<p><em>' + esc(model.headline) + '</em></p>')
     if (model.summary) parts.push('<p>' + esc(model.summary) + '</p>')
     parts.push('</header>')
-
-    if (model.snapshot) {
-      parts.push('<section>')
-      parts.push('<h2>Career Snapshot</h2>')
-      parts.push('<p><strong>Target role:</strong> ' + esc(model.snapshot.targetRole) + '</p>')
-      if (model.snapshot.coreExpertise.length > 0) {
-        parts.push('<p><strong>Strongest evidence</strong></p>')
-        parts.push('<ul>')
-        for (const area of model.snapshot.coreExpertise) parts.push('<li>' + esc(area) + '</li>')
-        parts.push('</ul>')
-      }
-      if (model.snapshot.highlights.length > 0) {
-        parts.push('<p><strong>Career highlights</strong></p>')
-        parts.push('<ul>')
-        for (const h of model.snapshot.highlights) parts.push('<li>' + esc(h) + '</li>')
-        parts.push('</ul>')
-      }
-      parts.push('</section>')
-    }
 
     if (model.experiences.length > 0) {
       parts.push('<section>')
@@ -115,22 +98,6 @@ export class HtmlResumeRenderer implements Renderer<ResumeModel> {
       parts.push('</section>')
     }
 
-    if (model.publications.length > 0) {
-      parts.push('<section>')
-      parts.push('<h2>Publications</h2>')
-      parts.push('<ul>')
-      for (const pub of model.publications) {
-        const authors = pub.authors.map(esc).join(', ')
-        const title = pub.url ? '<a href="' + esc(pub.url) + '">' + esc(pub.title) + '</a>' : esc(pub.title)
-        let line = '<li>' + authors + '. ' + title + '.'
-        if (pub.venue) line += ' <em>' + esc(pub.venue) + '.</em>'
-        if (pub.date) line += ' ' + esc(pub.date) + '.'
-        parts.push(line + '</li>')
-      }
-      parts.push('</ul>')
-      parts.push('</section>')
-    }
-
     if (model.certifications.length > 0) {
       parts.push('<section>')
       parts.push('<h2>Certifications</h2>')
@@ -143,32 +110,20 @@ export class HtmlResumeRenderer implements Renderer<ResumeModel> {
       parts.push('</section>')
     }
 
-    if (model.snapshot) {
-      if (model.snapshot.coreExpertise.length > 0) {
-        parts.push('<section>')
-        parts.push('<h2>Core expertise</h2>')
-        parts.push('<ul>')
-        for (const area of model.snapshot.coreExpertise) parts.push('<li><strong>' + esc(area) + '</strong></li>')
-        parts.push('</ul>')
-        parts.push('</section>')
-      }
-      if (model.snapshot.primaryTechnologies.length > 0) {
-        parts.push('<section>')
-        parts.push('<h2>Primary technologies</h2>')
-        parts.push('<ul>')
-        for (const t of model.snapshot.primaryTechnologies) parts.push('<li><strong>' + esc(t) + '</strong></li>')
-        parts.push('</ul>')
-        parts.push('</section>')
-      }
-    } else if (model.capabilities.length > 0) {
+    if (model.expertise.length > 0) {
       parts.push('<section>')
-      parts.push('<h2>Skills</h2>')
+      parts.push('<h2>Core expertise</h2>')
       parts.push('<ul>')
-      for (const cap of model.capabilities) {
-        const evidence = cap.evidenceCount > 0 ? ' (' + cap.evidenceCount + ' pieces of evidence)' : ''
-        parts.push('<li><strong>' + esc(cap.name) + '</strong>' + evidence + '</li>')
-        if (cap.description) parts.push('<li>' + esc(cap.description) + '</li>')
-      }
+      for (const area of model.expertise) parts.push('<li><strong>' + esc(area) + '</strong></li>')
+      parts.push('</ul>')
+      parts.push('</section>')
+    }
+
+    if (model.technologies.length > 0) {
+      parts.push('<section>')
+      parts.push('<h2>Primary technologies</h2>')
+      parts.push('<ul>')
+      for (const t of model.technologies) parts.push('<li><strong>' + esc(t) + '</strong></li>')
       parts.push('</ul>')
       parts.push('</section>')
     }
@@ -179,3 +134,5 @@ export class HtmlResumeRenderer implements Renderer<ResumeModel> {
     return parts.join('\n')
   }
 }
+
+export { HtmlCvRenderer as HtmlResumeRenderer }

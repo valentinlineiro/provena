@@ -117,3 +117,43 @@ The Career Compass and the CV projector both consume `career.ts` primitives
 (`deriveStrengths`, `deriveEvidenceCount`, `findEvidenceGaps`). Neither calls
 the other. If the Compass's weighting changes, the CV does not change unless
 the underlying primitive changes.
+
+## CV Projection contract
+
+The CV projection is the first renderer-neutral contract. A `CvProjection` is a
+flat, presentable model — no Profile shape leaks into it:
+
+```ts
+interface CvProjection {
+  identity: CvIdentity;
+  headline: string;
+  summary: string;
+  expertise: string[];
+  technologies: string[];
+  experiences: CvExperience[];
+  projects: CvProject[];
+  education: CvEducation[];
+  certifications: CvCertification[];
+}
+```
+
+The renderer only maps it:
+
+```text
+CvProjection → Markdown
+CvProjection → HTML
+CvProjection → PDF
+```
+
+Never `Profile → PDF`. The Projection phase extracts meaning; Presentation only
+formats it.
+
+### I9 — The renderer does not reason
+Selection, ranking, budgeting and deduplication live in the projection. A
+renderer never decides what is important, never filters evidence, and never
+compresses content — it receives an already editorialised projection. Decision
+Context (target role, audience) feeds the projection, not the renderer.
+
+Selection heuristics (relevance, evidence-over-claim, deduplication, recency,
+global budget) are the CV policy; they belong to the projection and are
+documented in `decision-model.md`.

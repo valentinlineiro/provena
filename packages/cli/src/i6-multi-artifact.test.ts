@@ -1,9 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resumeProjector } from '@provena/core'
+import { cvProjector } from '@provena/core'
 import type { Profile } from '@provena/core'
-import { MarkdownResumeRenderer } from '@provena/markdown'
-import { HtmlResumeRenderer } from '@provena/html'
+import { MarkdownCvRenderer } from '@provena/markdown'
+import { HtmlCvRenderer } from '@provena/html'
 
 function makeProfile(): Profile {
   return {
@@ -37,11 +37,11 @@ function makeProfile(): Profile {
   }
 }
 
-test('I6: one representation may have multiple artifacts — Markdown and HTML render the same ResumeModel faithfully', () => {
-  const model = resumeProjector.project(makeProfile())
+test('I6: one representation may have multiple artifacts — Markdown and HTML render the same CVProjection faithfully', () => {
+  const model = cvProjector(makeProfile(), { targetRole: 'Technical Lead' })
 
-  const markdown = new MarkdownResumeRenderer().render(model)
-  const html = new HtmlResumeRenderer().render(model)
+  const markdown = new MarkdownCvRenderer().render(model)
+  const html = new HtmlCvRenderer().render(model)
 
   assert.notEqual(markdown, html, 'the two artifacts are genuinely different formats')
 

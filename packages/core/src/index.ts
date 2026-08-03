@@ -34,8 +34,18 @@ export { resumeProjector, recruiterProjector } from './projections.js'
 export type { ResumeBuildOptions } from './projections.js'
 export { buildResumeModel } from './projections.js'
 
-export type { DecisionContext, CVContext, ProjectionMetadata, CVProjection } from './cv-projector.js'
-export { cvProjector } from './cv-projector.js'
+export type {
+  DecisionContext,
+  CVContext,
+  CvBudget,
+  CVProjection,
+  CvIdentity,
+  CvExperience,
+  CvProject,
+  CvEducation,
+  CvCertification,
+} from './cv-projector.js'
+export { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, EvidenceClass, classifyEvidence, rankAchievements, significantSignals, redundantSummary } from './cv-projector.js'
 
 export type { CareerExperience, CareerTimeline, Strength, Gap } from './career.js'
 export { deriveStrengths, deriveEvidenceCount, findEvidenceGaps, profileToTimeline } from './career.js'

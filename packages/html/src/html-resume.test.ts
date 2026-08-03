@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resumeProjector } from '@provena/core'
+import { cvProjector } from '@provena/core'
 import type { Profile } from '@provena/core'
-import { HtmlResumeRenderer } from './html-resume-renderer.js'
+import { HtmlCvRenderer } from './html-cv.js'
 
 function makeProfile(): Profile {
   return {
@@ -34,14 +34,15 @@ function makeProfile(): Profile {
     recommendations: [],
     capabilities: [{ id: 'cap-1', name: 'Testing', evidenceIds: ['ev-1'] }],
     evidence: [{ id: 'ev-1', type: 'experience', description: 'Did a thing' }],
+    preferences: { interests: ['Software Architecture'] },
   }
 }
 
 test('HTML renderer produces valid document structure', () => {
   const profile = makeProfile()
-  const model = resumeProjector.project(profile)
-  const renderer = new HtmlResumeRenderer()
-  const html = renderer.render(model)
+  const cv = cvProjector(profile, { targetRole: 'Engineer' })
+  const renderer = new HtmlCvRenderer()
+  const html = renderer.render(cv)
 
   assert.match(html, /<!DOCTYPE html>/)
   assert.match(html, /<html lang="en">/)
@@ -60,31 +61,22 @@ test('HTML renderer produces valid document structure', () => {
 test('HTML renderer escapes special characters', () => {
   const profile = makeProfile()
   const profile2: Profile = { ...profile, identity: { ...profile.identity, person: { ...profile.identity.person, name: 'Alex & <Co>' } } }
-  const model = resumeProjector.project(profile2)
-  const renderer = new HtmlResumeRenderer()
-  const html = renderer.render(model)
+  const cv = cvProjector(profile2, { targetRole: 'Engineer' })
+  const renderer = new HtmlCvRenderer()
+  const html = renderer.render(cv)
 
   assert.match(html, /Alex &amp; &lt;Co&gt;/)
   assert.doesNotMatch(html, /<Co>/)
 })
 
-test('HTML renderer renders the career snapshot and skills split when present', () => {
+test('HTML renderer renders expertise and technologies sections, not a snapshot or skills block', () => {
   const profile = makeProfile()
-  const base = resumeProjector.project(profile)
-  const model = {
-    ...base,
-    snapshot: {
-      targetRole: 'Staff Software Engineer',
-      coreExpertise: ['Software Architecture'],
-      primaryTechnologies: ['TypeScript'],
-      highlights: ['12+ years of software engineering experience'],
-    },
-  }
-  const html = new HtmlResumeRenderer().render(model)
-  assert.match(html, /Career Snapshot/)
-  assert.match(html, /Staff Software Engineer/)
+  const cv = cvProjector(profile, { targetRole: 'Staff Software Engineer' })
+  const html = new HtmlCvRenderer().render(cv)
   assert.match(html, /Core expertise/)
   assert.match(html, /Primary technologies/)
-  assert.match(html, /Software Architecture/)
+  assert.match(html, /Staff Software Engineer/)
+  assert.doesNotMatch(html, /Career Snapshot/)
   assert.doesNotMatch(html, /<h2>Skills<\/h2>/)
+  assert.doesNotMatch(html, /pieces of evidence/)
 })

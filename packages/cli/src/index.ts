@@ -5,7 +5,7 @@ import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import yaml from 'js-yaml'
 import { LinkedInImporter } from '@provena/linkedin-import'
-import { resumeProjector, validate, formatValidationErrors, recruiterProjector } from '@provena/core'
+import { cvProjector, validate, formatValidationErrors, recruiterProjector } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
 import { linkedInProjector, linkedInRenderer } from '@provena/linkedin'
 import { YamlWorkspaceLoader, YamlWorkspaceWriter, merge } from '@provena/yaml'
@@ -77,7 +77,7 @@ interface FormatEntry {
 
 const FORMAT_REGISTRY: Record<string, FormatEntry> = {
   markdown: {
-    project: (p) => resumeProjector.project(p),
+    project: (p) => cvProjector(p),
     render: (m) => new MarkdownResumeRenderer().render(m as never),
     ext: 'md',
   },
@@ -87,7 +87,7 @@ const FORMAT_REGISTRY: Record<string, FormatEntry> = {
     ext: 'json',
   },
   html: {
-    project: (p) => resumeProjector.project(p),
+    project: (p) => cvProjector(p),
     render: (m) => new HtmlResumeRenderer().render(m as never),
     ext: 'html',
   },

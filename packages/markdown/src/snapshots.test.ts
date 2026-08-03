@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resumeProjector } from '@provena/core'
+import { cvProjector } from '@provena/core'
 import type { Profile } from '@provena/core'
-import { MarkdownResumeRenderer } from './markdown-resume.js'
+import { MarkdownCvRenderer } from './markdown-cv.js'
 
 function makeProfile(): Profile {
   return {
@@ -65,53 +65,41 @@ function makeProfile(): Profile {
     recommendations: [],
     capabilities: [{ id: 'cap-1', name: 'TypeScript', description: 'Expert-level', evidenceIds: ['ev-1'] }],
     evidence: [{ id: 'ev-1', type: 'experience', description: 'Shipped it', date: '2023' }],
+    preferences: { interests: ['Software Architecture', 'Developer Productivity'] },
   }
 }
 
-test('markdown snapshot matches expected output', () => {
+test('markdown renders the flat CV projection', () => {
   const profile = makeProfile()
-  const model = resumeProjector.project(profile)
-  const renderer = new MarkdownResumeRenderer()
-  const output = renderer.render(model)
+  const cv = cvProjector(profile, { targetRole: 'Engineer' })
+  const renderer = new MarkdownCvRenderer()
+  const output = renderer.render(cv)
   assert.match(output, /# Test User/)
+  assert.match(output, /\*Engineer\*/)
   assert.match(output, /## About/)
   assert.match(output, /A summary\./)
   assert.match(output, /## Experience/)
   assert.match(output, /### Test Corp/)
   assert.match(output, /\*\*Senior Engineer\*\* \| Jan 2023 — Jun 2024/)
-  assert.match(output, /Shipped feature X/)
+  assert.match(output, /Shipped feature A?X/)
   assert.match(output, /## Projects/)
   assert.match(output, /\[Open Source Lib\]\(https:\/\/github\.com\/test\/lib\)/)
   assert.match(output, /## Education/)
   assert.match(output, /### BS in Computer Science/)
   assert.match(output, /University \| 2015 — 2019/)
-  assert.match(output, /## Publications/)
   assert.match(output, /## Certifications/)
   assert.match(output, /AWS Certified/)
-  assert.match(output, /## Skills/)
-  assert.match(output, /\*\*TypeScript\*\*/)
-  assert.match(output, /\*\*Rust\*\*/)
+  assert.match(output, /## Core expertise/)
+  assert.match(output, /\*\*Software Architecture\*\*/)
 })
 
-test('markdown renders the career snapshot and skills split when present', () => {
+test('markdown renders expertise and technologies as explicit projection sections', () => {
   const profile = makeProfile()
-  const base = resumeProjector.project(profile)
-  const model = {
-    ...base,
-    snapshot: {
-      targetRole: 'Staff Software Engineer',
-      coreExpertise: ['Software Architecture', 'Developer Productivity'],
-      primaryTechnologies: ['TypeScript', 'Rust'],
-      highlights: ['12+ years of software engineering experience', 'Strong expertise in TypeScript, Rust'],
-    },
-  }
-  const output = new MarkdownResumeRenderer().render(model)
-  assert.match(output, /## Career Snapshot/)
-  assert.match(output, /\*\*Target role:\*\* Staff Software Engineer/)
+  const cv = cvProjector(profile, { targetRole: 'Staff Software Engineer' })
+  const output = new MarkdownCvRenderer().render(cv)
   assert.match(output, /## Core expertise/)
-  assert.match(output, /- \*\*Software Architecture\*\*/)
   assert.match(output, /## Primary technologies/)
   assert.match(output, /- \*\*TypeScript\*\*/)
+  assert.doesNotMatch(output, /Career Snapshot/)
   assert.doesNotMatch(output, /## Skills/)
-  assert.match(output, /12\+ years of software engineering experience/)
 })

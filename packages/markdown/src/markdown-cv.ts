@@ -1,4 +1,4 @@
-import type { Renderer, ResumeModel } from '@provena/core'
+import type { Renderer, CVProjection } from '@provena/core'
 
 function fmtDate(d: string): string {
   const [y, m] = d.split('-')
@@ -11,26 +11,15 @@ function fmtRange(start: string, end?: string): string {
   return `${fmtDate(start)} — ${fmtDate(e)}`
 }
 
-export class MarkdownResumeRenderer implements Renderer<ResumeModel> {
-  render(model: ResumeModel): string {
+// R10 — the renderer never reasons. It serialises the editorialised
+// CvProjection it is handed: identity, headline, summary, expertise,
+// technologies, experiences, projects, education, certifications.
+export class MarkdownCvRenderer implements Renderer<CVProjection> {
+  render(model: CVProjection): string {
     const lines: string[] = []
 
-    lines.push(`# ${model.name}`, '')
-
-    if (model.snapshot) {
-      lines.push('## Career Snapshot', '')
-      lines.push(`**Target role:** ${model.snapshot.targetRole}`, '')
-      if (model.snapshot.coreExpertise.length > 0) {
-        lines.push('**Strongest evidence**', '')
-        for (const area of model.snapshot.coreExpertise) lines.push(`- ${area}`)
-        lines.push('')
-      }
-      if (model.snapshot.highlights.length > 0) {
-        lines.push('**Career highlights**', '')
-        for (const h of model.snapshot.highlights) lines.push(`- ${h}`)
-        lines.push('')
-      }
-    }
+    lines.push(`# ${model.identity.name}`, '')
+    lines.push(`*${model.headline}*`, '')
 
     if (model.summary) {
       lines.push('## About', '', model.summary, '')
@@ -68,18 +57,6 @@ export class MarkdownResumeRenderer implements Renderer<ResumeModel> {
       }
     }
 
-    if (model.publications.length > 0) {
-      lines.push('## Publications', '')
-      for (const pub of model.publications) {
-        const authors = pub.authors.join(', ')
-        const title = pub.url ? `[${pub.title}](${pub.url})` : pub.title
-        lines.push(`- ${authors}. ${title}.`)
-        if (pub.venue) lines[lines.length - 1] += ` ${pub.venue}.`
-        if (pub.date) lines[lines.length - 1] += ` ${pub.date}.`
-        lines.push('')
-      }
-    }
-
     if (model.certifications.length > 0) {
       lines.push('## Certifications', '')
       for (const cert of model.certifications) {
@@ -90,27 +67,20 @@ export class MarkdownResumeRenderer implements Renderer<ResumeModel> {
       }
     }
 
-    if (model.snapshot) {
-      if (model.snapshot.coreExpertise.length > 0) {
-        lines.push('## Core expertise', '')
-        for (const area of model.snapshot.coreExpertise) lines.push(`- **${area}**`)
-        lines.push('')
-      }
-      if (model.snapshot.primaryTechnologies.length > 0) {
-        lines.push('## Primary technologies', '')
-        for (const t of model.snapshot.primaryTechnologies) lines.push(`- **${t}**`)
-        lines.push('')
-      }
-    } else if (model.capabilities.length > 0) {
-      lines.push('## Skills', '')
-      for (const cap of model.capabilities) {
-        const evidence = cap.evidenceCount > 0 ? ` (${cap.evidenceCount} pieces of evidence)` : ''
-        lines.push(`- **${cap.name}**${evidence}`)
-        if (cap.description) lines.push(`  ${cap.description}`)
-      }
+    if (model.expertise.length > 0) {
+      lines.push('## Core expertise', '')
+      for (const area of model.expertise) lines.push(`- **${area}**`)
+      lines.push('')
+    }
+
+    if (model.technologies.length > 0) {
+      lines.push('## Primary technologies', '')
+      for (const t of model.technologies) lines.push(`- **${t}**`)
       lines.push('')
     }
 
     return lines.join('\n')
   }
 }
+
+export { MarkdownCvRenderer as MarkdownResumeRenderer }

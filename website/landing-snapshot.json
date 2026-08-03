@@ -1,0 +1,48 @@
+{
+  "identity": {
+    "name": "Provena",
+    "tagline": "Your professional identity, canonically yours."
+  },
+  "narrative": {
+    "problem": [
+      "Your professional history is fragmented across platforms.",
+      "LinkedIn is a platform, not your source of truth."
+    ],
+    "principles": [
+      "local-first",
+      "provenance-aware",
+      "selective-projections"
+    ]
+  },
+  "sections": {
+    "capabilities": [
+      {
+        "id": "cv-projection",
+        "title": "Targeted CV Projections",
+        "summary": "Select relevant signals based on context and budget.",
+        "presentation": "primary",
+        "priority": 80,
+        "status": "available",
+        "maturity": "stable"
+      },
+      {
+        "id": "continuous-capture",
+        "title": "Capture as you work",
+        "summary": "Capture professional evidence when it happens, without restructuring your profile.",
+        "presentation": "primary",
+        "priority": 70,
+        "status": "available",
+        "maturity": "experimental"
+      },
+      {
+        "id": "linkedin-bootstrap",
+        "title": "Bootstrap from LinkedIn",
+        "summary": "Export your profile zip and seed your canonical history in seconds.",
+        "presentation": "secondary",
+        "priority": 50,
+        "status": "available",
+        "maturity": "beta"
+      }
+    ]
+  }
+}

@@ -13,6 +13,7 @@ import { MarkdownResumeRenderer, RecruiterBriefRenderer } from '@provena/markdow
 import { HtmlResumeRenderer } from '@provena/html'
 import { cmdInit } from './init.js'
 import { startServer } from './serve.js'
+import { runLandingReview, runLandingAccept } from './commands/landing.js'
 import type { Profile } from '@provena/core'
 
 async function cmdImportLinkedin(
@@ -368,6 +369,30 @@ if (command === 'render') {
   } else {
     err(`Unknown import source: "${subcommand}". Available: linkedin`)
   }
+} else if (command === 'landing') {
+  const subcommand = args[0]
+  if (subcommand === 'review') {
+    try {
+      const { hasDiff } = await runLandingReview(process.cwd())
+      if (hasDiff) {
+        console.log('Landing model has unaccepted changes compared to website/landing-snapshot.json')
+        process.exit(1)
+      } else {
+        console.log('✓ Landing model matches website/landing-snapshot.json')
+      }
+    } catch (e) {
+      err(e instanceof Error ? e.message : String(e))
+    }
+  } else if (subcommand === 'accept') {
+    try {
+      await runLandingAccept(process.cwd())
+      console.log('✓ Updated website/landing-snapshot.json')
+    } catch (e) {
+      err(e instanceof Error ? e.message : String(e))
+    }
+  } else {
+    err(`Unknown landing command: "${subcommand}". Available: review, accept`)
+  }
 } else {
-  err(`Unknown command: "${command}"`, 'Available commands: render, validate, init')
+  err(`Unknown command: "${command}"`, 'Available commands: render, validate, init, landing')
 }

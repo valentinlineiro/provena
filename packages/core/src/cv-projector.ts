@@ -48,6 +48,7 @@ export interface CVProjection {
   readonly projects: CvProject[]
   readonly education: CvEducation[]
   readonly certifications: CvCertification[]
+  readonly projectionMetadata: ProjectionMetadata
 }
 
 export interface CvIdentity {
@@ -83,6 +84,47 @@ export const CONTRIBUTION_BUDGET: Readonly<Record<ExperienceContribution, number
   Historical: 1,
 }
 
+// R6 — contribution-aware project selection. Projects are optional evidence:
+// an experience keeps minimal presence when Historical (trajectory continuity),
+// but a Historical project is omitted — it carries no continuity function.
+// Signals come from title + description + technologies. R4b's domain-context
+// nouns (and their inflections) are dropped first, so a passing reference to
+// "architectures"/"systems" in a research blurb cannot inflate relevance:
+// projects must earn inclusion with more than a ubiquitous domain noun.
+// ponytail: a project whose subject is only a domain noun (e.g. bare
+// "distributed platform") is treated as Historical; revisit if such a project
+// ever needs inclusion.
+function isDomainContextNoun(sig: string): boolean {
+  for (const w of DOMAIN_STOPWORDS) {
+    if (sig === w || sig.startsWith(w) || w.startsWith(sig)) return true
+  }
+  return false
+}
+
+export function projectContribution(
+  title: string,
+  description: string,
+  technologies: readonly string[],
+  vocab: readonly string[],
+): ExperienceContribution {
+  const active = activatedGroups(vocab)
+  let hits = 0
+  for (const sig of significantSignals([title, description, ...technologies].join(' '))) {
+    if (isDomainContextNoun(sig)) continue
+    for (const gi of active) {
+      if (RELEVANCE_GROUPS[gi]!.some(stem => sig.startsWith(stem))) {
+        hits += 1
+        break
+      }
+    }
+  }
+  return hits === 0 ? 'Historical' : hits >= 2 ? 'Core' : 'Supporting'
+}
+
+export interface ProjectionMetadata {
+  readonly omittedProjects: readonly { readonly name: string; readonly contribution: ExperienceContribution }[]
+}
+
 export interface CvExperience {
   readonly organization: string
   readonly title: string
@@ -100,6 +142,7 @@ export interface CvProject {
   readonly description: string
   readonly url?: string
   readonly technologies: readonly string[]
+  readonly contribution: ExperienceContribution
 }
 
 export interface CvEducation {
@@ -164,6 +207,10 @@ const RELEVANCE_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
   ['decis'],                   // decision-making
   ['influenc'],                // influence / leverage
   ['own', 'responsab'],        // ownership / responsibility
+  ['mutat'],                   // mutation testing
+  ['formal'],                  // formal methods / verification
+  ['verif'],                   // verification
+  ['test'],                    // software testing / test generation
 ]
 
 function activatedGroups(vocab: readonly string[]): ReadonlySet<number> {
@@ -344,8 +391,6 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
   const generate = context.generateSummary === true || (!hasExplicit && !!context.targetRole)
   const summary = generate && context.targetRole ? autoSummary(profile, context.targetRole) : base.summary
 
-  const projects = (context.audience === 'recruiter' ? [] : base.projects) as readonly ResumeProject[]
-
   // R2 — select before compress: rank by target relevance, then evidence
   // strength (stable), then cap. The budget removes from the weakest margin.
   const cap = (list: readonly string[], max: number): string[] => list.slice(0, max)
@@ -355,6 +400,18 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
   ]
   const capEvidence = (list: readonly string[], max: number): string[] =>
     cap(rankAchievements(list, relevanceVocab), max)
+
+  // R6 — select projects by contribution: a Historical project is omitted
+  // (optional evidence), Core and Supporting stay. No project budget, no
+  // ordering, no dedup against experiences yet.
+  const recruitProjects = (context.audience === 'recruiter' ? [] : base.projects) as readonly ResumeProject[]
+  const classifiedProjects = recruitProjects.map((p: ResumeProject) => ({
+    ...p,
+    contribution: projectContribution(p.name, p.description, p.technologies, relevanceVocab),
+  }))
+  const omittedProjects = classifiedProjects
+    .filter(p => p.contribution === 'Historical')
+    .map(p => ({ name: p.name, contribution: p.contribution }))
 
   return {
     identity: {
@@ -388,13 +445,16 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
         contribution,
       }
     }),
-    projects: projects.map((p: ResumeProject): CvProject => ({
-      name: p.name,
-      role: p.role,
-      description: p.description,
-      url: p.url,
-      technologies: p.technologies,
-    })),
+    projects: classifiedProjects
+      .filter(p => p.contribution !== 'Historical')
+      .map((p: ResumeProject & { contribution: ExperienceContribution }): CvProject => ({
+        name: p.name,
+        role: p.role,
+        description: p.description,
+        url: p.url,
+        technologies: p.technologies,
+        contribution: p.contribution,
+      })),
     education: base.education.map((e: Education): CvEducation => ({
       institution: e.institution,
       degree: e.degree,
@@ -403,6 +463,7 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
       end: e.end,
     })),
     certifications: mapCertifications(base.certifications),
+    projectionMetadata: { omittedProjects },
   }
 }
 

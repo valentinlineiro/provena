@@ -32,7 +32,7 @@ function makeProfile(): Profile {
       id: 'proj-1',
       name: 'Open Source Lib',
       role: 'Maintainer',
-      description: 'A useful library.',
+      description: 'A useful library for developer productivity.',
       url: 'https://github.com/test/lib',
       technologies: ['TypeScript'],
       capabilityIds: ['cap-1'],

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution, CONTRIBUTION_BUDGET } from './cv-projector.js'
+import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution, CONTRIBUTION_BUDGET, projectContribution } from './cv-projector.js'
 import type { Profile } from './profile.js'
 
 function makeProfile(): Profile {
@@ -16,7 +16,7 @@ function makeProfile(): Profile {
       { id: 'exp-2', organization: 'VINCLE', title: 'Software Engineer', start: '2017-01', end: '2021-06', achievements: ['Built a CRM'], technologies: ['Java', 'Angular'], capabilityIds: [], evidenceIds: [] },
       { id: 'exp-3', organization: 'Old Role', title: 'Developer', start: '2013-01', end: '2014-01', achievements: ['Maintained legacy'], technologies: ['COBOL'], capabilityIds: [], evidenceIds: [] },
     ],
-    projects: [{ id: 'proj-1', name: 'Provena', description: 'A framework.', technologies: ['TypeScript'], capabilityIds: [], evidenceIds: [] }],
+    projects: [{ id: 'proj-1', name: 'Provena', description: 'A framework improving developer productivity.', technologies: ['TypeScript'], capabilityIds: [], evidenceIds: [] }],
     education: [], publications: [], certifications: [], recommendations: [],
     capabilities: [], evidence: [],
     preferences: {
@@ -373,6 +373,67 @@ test('R5b: same context, deterministic output', () => {
   const first = cvProjector(makeProfile(), { targetRole: 'Staff Software Engineer' })
   const second = cvProjector(makeProfile(), { targetRole: 'Staff Software Engineer' })
   assert.deepEqual(second, first)
+})
+
+// R6 — contribution-aware project selection. Projects are optional evidence:
+// a Historical project is omitted (no trajectory continuity), Core and
+// Supporting stay. Same taxonomy as R5; the classifier just reads project
+// signals. No budget, no ordering, no dedup against experiences.
+
+const MUTATION_PROJECTS = [
+  { id: 'proj-m1', name: 'Autoseed — Mutation-based Test Generation', description: 'Research project focused on improving software reliability through automated test generation techniques. Developed mutation-based approaches to generate and optimize test suites for service-oriented architectures.', technologies: [], capabilityIds: [], evidenceIds: [] },
+  { id: 'proj-m2', name: 'WS-BPEL Mutation Operators', description: 'Research project exploring mutation testing strategies to improve test coverage and fault detection in WS-BPEL 2.0 systems. Designed new mutation operators to evaluate software quality and testing effectiveness.', technologies: [], capabilityIds: [], evidenceIds: [] },
+]
+
+const TESTING_VOCAB = ['Software Testing', 'Formal Verification', 'Mutation Testing']
+
+test('R6: real projects are Historical under Staff and omitted from the projection (acceptance)', () => {
+  const p: Profile = { ...makeProfile(), identity: { ...makeProfile().identity, projectIds: MUTATION_PROJECTS.map(x => x.id) }, projects: MUTATION_PROJECTS, preferences: { interests: STAFF_VOCAB } }
+  const cv = cvProjector(p, { targetRole: 'Staff Software Engineer' })
+  assert.equal(cv.projects.length, 0)
+  assert.equal(cv.projectionMetadata.omittedProjects.length, 2)
+  assert.ok(cv.projectionMetadata.omittedProjects.every(o => o.contribution === 'Historical'))
+  assert.equal(projectContribution(MUTATION_PROJECTS[0]!.name, MUTATION_PROJECTS[0]!.description, [], STAFF_VOCAB), 'Historical')
+  assert.equal(projectContribution(MUTATION_PROJECTS[1]!.name, MUTATION_PROJECTS[1]!.description, [], STAFF_VOCAB), 'Historical')
+})
+
+test('R6: the same projects reappear under a testing/formal-methods decision (reversibility)', () => {
+  const p: Profile = { ...makeProfile(), identity: { ...makeProfile().identity, projectIds: MUTATION_PROJECTS.map(x => x.id) }, projects: MUTATION_PROJECTS, preferences: { interests: STAFF_VOCAB } }
+  const cv = cvProjector(p, { targetRole: 'Staff Software Engineer', emphasize: TESTING_VOCAB })
+  assert.equal(cv.projects.length, 2)
+  assert.equal(cv.projectionMetadata.omittedProjects.length, 0)
+  assert.ok(cv.projects.every(x => x.contribution === 'Core'))
+  assert.equal(projectContribution(MUTATION_PROJECTS[0]!.name, MUTATION_PROJECTS[0]!.description, [], TESTING_VOCAB), 'Core')
+  assert.equal(projectContribution(MUTATION_PROJECTS[1]!.name, MUTATION_PROJECTS[1]!.description, [], TESTING_VOCAB), 'Core')
+})
+
+test('R6: without a Historical project the default projection keeps legacy behavior', () => {
+  const cv = cvProjector(makeProfile())
+  assert.equal(cv.projects.length, 1)
+  assert.equal(cv.projects[0]!.contribution, 'Supporting')
+  assert.equal(cv.projectionMetadata.omittedProjects.length, 0)
+})
+
+test('R6: project selection never alters the experience pipeline', () => {
+  const base = { ...makeProfile(), preferences: { interests: STAFF_VOCAB } }
+  const withProjects: Profile = { ...base, identity: { ...base.identity, projectIds: MUTATION_PROJECTS.map(x => x.id) }, projects: MUTATION_PROJECTS }
+  const a = cvProjector(base, { targetRole: 'Staff Software Engineer' })
+  const b = cvProjector(withProjects, { targetRole: 'Staff Software Engineer' })
+  assert.deepEqual(b.experiences, a.experiences)
+})
+
+test('R6: same context, deterministic project selection', () => {
+  const p: Profile = { ...makeProfile(), identity: { ...makeProfile().identity, projectIds: MUTATION_PROJECTS.map(x => x.id) }, projects: MUTATION_PROJECTS, preferences: { interests: STAFF_VOCAB } }
+  const a = cvProjector(p, { targetRole: 'Staff Software Engineer' })
+  const b = cvProjector(p, { targetRole: 'Staff Software Engineer' })
+  assert.deepEqual(b, a)
+})
+
+test('R6: the projection never mutates the Profile', () => {
+  const p: Profile = { ...makeProfile(), identity: { ...makeProfile().identity, projectIds: MUTATION_PROJECTS.map(x => x.id) }, projects: MUTATION_PROJECTS, preferences: { interests: STAFF_VOCAB } }
+  const before = JSON.stringify(p.projects)
+  cvProjector(p, { targetRole: 'Staff Software Engineer' })
+  assert.equal(JSON.stringify(p.projects), before)
 })
 
 // R4 — semantic redundancy suppression: never emit a summary that only

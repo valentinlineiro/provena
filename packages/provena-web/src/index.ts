@@ -110,9 +110,9 @@ textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; bor
 .quick button { width: auto; padding: 0.375rem 0.75rem; font-size: 0.875rem; background: #fff; color: #1a1a1a; border: 1px solid #ccc; margin: 0; }
 #status { margin-top: 0.75rem; font-size: 0.875rem; color: #666; }
 .hidden { display: none; }
-.site { margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e5e5; }
-.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; }
-.site a:not(.brand) { display: inline-block; margin: 0.375rem 1rem 0 0; font-size: 0.875rem; color: #999; text-decoration: none; }
+.site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
+.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
+.site a:not(.brand) { display: inline-block; margin-right: 1.25rem; font-size: 0.875rem; color: #999; text-decoration: none; }
 .site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
 </style>
 <main>
@@ -295,10 +295,13 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 .meta { background: #fffbe6; border: 1px solid #e6d98a; border-radius: 0.5rem; padding: 0.625rem; font-size: 0.8125rem; color: #6b5b00; margin-top: 1rem; display: none; }
 .row { display: flex; gap: 0.5rem; }
 .row button { flex: 1; }
-.site { margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e5e5; }
-.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; }
-.site a:not(.brand) { display: inline-block; margin: 0.375rem 1rem 0 0; font-size: 0.875rem; color: #999; text-decoration: none; }
+.site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
+.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
+.site a:not(.brand) { display: inline-block; margin-right: 1.25rem; font-size: 0.875rem; color: #999; text-decoration: none; }
 .site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
+.section { margin-top: 1.5rem; }
+.site a:not(.brand).active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; padding-bottom: 0.125rem; }
+.your-cv { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
 </style>
 <main>
 ${siteNav('prepare')}
@@ -341,7 +344,7 @@ ${siteNav('prepare')}
 <div class="meta" id="meta"></div>
 <div class="meta" id="readiness"></div>
 
-<button onclick="preview()">Preview CV</button>
+<div class="your-cv">Your CV</div>
 <div class="row">
   <button onclick="exportMd()">Download .md</button>
   <button onclick="exportHtml()">Open HTML / Print PDF</button>
@@ -417,6 +420,12 @@ function exportHtml() {
   const w = window.open('', '_blank')
   if (w) { w.document.write(lastResult.html); w.document.close(); w.focus() }
 }
+
+document.getElementById('role').addEventListener('input', preview)
+document.getElementById('audience').addEventListener('change', preview)
+document.getElementById('autoSummary').addEventListener('change', preview)
+document.getElementById('experiences').addEventListener('change', preview)
+document.getElementById('caps').addEventListener('change', preview)
 
 preview()
 </script>

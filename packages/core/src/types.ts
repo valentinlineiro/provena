@@ -178,6 +178,6 @@ export interface Identity {
   readonly certificationIds: readonly string[]
   readonly recommendationIds: readonly string[]
   readonly capabilityIds: readonly string[]
-  readonly contributionIds: readonly string[]
+  readonly contributionIds?: readonly string[]
 }
 

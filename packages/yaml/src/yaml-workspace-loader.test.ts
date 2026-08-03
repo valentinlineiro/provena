@@ -114,8 +114,8 @@ test('loads contributions.yaml into profile.contributions and identity.contribut
   try {
     const { profile } = await new YamlWorkspaceLoader().load(dir)
     assert.deepEqual(profile.identity.contributionIds, ['contrib-1'])
-    assert.equal(profile.contributions.length, 1)
-    assert.deepEqual(profile.contributions[0], {
+    assert.equal(profile.contributions!.length, 1)
+    assert.deepEqual(profile.contributions![0], {
       id: 'contrib-1',
       experienceRef: 'exp-a',
       summary: 'High impact architecture rework',

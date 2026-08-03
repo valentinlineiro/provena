@@ -23,7 +23,7 @@ function makeProfile(): Profile {
       start: '2023-01',
       end: '2024-06',
       summary: 'Led a team.',
-      achievements: ['Shipped feature X', 'Reduced bugs by 50%'],
+      achievements: ['Shipped feature X', 'Reduced bugs by 50%', 'Architected distributed systems'],
       technologies: ['TypeScript', 'Rust'],
       capabilityIds: ['cap-1'],
       evidenceIds: [],
@@ -65,7 +65,7 @@ function makeProfile(): Profile {
     recommendations: [],
     capabilities: [{ id: 'cap-1', name: 'TypeScript', description: 'Expert-level', evidenceIds: ['ev-1'] }],
     evidence: [{ id: 'ev-1', type: 'experience', description: 'Shipped it', date: '2023' }],
-    preferences: { interests: ['Software Architecture', 'Developer Productivity'] },
+    preferences: { interests: ['Software Architecture', 'Developer Productivity', 'Distributed Systems'] },
   }
 }
 

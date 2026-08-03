@@ -72,6 +72,17 @@ export function experienceContribution(achievements: readonly string[], vocab: r
   return max >= 2 ? 'Core' : 'Supporting'
 }
 
+// R5b — contribution-aware evidence budget: an experience consumes as much
+// evidence as its contribution to the current decision allows. Core keeps the
+// full budget; Supporting is compressed; Historical keeps its single best
+// achievement (title, company, dates remain). The winner is not chosen here —
+// R2→R3 already rank it — only the allowance changes.
+export const CONTRIBUTION_BUDGET: Readonly<Record<ExperienceContribution, number>> = {
+  Core: DEFAULT_CV_BUDGET.maxBulletsPerExperience,
+  Supporting: 2,
+  Historical: 1,
+}
+
 export interface CvExperience {
   readonly organization: string
   readonly title: string
@@ -358,7 +369,10 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
     expertise: cap(expertiseFor(profile, headline), DEFAULT_CV_BUDGET.maxCoreExpertise),
     technologies: cap(technologiesFor(profile), DEFAULT_CV_BUDGET.maxTechnologies),
     experiences: base.experiences.map((e: ResumeExperience) => {
-      const achievements = capEvidence(e.achievements, DEFAULT_CV_BUDGET.maxBulletsPerExperience)
+      // R5b — budget follows contribution; the survivor is still picked by
+      // R2→R3, so this only reduces the allowance Historical may consume.
+      const contribution = experienceContribution(e.achievements, relevanceVocab)
+      const achievements = capEvidence(e.achievements, CONTRIBUTION_BUDGET[contribution])
       // R4 — suppress an experience summary that only re-enunciates, in prose,
       // signals already carried by the experience's own surviving bullets.
       const bulletSignals = achievements.flatMap(significantSignals)
@@ -371,7 +385,7 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
         summary: decoSummary || undefined,
         achievements,
         technologies: e.technologies,
-        contribution: experienceContribution(e.achievements, relevanceVocab),
+        contribution,
       }
     }),
     projects: projects.map((p: ResumeProject): CvProject => ({

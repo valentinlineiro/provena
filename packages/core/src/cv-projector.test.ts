@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution } from './cv-projector.js'
+import { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, classifyEvidence, EvidenceClass, rankAchievements, significantSignals, redundantSummary, experienceContribution, CONTRIBUTION_BUDGET } from './cv-projector.js'
 import type { Profile } from './profile.js'
 
 function makeProfile(): Profile {
@@ -55,14 +55,16 @@ test('technologies are frequency-ordered, exclude expertise, and are capped', ()
   assert.ok(!cv.technologies.some(t => cv.expertise.includes(t)))
 })
 
-test('achievements per experience respect maxBulletsPerExperience budget', () => {
+test('R5b: the evidence budget follows contribution — Core full, Supporting 2, Historical 1', () => {
   const p = makeProfile()
-  const p2: Profile = {
-    ...p,
-    experiences: [{ ...p.experiences[0]!, achievements: Array.from({ length: 10 }, (_, i) => 'achievement ' + i) }],
-  }
-  const cv = cvProjector(p2)
-  assert.equal(cv.experiences[0]!.achievements.length, DEFAULT_CV_BUDGET.maxBulletsPerExperience)
+  const ten = Array.from({ length: 10 }, (_, i) => 'Shipped feature ' + i)
+  const core: Profile = { ...p, preferences: { interests: STAFF_VOCAB }, experiences: [{ ...p.experiences[0]!, achievements: [...ten, 'Architected distributed systems and led the platform'] }] }
+  const supporting: Profile = { ...p, experiences: [{ ...p.experiences[0]!, achievements: [...ten, 'Participated in architecture decisions'] }] }
+  const historical: Profile = { ...p, experiences: [{ ...p.experiences[0]!, achievements: ten }] }
+  assert.equal(cvProjector(core).experiences[0]!.achievements.length, CONTRIBUTION_BUDGET.Core)
+  assert.equal(cvProjector(supporting).experiences[0]!.achievements.length, CONTRIBUTION_BUDGET.Supporting)
+  assert.equal(cvProjector(historical).experiences[0]!.achievements.length, CONTRIBUTION_BUDGET.Historical)
+  assert.equal(CONTRIBUTION_BUDGET.Core, DEFAULT_CV_BUDGET.maxBulletsPerExperience)
 })
 
 test('certifications are capped by the budget', () => {
@@ -313,6 +315,64 @@ test('R5a: contribution is metadata — the projection renders the same CV it di
   const contributions = withMeta.experiences.map(e => e.contribution)
   assert.ok(contributions.every(c => c === 'Core' || c === 'Supporting' || c === 'Historical'))
   assert.equal(withMeta.experiences.length, makeProfile().experiences.length)
+})
+
+// R5b — contribution-aware budget. Selection of the survivor is still R2→R3;
+// the allowance is what changes. The Profile stays canonical; the projection
+// adapts, and the adaptation is reversible when the decision changes.
+
+test('R5b: the same experience recovers its budget when another decision makes it Core (reversible projection)', () => {
+  const p = makeProfile()
+  const research = ['Architected a research platform for distributed analysis']
+  const chores = Array.from({ length: 6 }, (_, i) => 'Managed tickets ' + i)
+  const subject: Profile = { ...p, experiences: [{ ...p.experiences[0]!, achievements: [...research, ...chores] }] }
+  const staff = cvProjector(subject, { targetRole: 'Staff Software Engineer' }).experiences[0]!.achievements.length
+  const productivity = cvProjector(subject, { targetRole: 'Staff Software Engineer', emphasize: ['Developer Productivity'] }).experiences[0]!.achievements.length
+  assert.equal(staff, CONTRIBUTION_BUDGET.Core, 'staff context grants the full budget')
+  assert.equal(productivity, CONTRIBUTION_BUDGET.Historical, 'a productivity-only decision compresses it')
+})
+
+test('R5b: Historical keeps its best-ranked achievement, not the first canonical one', () => {
+  const p = makeProfile()
+  const achievements = [
+    'Handled routine tickets',             // Generic, canonical first
+    'Reduced operational costs by 30%',    // Quantified
+    'Maintained internal documentation',   // Generic
+  ]
+  const historical: Profile = { ...p, experiences: [{ ...p.experiences[0]!, achievements }] }
+  const bullets = cvProjector(historical).experiences[0]!.achievements
+  assert.equal(bullets.length, CONTRIBUTION_BUDGET.Historical)
+  assert.equal(bullets[0], achievements[1], 'the quantified outcome wins over the first canonical claim')
+})
+
+test('R5b: without a Decision Context the default projection keeps the existing R2→R3 selection (Core keeps the full budget)', () => {
+  const p = makeProfile()
+  const achievements = ['Architected distributed systems', 'Handled routine tickets', 'Reduced operational costs by 30%', 'Shipped a new service']
+  const core: Profile = { ...p, preferences: { interests: STAFF_VOCAB }, experiences: [{ ...p.experiences[0]!, achievements }] }
+  const cv = cvProjector(core)
+  assert.equal(cv.experiences[0]!.contribution, 'Core')
+  assert.equal(cv.experiences[0]!.achievements.length, DEFAULT_CV_BUDGET.maxBulletsPerExperience)
+  assert.equal(cv.experiences[0]!.achievements[0], achievements[0], 'the ranking itself is untouched')
+})
+
+test('R5b: the budget never changes content — survivors are a subset of the canonical history', () => {
+  const p = makeProfile()
+  const achievements = [
+    'Handled routine tickets',
+    'Reduced operational costs by 30%',
+    'Maintained internal documentation',
+    'Ran nightly backups',
+    'Wrote internal tooling',
+  ]
+  const historical: Profile = { ...p, experiences: [{ ...p.experiences[0]!, achievements }] }
+  const bullets = cvProjector(historical).experiences[0]!.achievements
+  assert.ok(bullets.every(b => achievements.includes(b)))
+})
+
+test('R5b: same context, deterministic output', () => {
+  const first = cvProjector(makeProfile(), { targetRole: 'Staff Software Engineer' })
+  const second = cvProjector(makeProfile(), { targetRole: 'Staff Software Engineer' })
+  assert.deepEqual(second, first)
 })
 
 // R4 — semantic redundancy suppression: never emit a summary that only

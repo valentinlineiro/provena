@@ -45,7 +45,7 @@ export type {
   CvEducation,
   CvCertification,
 } from './cv-projector.js'
-export { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, EvidenceClass, classifyEvidence, rankAchievements, significantSignals, redundantSummary, experienceContribution } from './cv-projector.js'
+export { cvProjector, buildCvProjection, DEFAULT_CV_BUDGET, EvidenceClass, classifyEvidence, rankAchievements, significantSignals, redundantSummary, experienceContribution, CONTRIBUTION_BUDGET } from './cv-projector.js'
 
 export type { CareerExperience, CareerTimeline, Strength, Gap } from './career.js'
 export { deriveStrengths, deriveEvidenceCount, findEvidenceGaps, profileToTimeline } from './career.js'

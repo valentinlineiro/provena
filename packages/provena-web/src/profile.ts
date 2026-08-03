@@ -150,14 +150,14 @@ export default {
       "title": "Senior Software Engineer",
       "start": "2021-07",
       "end": "2025-10",
-      "summary": "Consultoría de software en múltiples clientes y dominios. Construyó una base sólida en sistemas distribuidos, microservicios y cloud, trabajando con Spring Boot, Kafka, Kubernetes y Azure en entornos de producción reales. Aprendió a adaptarse rápido a contextos distintos, entender sistemas ajenos y aportar valor en entornos cambiantes. Etapa de crecimiento como ingeniero \"todoterreno\": pasó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, despliegues, CI/CD, operación. La comunicación técnica en entornos de consultoría fue una escuela: alinear decisiones con equipos distintos y asegurar que las soluciones fueran mantenibles por quienes las recibían.",
+      "summary": "Software consulting across multiple clients and domains. Built a solid foundation in distributed systems, microservices, and cloud, working with Spring Boot, Kafka, Kubernetes, and Azure in real production environments. Learned to adapt quickly to different contexts, understand unfamiliar systems, and add value in changing environments. A growth phase as a generalist engineer: moved from writing code to understanding complete systems — APIs, messaging, databases, deployments, CI/CD, operations. Technical communication in consulting was a school: aligning decisions with different teams and ensuring solutions stayed maintainable for those who received them.",
       "achievements": [
-        "Trabajó con arquitecturas distribuidas, microservicios y cloud (Spring Boot, Kafka, Docker, Kubernetes, Azure) en sistemas de producción reales",
-        "Desarrolló capacidad de adaptación rápida a múltiples clientes, contextos y dominios distintos",
-        "Evolucionó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, CI/CD, operación",
-        "Aprendió a alinear decisiones técnicas con equipos y culturas de cliente distintas, asegurando mantenibilidad a largo plazo",
-        "Construyó los cimientos técnicos que luego permitieron moverse hacia responsabilidades de arquitectura, productividad e IA",
-        "Diseñó servicios backend escalables con Java, Spring Boot, Kafka y MongoDB, mejorando la capacidad del sistema en un 40%"
+        "Worked with distributed architectures, microservices, and cloud (Spring Boot, Kafka, Docker, Kubernetes, Azure) in real production systems",
+        "Developed the ability to adapt quickly to different clients, contexts, and domains",
+        "Evolved from writing code to understanding complete systems — APIs, messaging, databases, CI/CD, operations",
+        "Learned to align technical decisions with different teams and client cultures, ensuring long-term maintainability",
+        "Built the technical foundations that later enabled a move toward architecture, productivity, and AI responsibilities",
+        "Designed scalable backend services with Java, Spring Boot, Kafka, and MongoDB, improving system capacity by 40%"
       ],
       "technologies": [
         "Java",
@@ -258,7 +258,7 @@ export default {
   "projects": [
     {
       "id": "810fe6dd-05d5-4d8a-a534-5fa6c6d5bf94",
-      "name": "",
+      "name": "Autoseed — Mutation-based Test Generation",
       "description": "Research project focused on improving software reliability through automated test generation techniques.  Developed mutation-based approaches to generate and optimize test suites for service-oriented architectures.",
       "url": "https://neptuno.uca.es/redmine/projects/sources-fm/repository/show/trunk/src/test-generator-autoseed",
       "technologies": [],
@@ -271,7 +271,7 @@ export default {
     },
     {
       "id": "53797b09-5e5c-4d48-a5d5-c51c82875b88",
-      "name": "",
+      "name": "WS-BPEL Mutation Operators",
       "description": "Research project exploring mutation testing strategies to improve test coverage and fault detection in WS-BPEL 2.0 systems.  Designed new mutation operators to evaluate software quality and testing effectiveness.",
       "url": "https://neptuno.uca.es/redmine/projects/sources-fm/repository/show/trunk/src/mubpel/src/main/resources/es/uca/webservices/mutants/operators",
       "technologies": [],

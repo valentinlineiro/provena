@@ -187,6 +187,72 @@ test('R3: within an equal class the canonical profile order is preserved', () =>
   assert.equal(ranked[2], 'Ship third')
 })
 
+// R2 — target relevance modifies selection order (relevance → evidence →
+// canonical), never the truth of evidence. Vocabulary is the decision
+// context's emphasize (else profile interests) bridged bilingually, plus
+// implicit technical-leadership signals. Real CV data, acceptance for Staff.
+
+const STAFF_VOCAB = [
+  'Software Architecture',
+  'Developer Productivity',
+  'AI-Assisted Engineering',
+  'Distributed Systems',
+  'Platform Engineering',
+  'Technical Leadership',
+]
+
+const KNOWMAD_ACHIEVEMENTS = [
+  'Trabajó con arquitecturas distribuidas, microservicios y cloud (Spring Boot, Kafka, Docker, Kubernetes, Azure) en sistemas de producción reales',
+  'Desarrolló capacidad de adaptación rápida a múltiples clientes, contextos y dominios distintos',
+  'Evolucionó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, CI/CD, operación',
+  'Aprendió a alinear decisiones técnicas con equipos y culturas de cliente distintas, asegurando mantenibilidad a largo plazo',
+  'Construyó los cimientos técnicos que luego permitieron moverse hacia responsabilidades de arquitectura, productividad e IA',
+  'Diseñó servicios backend escalables con Java, Spring Boot, Kafka y MongoDB, mejorando la capacidad del sistema en un 40%',
+]
+
+test('R2: relevance outranks evidence strength — knowmad leads with systems scope and keeps the quantified 40% within budget', () => {
+  const top4 = rankAchievements(KNOWMAD_ACHIEVEMENTS, STAFF_VOCAB).slice(0, 4)
+  assert.equal(top4[0], KNOWMAD_ACHIEVEMENTS[0]!, 'distributed-systems evidence leads the scope narrative')
+  assert.equal(top4[1], KNOWMAD_ACHIEVEMENTS[4]!, 'foundations toward architecture/productivity/AI follow')
+  assert.ok(top4.includes(KNOWMAD_ACHIEVEMENTS[5]!), 'the quantified 40% survives within the budget')
+})
+
+test('R2: influence and architecture ownership lead Summa and VINCLE', () => {
+  const summa = [
+    'Designed a Clean Architecture proposal for the HSS backend — adopted as the foundation for a separate product (SMSC)',
+    "Became the internal reference for AI-assisted engineering; the company's AI Lead shared experiments and sought input on internal training",
+    'Evolved from ticket-based development to owning the product roadmap, driving architectural improvements in a legacy 4G network core',
+    'Drove modernization of a critical telecom system without compromising stability',
+    'Reduced team friction by improving maintainability, simplifying decisions, and accelerating delivery velocity',
+  ]
+  const vincle = [
+    'Led the migration of a legacy CRM/SFA to Spring Boot and Angular, improving maintainability and enabling future evolution',
+    'Led a frontend team and participated in architecture decisions across backend, integrations, and business-critical functionality',
+  ]
+  const summaOrder = rankAchievements(summa, STAFF_VOCAB)
+  const vincleOrder = rankAchievements(vincle, STAFF_VOCAB)
+  assert.equal(summaOrder[0], summa[1]!, 'the AI-assisted influence reference leads')
+  assert.equal(vincleOrder[0], vincle[1]!, 'the architecture-decisions ownership leads the migration')
+})
+
+test('R2: relevance never rewrites, dedupes or rewords achievement content', () => {
+  const ranked = rankAchievements(KNOWMAD_ACHIEVEMENTS, STAFF_VOCAB)
+  assert.deepEqual(new Set(ranked), new Set(KNOWMAD_ACHIEVEMENTS))
+})
+
+test('R2: cvProjector threads the vocabulary by default (interests + leadership) on the real data', () => {
+  const p: Profile = {
+    ...makeProfile(),
+    identity: { ...makeProfile().identity, person: { ...makeProfile().identity.person, summary: undefined } },
+    preferences: { interests: STAFF_VOCAB },
+    experiences: [{ ...makeProfile().experiences[0]!, organization: 'knowmad mood', title: 'Senior Software Engineer', achievements: KNOWMAD_ACHIEVEMENTS }],
+  }
+  const bullets = cvProjector(p, { targetRole: 'Staff Software Engineer' }).experiences[0]!.achievements
+  assert.equal(bullets[0], KNOWMAD_ACHIEVEMENTS[0])
+  assert.equal(bullets[1], KNOWMAD_ACHIEVEMENTS[4])
+  assert.ok(bullets.includes(KNOWMAD_ACHIEVEMENTS[5]!), 'the quantified 40% survives the budget cap')
+})
+
 // R4 — semantic redundancy suppression: never emit a summary that only
 // re-enunciates, in prose, claims already covered by the experience's own
 // achievements (which R3 already curated). Deterministic, token-based.

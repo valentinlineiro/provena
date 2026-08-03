@@ -117,12 +117,62 @@ export function classifyEvidence(achievement: string): EvidenceClass {
   return EvidenceClass.Generic
 }
 
-// R3 — rank achievements by evidence strength with a stable sort: within the
-// same evidence class the original (canonical Profile) order is preserved, so
-// the budget cap removes from the weakest margin, not a blind slice(0, n).
-export function rankAchievements(achievements: readonly string[]): string[] {
-  const indexed = achievements.map((a, i) => ({ a, i }))
+// R2 — target relevance modifies selection order, never evidence truth.
+// The relevance vocabulary is the decision context's emphasize (else the
+// profile interests) plus implicit technical-leadership signals for senior
+// roles. RELEVANCE_GROUPS bridge vocabulary terms to inflected or Spanish
+// achievement signals: an English interest matches a Spanish signal when both
+// share a stem group. Groups are cheap; only those activated by the
+// vocabulary participate, so ubiquitous terms alone never inflate a score.
+const RELEVANCE_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
+  ['archit', 'arquitect'],     // software architecture
+  ['distribut', 'distribuid'], // distributed systems
+  ['sistem', 'system'],        // systems
+  ['plataform', 'platform'],   // platform engineering
+  ['productiv'],               // developer productivity
+  ['ingenier', 'engineer'],    // engineering
+  ['assist', 'asist'],         // AI-assisted
+  ['lider', 'lead'],           // technical leadership
+  ['equip', 'team'],           // teams
+  ['decis'],                   // decision-making
+  ['influenc'],                // influence / leverage
+  ['own', 'responsab'],        // ownership / responsibility
+]
+
+function activatedGroups(vocab: readonly string[]): ReadonlySet<number> {
+  const active = new Set<number>()
+  for (const term of vocab) {
+    const tokens = significantSignals(term)
+    RELEVANCE_GROUPS.forEach((group, gi) => {
+      if (group.some(stem => tokens.some(t => t.startsWith(stem)))) active.add(gi)
+    })
+  }
+  return active
+}
+
+function relevanceScore(achievement: string, active: ReadonlySet<number>): number {
+  let score = 0
+  for (const sig of significantSignals(achievement)) {
+    for (const gi of active) {
+      if (RELEVANCE_GROUPS[gi]!.some(stem => sig.startsWith(stem))) {
+        score += 1
+        break
+      }
+    }
+  }
+  return score
+}
+
+// R3 — rank achievements with a stable sort: within the same relevance and
+// evidence class the original (canonical Profile) order is preserved, so the
+// budget cap removes from the weakest margin, not a blind slice(0, n).
+// Order is relevance → evidence → canonical; with no vocab given, relevance
+// is a no-op and R3's evidence-over-claim ranking stands unchanged.
+export function rankAchievements(achievements: readonly string[], vocab?: readonly string[]): string[] {
+  const active = vocab ? activatedGroups(vocab) : undefined
+  const indexed = achievements.map((a, i) => ({ a, i, r: active ? relevanceScore(a, active) : 0 }))
   indexed.sort((x, y) => {
+    if (x.r !== y.r) return y.r - x.r
     const diff = classifyEvidence(y.a).valueOf() - classifyEvidence(x.a).valueOf()
     return diff !== 0 ? diff : x.i - y.i
   })
@@ -269,11 +319,15 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
 
   const projects = (context.audience === 'recruiter' ? [] : base.projects) as readonly ResumeProject[]
 
-  // R3 — select before compress: rank by evidence strength (stable), then cap.
-  // The budget removes from the weakest margin, never a blind positional slice.
+  // R2 — select before compress: rank by target relevance, then evidence
+  // strength (stable), then cap. The budget removes from the weakest margin.
   const cap = (list: readonly string[], max: number): string[] => list.slice(0, max)
+  const relevanceVocab = [
+    ...(context.emphasize && context.emphasize.length > 0 ? context.emphasize : (profile.preferences?.interests ?? [])),
+    'Technical Leadership',
+  ]
   const capEvidence = (list: readonly string[], max: number): string[] =>
-    cap(rankAchievements(list), max)
+    cap(rankAchievements(list, relevanceVocab), max)
 
   return {
     identity: {

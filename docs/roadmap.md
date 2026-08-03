@@ -273,6 +273,8 @@ interface CareerCompass {
 
 **Guiding principle (PD-007):** Every new capability must answer a question the user is already asking when opening Provena. Who am I? → Timeline. How am I doing? / What's next? → Compass L1. Nothing else until those are answered.
 
+**Calibration data (2026-08-03):** Compass thresholds and any future tailor hint calibrate against a **consented profile corpus** (LinkedIn export → Provena import → Compass → structured human correction), not scraped profiles. The divergence between inference and human judgment is the signal. See [compass-calibration-corpus](research/compass-calibration-corpus.md). Initial experiment: ~10 real professionals.
+
 ---
 
 ## Epic 2 — Career Narrative

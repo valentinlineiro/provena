@@ -1,0 +1,7 @@
+id: linkedin-bootstrap
+lifecycle:
+  status: available
+  maturity: beta
+evidence:
+  - type: file-exists
+    target: packages/linkedin/src/index.ts

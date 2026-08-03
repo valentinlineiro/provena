@@ -1,0 +1,7 @@
+id: cv-projection
+lifecycle:
+  status: available
+  maturity: stable
+evidence:
+  - type: file-exists
+    target: packages/html/src/index.ts

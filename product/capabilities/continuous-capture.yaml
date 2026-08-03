@@ -1,0 +1,7 @@
+id: continuous-capture
+lifecycle:
+  status: available
+  maturity: experimental
+evidence:
+  - type: file-exists
+    target: packages/cli/src/index.ts

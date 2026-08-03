@@ -16,6 +16,11 @@ export type {
   Preferences,
   Capture,
   Identity,
+  ScopeLevel,
+  ContributionRole,
+  Scope,
+  Outcome,
+  Contribution,
 } from './types.js'
 
 export type { Profile } from './profile.js'

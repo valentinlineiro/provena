@@ -132,6 +132,43 @@ export interface Preferences {
   readonly interests?: readonly string[]
 }
 
+export type ScopeLevel =
+  | 'individual'
+  | 'team'
+  | 'multi-team'
+  | 'product'
+  | 'organization'
+
+export type ContributionRole =
+  | 'initiator'
+  | 'lead'
+  | 'contributor'
+
+export interface Scope {
+  readonly level: ScopeLevel
+  readonly affectedTeams?: number
+  readonly role?: ContributionRole
+}
+
+export interface Outcome {
+  readonly summary: string
+}
+
+export interface Contribution {
+  readonly id: string
+  readonly experienceRef: string
+  readonly summary: string
+  readonly period?: {
+    readonly start: string
+    readonly end?: string
+  }
+  readonly outcome?: Outcome
+  readonly scope?: Scope
+  readonly capabilityIds: readonly string[]
+  readonly technologies?: readonly string[]
+  readonly evidenceIds: readonly string[]
+}
+
 export interface Identity {
   readonly person: Person
   readonly experienceIds: readonly string[]
@@ -141,4 +178,6 @@ export interface Identity {
   readonly certificationIds: readonly string[]
   readonly recommendationIds: readonly string[]
   readonly capabilityIds: readonly string[]
+  readonly contributionIds: readonly string[]
 }
+

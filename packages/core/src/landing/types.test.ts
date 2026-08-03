@@ -1,7 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import type { Capability, VerifiedCapability, ProductState } from "../../src/landing/types.js";
-import "../../src/landing/types.js";
+import type { Capability } from "./types.js";
 
 describe("Capability & ProductState types", () => {
   it("should construct a valid capability object", () => {

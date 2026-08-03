@@ -528,3 +528,73 @@ test('R4b: real pipeline context (union of all experience bullets) — a sentenc
     'Etapa de crecimiento como ingeniero "todoterreno": pasó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, despliegues, CI/CD, operación.'
   )
 })
+
+// Contribution projection & fallback tests
+
+test('CVProjector renders Contribution summaries with Outcome when linked contributions exist', () => {
+  const p = makeProfile()
+  const profileWithContribs: Profile = {
+    ...p,
+    contributions: [
+      {
+        id: 'c1',
+        experienceRef: 'exp-1',
+        summary: 'Designed a Clean Architecture proposal for HSS backend.',
+        outcome: { summary: 'Adopted as SMSC architecture foundation.' },
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+      {
+        id: 'c2',
+        experienceRef: 'exp-1',
+        summary: 'Drove technical initiative without explicit outcome.',
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+    ],
+  }
+  const cv = cvProjector(profileWithContribs)
+  const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
+  assert.ok(exp1)
+  assert.ok(exp1.achievements.includes('Designed a Clean Architecture proposal for HSS backend. (Outcome: Adopted as SMSC architecture foundation.)'))
+  assert.ok(exp1.achievements.includes('Drove technical initiative without explicit outcome.'))
+})
+
+test('CVProjector falls back to legacy achievements when zero linked Contribution records exist', () => {
+  const p = makeProfile()
+  const profileWithPartialContribs: Profile = {
+    ...p,
+    contributions: [
+      {
+        id: 'c1',
+        experienceRef: 'exp-1',
+        summary: 'Designed Clean Architecture.',
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+    ],
+  }
+  const cv = cvProjector(profileWithPartialContribs)
+  const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
+  const exp2 = cv.experiences.find(e => e.organization === 'VINCLE')!
+  assert.deepEqual(exp1.achievements, ['Designed Clean Architecture.'])
+  assert.deepEqual(exp2.achievements, ['Built a CRM'])
+})
+
+test('budget constraints (maxBulletsPerExperience) limit total bullets rendered per experience when projecting contributions', () => {
+  const p = makeProfile()
+  const manyContribs = Array.from({ length: 6 }, (_, i) => ({
+    id: `c-exp1-${i}`,
+    experienceRef: 'exp-1',
+    summary: `Architected distributed systems component ${i}`,
+    capabilityIds: [],
+    evidenceIds: [],
+  }))
+  const profileWithManyContribs: Profile = {
+    ...p,
+    contributions: manyContribs,
+  }
+  const cv = cvProjector(profileWithManyContribs)
+  const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
+  assert.equal(exp1.achievements.length, DEFAULT_CV_BUDGET.maxBulletsPerExperience)
+})

@@ -3,7 +3,7 @@ import type {
   ResumeExperience,
   ResumeProject,
 } from './projections.js'
-import type { Education, Certification } from './types.js'
+import type { Education, Certification, Experience } from './types.js'
 import { buildResumeModel } from './projections.js'
 import { deriveStrengths } from './career.js'
 
@@ -413,6 +413,11 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
     .filter(p => p.contribution === 'Historical')
     .map(p => ({ name: p.name, contribution: p.contribution }))
 
+  const expMap = new Map(profile.experiences.map(exp => [exp.id, exp]))
+  const canonicalExperiences = profile.identity.experienceIds
+    .map(id => expMap.get(id))
+    .filter((exp): exp is Experience => exp !== undefined && selected.includes(exp.id))
+
   return {
     identity: {
       name: base.name,
@@ -425,11 +430,20 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
     summary,
     expertise: cap(expertiseFor(profile, headline), DEFAULT_CV_BUDGET.maxCoreExpertise),
     technologies: cap(technologiesFor(profile), DEFAULT_CV_BUDGET.maxTechnologies),
-    experiences: base.experiences.map((e: ResumeExperience) => {
+    experiences: base.experiences.map((e: ResumeExperience, idx: number) => {
+      const targetExp = canonicalExperiences[idx]
+      const expContributions = targetExp
+        ? (profile.contributions ?? []).filter(c => c.experienceRef === targetExp.id)
+        : []
+
+      const rawBullets = expContributions.length > 0
+        ? expContributions.map(c => c.outcome?.summary ? `${c.summary} (Outcome: ${c.outcome.summary})` : c.summary)
+        : e.achievements
+
       // R5b — budget follows contribution; the survivor is still picked by
       // R2→R3, so this only reduces the allowance Historical may consume.
-      const contribution = experienceContribution(e.achievements, relevanceVocab)
-      const achievements = capEvidence(e.achievements, CONTRIBUTION_BUDGET[contribution])
+      const contribution = experienceContribution(rawBullets, relevanceVocab)
+      const achievements = capEvidence(rawBullets, CONTRIBUTION_BUDGET[contribution])
       // R4 — suppress an experience summary that only re-enunciates, in prose,
       // signals already carried by the experience's own surviving bullets.
       const bulletSignals = achievements.flatMap(significantSignals)

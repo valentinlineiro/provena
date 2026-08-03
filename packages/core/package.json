@@ -7,6 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./landing/*.js": "./src/landing/*.ts",
-    "./landing/*": "./src/landing/*.ts"
+    "./landing/*": "./src/landing/*.ts",
+    "./test-utils/*.js": "./src/test-utils/*.ts",
+    "./test-utils/*": "./src/test-utils/*.ts"
   }
 }

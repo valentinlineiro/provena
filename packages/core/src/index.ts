@@ -56,3 +56,6 @@ export type { WorkspaceLoader } from './workspace.js'
 
 export { validate, formatValidationErrors } from './validate.js'
 export type { ValidationError } from './validate.js'
+
+export { createTestWorkspace, type SyntheticWorkspaceOptions } from './test-utils/createTestWorkspace.js'
+

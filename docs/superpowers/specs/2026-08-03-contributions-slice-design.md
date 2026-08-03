@@ -60,9 +60,26 @@ export interface Contribution {
 }
 ```
 
-### Profile Integration
+### Existing Evidence Reuse
 
-In `@provena/core` (`packages/core/src/profile.ts` and `types.ts`):
+`Evidence` is an **existing first-class entity** in `@provena/core` (`packages/core/src/types.ts`):
+
+```typescript
+export interface Evidence {
+  readonly id: string
+  readonly type: EvidenceSource
+  readonly description: string
+  readonly url?: string
+  readonly date?: string
+  readonly provenance?: Provenance
+}
+```
+
+`Contribution.evidenceIds` references items in `Profile.evidence` (loaded from `profiles/<id>/evidence.yaml`).
+
+### Profile & Identity Integration
+
+To preserve structural symmetry across top-level collections in Provena (`experienceIds`, `projectIds`, `capabilityIds`, etc.), `Identity` and `Profile` are updated:
 
 ```typescript
 export interface Identity {
@@ -121,41 +138,52 @@ Example (`profiles/valentin/contributions.yaml`):
 
 ---
 
-## 4. Hybrid Migration & Compatibility Strategy
+## 4. Atomic Migration Strategy per Experience
 
-To ensure zero regressions and incremental adoption:
+To avoid partial migration ambiguity and maintain canonical clarity:
 
-- `Experience.achievements` is designated as a **legacy fallback representation**.
+- **Experience Boundary Migration**: Migration from legacy `achievements[]` to `Contribution` records is **atomic at the `Experience` level**.
+- When an `Experience` has one or more linked `Contribution` records in `contributions.yaml`, its legacy `achievements[]` array in `experience.yaml` MUST be cleared/migrated so that zero duplicate facts exist.
+- Experiences that have not yet been migrated keep their legacy `achievements[]` array and operate under fallback logic.
 - **Core Invariant**: A professional fact MUST NOT be canonically maintained in both `Experience.achievements` and `Contribution`.
-
-### Projector Selection Logic (`CVProjector`)
-
-When projecting a targeted CV:
-
-1. If an `Experience` has linked `Contribution`s in `Profile`:
-   - Filter/rank `Contribution`s based on target role capabilities, scope, and relevance.
-   - Render selected `Contribution` summaries and outcomes as experience bullet points.
-2. If an `Experience` has **zero** `Contribution`s:
-   - Fall back to projecting legacy `Experience.achievements`.
-3. `Experience` baseline continuity (company header, title, dates) is always preserved regardless of whether contributions are selected.
 
 ---
 
-## 5. Non-Goals (Out of Scope for V1 Slice)
+## 5. Separation of Decision Context & CV Projection
+
+The selection pipeline separates candidate filtering from CV presentation:
+
+```text
+Profile (Contributions + Experiences)
+       ↓
+Decision Context (R4/R6 evaluate and rank candidate Contributions by target role/scope)
+       ↓
+Selected Contributions
+       ↓
+CVProjector (Formats selected contributions & fits within CV budget)
+       ↓
+CVProjection -> Renderer
+```
+
+1. **Decision Context**: Evaluates `Contribution` relevance using `capabilityIds`, `scope.level`, `scope.role`, and `technologies`.
+2. **CVProjector**: Formats selected `Contribution`s into experience bullet points (combining `summary` + `outcome.summary`). For unmigrated experiences, legacy `achievements` are formatted.
+
+---
+
+## 6. Non-Goals (Out of Scope for V1 Slice)
 
 - Generalizing `Contribution` to reference entities other than `Experience` (e.g. standalone projects or open-source initiatives).
-- Removing `Experience.achievements` completely.
-- Migrating all legacy experiences in `profiles/valentin` at once.
+- Removing `Experience.achievements` completely across all profile files.
 - Fine-grained provenance attribution models (`asserted`, `documented`, `observed`, `derived`).
 - Automatic LLM extraction of `Contribution`s from prose.
 
 ---
 
-## 6. Testing Strategy
+## 7. Testing Strategy
 
 1. **Serialization**: `contributions.yaml` parses correctly into `Contribution[]`.
-2. **Referential Integrity**: Invalid `experienceRef`, non-existent `capabilityIds`, or invalid `scope.affectedTeams` fail validation cleanly.
-3. **Projector Logic**:
+2. **Referential Integrity**: Invalid `experienceRef`, non-existent `capabilityIds`, non-existent `evidenceIds`, or invalid `scope.affectedTeams` fail validation cleanly.
+3. **Decision Context & Projector**:
    - `Contribution`s are selected based on decision context relevance & scope.
-   - `Experience` without `Contribution`s falls back to legacy `achievements`.
-4. **End-to-End Smoke Test**: Verify projection pipeline with `profiles/valentin`.
+   - Unmigrated `Experience` (zero contributions) falls back to legacy `achievements`.
+4. **End-to-End Smoke Test**: Verify full pipeline with `profiles/valentin`.

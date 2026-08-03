@@ -234,3 +234,48 @@ test('R4: redundantSummary is deterministic — same inputs, same output', () =>
   const ctx = significantSignals('Worked on distributed systems, microservices and cloud in production.')
   assert.equal(redundantSummary(summary, ctx), redundantSummary(summary, ctx))
 })
+
+// R4b — morphological signal equivalence: a summary sentence dies when a bullet
+// expresses the same claim in inflected form, and survives when it adds
+// material evidence or when the overlap is only ubiquitous tech vocabulary.
+
+test('R4b: an inflected sentence re-expressing a bullet claim is suppressed (acceptance case)', () => {
+  const summary = 'La comunicación técnica en entornos de consultoría fue una escuela: alinear decisiones con equipos distintos y asegurar que las soluciones fueran mantenibles por quienes las recibían.'
+  const bullets = significantSignals('Aprendió a alinear decisiones técnicas con equipos y culturas de cliente distintas, asegurando mantenibilidad a largo plazo.')
+  assert.equal(redundantSummary(summary, bullets), '')
+})
+
+test('R4b: morphological variants count as the same signal (asegurar/asegurando, mantenibles/mantenibilidad)', () => {
+  const summary = 'Aseguró que las soluciones fueran mantenibles para los equipos de cliente.'
+  const bullets = significantSignals('Aprendió a alinear decisiones técnicas, asegurando mantenibilidad a largo plazo.')
+  assert.equal(redundantSummary(summary, bullets), '')
+})
+
+test('R4b: ubiquitous tech vocabulary alone never triggers suppression', () => {
+  const summary = 'Worked with cloud architecture and distributed systems in production.'
+  const bullets = significantSignals('Architected scalable systems in the cloud for production workloads.')
+  assert.equal(redundantSummary(summary, bullets), summary)
+})
+
+test('R4b: a sentence adding material evidence beyond the bullet survives when the overlap is only ubiquitous vocabulary', () => {
+  const summary = 'Aprendió a adaptarse rápido a contextos distintos, entender sistemas ajenos y aportar valor en entornos cambiantes.'
+  const bullets = significantSignals('Desarrolló capacidad de adaptación rápida a múltiples clientes, contextos y dominios distintos.')
+  assert.equal(redundantSummary(summary, bullets), summary)
+})
+
+test('R4b: real pipeline context (union of all experience bullets) — a sentence restating a bullet claim across the union dies, unique claims survive', () => {
+  const union = [
+    'Diseñó servicios backend escalables con Java, Spring Boot, Kafka y MongoDB, mejorando la capacidad del sistema en un 40%',
+    'Aprendió a alinear decisiones técnicas con equipos y culturas de cliente distintas, asegurando mantenibilidad a largo plazo',
+    'Trabajó con arquitecturas distribuidas, microservicios y cloud (Spring Boot, Kafka, Docker, Kubernetes, Azure) en sistemas de producción reales',
+    'Desarrolló capacidad de adaptación rápida a múltiples clientes, contextos y dominios distintos',
+  ].flatMap(significantSignals)
+  assert.equal(
+    redundantSummary('Aprendió a adaptarse rápido a contextos distintos, entender sistemas ajenos y aportar valor en entornos cambiantes.', union),
+    ''
+  )
+  assert.equal(
+    redundantSummary('Etapa de crecimiento como ingeniero "todoterreno": pasó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, despliegues, CI/CD, operación.', union),
+    'Etapa de crecimiento como ingeniero "todoterreno": pasó de escribir código a entender sistemas completos — APIs, mensajería, bases de datos, despliegues, CI/CD, operación.'
+  )
+})

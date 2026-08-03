@@ -170,15 +170,22 @@ export function significantSignals(text: string): string[] {
   return [...seen]
 }
 
-function setIntersection<T>(a: ReadonlySet<T>, b: ReadonlySet<T>): number {
-  let n = 0
-  for (const x of a) if (b.has(x)) n++
-  return n
-}
-
 // Split a summary into its claims (sentences). Splitting gives the suppression
 // sentence-granularity: a claim already communicated by the surviving bullets
 // is suppressed, while a unique claim in the same summary survives.
+
+// R4b — ubiquitous tech vocabulary never implies signal equivalence on its
+// own. Shared `cloud`/`systems`/`architecture`-class tokens are dropped from
+// both sides of the comparison so they cannot drive a false positive.
+const DOMAIN_STOPWORDS = new Set([
+  // en
+  'cloud', 'systems', 'system', 'architecture', 'production', 'platform',
+  'software', 'stack', 'scalable', 'service', 'services', 'workload',
+  'distributed', 'maintainability',
+  // es
+  'sistemas', 'sistema', 'servicios', 'servicio', 'soluciones', 'solucion',
+  'entornos', 'entorno', 'cambiantes', 'clientes', 'cliente',
+])
 
 // R4 — suppress the redundant sentences of a summary. A sentence is redundant
 // when most of its signals are already covered by the context (the experience's
@@ -186,14 +193,20 @@ function setIntersection<T>(a: ReadonlySet<T>, b: ReadonlySet<T>): number {
 // (measured / adopted / artifact) beyond that coverage. Deterministic; never
 // rewrites content, never dedupes whole fields. Order of survivors is intact.
 export function redundantSummary(summary: string, contextSignals: readonly string[]): string {
-  const ctx = new Set(contextSignals)
+  // R4b — two signals are equivalent when they share a significant prefix, so
+  // morphological variants (asegurar/asegurando, distintos/distintas,
+  // mantenibles/mantenibilidad) count as the same claim, while ubiquitous tech
+  // vocabulary is dropped from both sides.
+  const ctx = contextSignals
+    .map(s => normalizeToken(s))
+    .filter(s => s.length > 0 && !DOMAIN_STOPWORDS.has(s))
   return splitSlices(summary)
     .filter(s => {
-      const signals = significantSignals(s)
+      const signals = significantSignals(s).filter(t => !DOMAIN_STOPWORDS.has(t))
       if (signals.length === 0) return false
       const cls = classifyEvidence(s)
       if (cls === EvidenceClass.Quantified || cls === EvidenceClass.Adopted) return true
-      const covered = setIntersection(new Set(signals), ctx)
+      const covered = signals.filter(sig => ctx.some(c => sig.slice(0, 5) === c.slice(0, 5))).length
       return covered / signals.length < 0.5
     })
     .join(' ')

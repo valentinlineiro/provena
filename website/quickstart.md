@@ -5,14 +5,14 @@ Clone, install, create a workspace, and render it. No previous setup needed.
 ## 1. Use the CLI directly
 
 ```bash
-npx @provena/cli render examples/valen
+npx @provena/cli render profiles/valentin
 ```
 
 Or install globally:
 
 ```bash
 npm install -g @provena/cli
-provena render examples/valen
+provena render profiles/valentin
 ```
 
 ## 2. Create a workspace
@@ -82,6 +82,6 @@ source, without any manual copying.
 ## Next steps
 
 - See the [concept](/concept) behind the model
-- Browse the [example workspace](https://github.com/valentinlineiro/provena/tree/main/examples/valen)
+- Browse the [example workspace](https://github.com/valentinlineiro/provena/tree/main/profiles/valentin)
 - Read the [architecture](/architecture)
 - View the [source](https://github.com/valentinlineiro/provena) on GitHub

@@ -72,8 +72,8 @@ features:
 Try it:
 
 ```bash
-npx @provena/cli render examples/valen
-cat examples/valen/resume.md
+npx @provena/cli render profiles/valentin
+cat profiles/valentin/resume.md
 ```
 
 ## See it in action

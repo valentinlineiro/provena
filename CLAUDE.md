@@ -12,7 +12,7 @@ Provena is a canonical domain model for professional identity: a single `Profile
 npm install            # instalar (npm workspaces, packages/*)
 npm run typecheck      # tsc --noEmit en todos los paquetes
 npm test               # node --import tsx --test packages/*/src/*.test.ts
-npm run demo           # carga examples/valen y renderiza a stdout
+npm run demo           # carga profiles/valentin y renderiza a stdout
 ```
 
 typecheck + test son los dos pasos de verificación. No hay linter configurado todavía.
@@ -56,7 +56,7 @@ packages/
   jsonresume/ JSON Resume projector + renderer
   linkedin/   LinkedIn projector + renderer (headline/about/experience text sized to platform limits)
   cli/        provena CLI (render, validate, init) with workspace templates in templates/
-examples/valen/   sample workspace consumed by `npm run demo` and the CLI
+profiles/valentin/ canonical profile consumed by `npm run demo` and the CLI
 website/          VitePress docs site (separate npm project, own package.json)
 ```
 

@@ -1,6 +1,6 @@
 # Examples
 
-The same identity becomes different outputs depending on the projection. Everything below is the actual output of `provena render examples/valen`, not a hand-written mockup — clone the repo and run it yourself to see the same thing.
+The same identity becomes different outputs depending on the projection. Everything below is the actual output of `provena render profiles/valentin`, not a hand-written mockup — clone the repo and run it yourself to see the same thing.
 
 ## At a glance
 
@@ -21,7 +21,7 @@ This is not a CV generator producing one document. It is one model, queried or r
 
 ## Input
 
-`examples/valen/` — a real workspace, unmodified.
+`profiles/valentin/` — a real workspace, unmodified.
 
 ::: code-group
 
@@ -196,7 +196,7 @@ The identity is the source of truth. Outputs are temporary views.
 Try it yourself:
 
 ```bash
-npx @provena/cli render examples/valen --format markdown --stdout
-npx @provena/cli render examples/valen --format jsonresume --stdout
-npx @provena/cli render examples/valen --format linkedin --stdout
+npx @provena/cli render profiles/valentin --format markdown --stdout
+npx @provena/cli render profiles/valentin --format jsonresume --stdout
+npx @provena/cli render profiles/valentin --format linkedin --stdout
 ```

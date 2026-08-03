@@ -87,3 +87,47 @@ test('migration roundtrip: load with migration writes migrated workspace', async
     await rm(dir, { recursive: true })
   }
 })
+
+test('loads contributions.yaml into profile.contributions and identity.contributionIds', async () => {
+  const dir = await makeWorkspace('version: 1\n')
+  await writeFile(
+    join(dir, 'contributions.yaml'),
+    [
+      '- id: contrib-1',
+      '  experience_ref: exp-a',
+      '  summary: High impact architecture rework',
+      '  period:',
+      '    start: "2025-01"',
+      '  outcome:',
+      '    summary: Reduced latency by 50%',
+      '  scope:',
+      '    level: team',
+      '    affected_teams: 2',
+      '    role: lead',
+      '  capabilities: []',
+      '  technologies:',
+      '    - rust',
+      '  evidence: []',
+      '',
+    ].join('\n'),
+  )
+  try {
+    const { profile } = await new YamlWorkspaceLoader().load(dir)
+    assert.deepEqual(profile.identity.contributionIds, ['contrib-1'])
+    assert.equal(profile.contributions.length, 1)
+    assert.deepEqual(profile.contributions[0], {
+      id: 'contrib-1',
+      experienceRef: 'exp-a',
+      summary: 'High impact architecture rework',
+      period: { start: '2025-01', end: undefined },
+      outcome: { summary: 'Reduced latency by 50%' },
+      scope: { level: 'team', affectedTeams: 2, role: 'lead' },
+      capabilityIds: [],
+      technologies: ['rust'],
+      evidenceIds: [],
+    })
+  } finally {
+    await rm(dir, { recursive: true })
+  }
+})
+

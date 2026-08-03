@@ -9,6 +9,7 @@ import type {
   Capability,
   Evidence,
   Preferences,
+  Contribution,
 } from '@provena/core'
 
 type Check = readonly [field: string, ok: (v: unknown) => boolean]
@@ -137,3 +138,71 @@ export function parsePreferences(raw: unknown, _file = 'preferences.yaml'): Pref
   if (!raw || typeof raw !== 'object') return null
   return raw as Preferences
 }
+
+export function parseContributions(raw: unknown, file = 'contributions.yaml'): Contribution[] {
+  if (!raw) return []
+  if (!Array.isArray(raw)) throw new Error(`${file} must be a YAML array`)
+  return raw.map((item, i) => {
+    if (!item || typeof item !== 'object') throw new Error(`${file}[${i}]: expected an object`)
+    const rawObj = item as Record<string, unknown>
+
+    const id = String(rawObj.id ?? '')
+    const experienceRef = String(rawObj.experienceRef ?? rawObj.experience_ref ?? '')
+    const summary = String(rawObj.summary ?? '')
+
+    if (!id || !experienceRef || !summary) {
+      throw new Error(`${file}[${i}]: missing required field(s) id, experienceRef, or summary`)
+    }
+
+    let period: Contribution['period'] = undefined
+    if (rawObj.period && typeof rawObj.period === 'object') {
+      const p = rawObj.period as Record<string, unknown>
+      period = {
+        start: String(p.start ?? ''),
+        end: p.end ? String(p.end) : undefined,
+      }
+    }
+
+    let outcome: Contribution['outcome'] = undefined
+    if (rawObj.outcome && typeof rawObj.outcome === 'object') {
+      const o = rawObj.outcome as Record<string, unknown>
+      outcome = {
+        summary: String(o.summary ?? ''),
+      }
+    }
+
+    let scope: Contribution['scope'] = undefined
+    if (rawObj.scope && typeof rawObj.scope === 'object') {
+      const s = rawObj.scope as Record<string, unknown>
+      const affectedTeams = typeof s.affectedTeams === 'number'
+        ? s.affectedTeams
+        : (typeof s.affected_teams === 'number' ? s.affected_teams : undefined)
+      scope = {
+        level: s.level as NonNullable<Contribution['scope']>['level'],
+        affectedTeams,
+        role: s.role as NonNullable<Contribution['scope']>['role'],
+      }
+    }
+
+    const rawCap = rawObj.capabilityIds ?? rawObj.capabilities
+    const capabilityIds = Array.isArray(rawCap) ? rawCap.map(String) : []
+
+    const technologies = Array.isArray(rawObj.technologies) ? rawObj.technologies.map(String) : undefined
+
+    const rawEv = rawObj.evidenceIds ?? rawObj.evidence
+    const evidenceIds = Array.isArray(rawEv) ? rawEv.map(String) : []
+
+    return {
+      id,
+      experienceRef,
+      summary,
+      period,
+      outcome,
+      scope,
+      capabilityIds,
+      technologies,
+      evidenceIds,
+    }
+  })
+}
+

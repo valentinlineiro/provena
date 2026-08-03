@@ -8,6 +8,7 @@ import type {
   Recommendation,
   Capability,
   Evidence,
+  Contribution,
 } from './types.js'
 
 export interface ValidationError {
@@ -26,6 +27,7 @@ function sourceFromPath(path: string): string | undefined {
   if (path.startsWith('publication')) return 'publications.yaml'
   if (path.startsWith('certification')) return 'certifications.yaml'
   if (path.startsWith('capabilities')) return 'capabilities.yaml'
+  if (path.startsWith('contributions') || path.startsWith('contribution')) return 'contributions.yaml'
   return undefined
 }
 
@@ -68,6 +70,7 @@ export function validate(data: {
   recommendations?: readonly Recommendation[]
   capabilities?: readonly Capability[]
   evidence?: readonly Evidence[]
+  contributions?: readonly Contribution[]
 }): ValidationError[] {
   const errors: ValidationError[] = []
 
@@ -79,6 +82,7 @@ export function validate(data: {
   const allPublications = data.publications ?? []
   const allCertifications = data.certifications ?? []
   const allRecommendations = data.recommendations ?? []
+  const allContributions = data.contributions ?? []
 
   findDuplicates('capabilities', allCapabilities, errors)
   findDuplicates('evidence', allEvidence, errors)
@@ -88,6 +92,7 @@ export function validate(data: {
   findDuplicates('publications', allPublications, errors)
   findDuplicates('certifications', allCertifications, errors)
   findDuplicates('recommendations', allRecommendations, errors)
+  findDuplicates('contributions', allContributions, errors)
 
   const capabilityIds = collectIds(allCapabilities)
   const evidenceIds = collectIds(allEvidence)
@@ -97,6 +102,7 @@ export function validate(data: {
   const publicationIds = collectIds(allPublications)
   const certificationIds = collectIds(allCertifications)
   const recommendationIds = collectIds(allRecommendations)
+  const contributionIds = collectIds(allContributions)
 
   findMissing('identity.experienceIds', data.identity.experienceIds, experienceIds, errors)
   findMissing('identity.projectIds', data.identity.projectIds, projectIds, errors)
@@ -105,6 +111,9 @@ export function validate(data: {
   findMissing('identity.certificationIds', data.identity.certificationIds, certificationIds, errors)
   findMissing('identity.recommendationIds', data.identity.recommendationIds, recommendationIds, errors)
   findMissing('identity.capabilityIds', data.identity.capabilityIds, capabilityIds, errors)
+  if (data.identity.contributionIds) {
+    findMissing('identity.contributionIds', data.identity.contributionIds, contributionIds, errors)
+  }
 
   if (!data.identity.person.name || data.identity.person.name.trim() === '') {
     errors.push({
@@ -133,6 +142,26 @@ export function validate(data: {
     findMissing(`certification.${cert.id}.evidenceIds`, cert.evidenceIds, evidenceIds, errors)
   }
 
+  for (const contrib of allContributions) {
+    if (!experienceIds.has(contrib.experienceRef)) {
+      errors.push({
+        path: `contribution.${contrib.id}.experienceRef`,
+        message: `Reference to unknown id "${contrib.experienceRef}"`,
+        source: 'contributions.yaml',
+      })
+    }
+    findMissing(`contribution.${contrib.id}.capabilityIds`, contrib.capabilityIds, capabilityIds, errors)
+    findMissing(`contribution.${contrib.id}.evidenceIds`, contrib.evidenceIds, evidenceIds, errors)
+
+    if (contrib.scope?.affectedTeams !== undefined && contrib.scope.affectedTeams <= 0) {
+      errors.push({
+        path: `contribution.${contrib.id}.scope.affectedTeams`,
+        message: 'affectedTeams must be greater than 0',
+        source: 'contributions.yaml',
+      })
+    }
+  }
+
   return errors
 }
 
@@ -142,3 +171,4 @@ export function formatValidationErrors(errors: ValidationError[]): string {
     return `  ${e.path}${file}: ${e.message}`
   }).join('\n')
 }
+

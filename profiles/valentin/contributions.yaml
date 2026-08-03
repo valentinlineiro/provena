@@ -14,3 +14,64 @@
     - java
     - spring
   evidenceIds: []
+
+- id: summa-ai-assisted-engineering
+  experienceRef: 822fcbb8-f7c8-40a7-bc7d-cb61092c5861
+  summary: >
+    Established AI-assisted engineering workflows and acted as internal technical reference.
+  outcome:
+    summary: >
+      Partnered with company AI Lead to guide internal tooling experiments and team training.
+  scope:
+    level: organization
+    role: lead
+  capabilityIds: []
+  technologies:
+    - AI-Assisted Engineering
+  evidenceIds: []
+
+- id: summa-roadmap-ownership-4g-core
+  experienceRef: 822fcbb8-f7c8-40a7-bc7d-cb61092c5861
+  summary: >
+    Evolved role to own the product roadmap and architectural improvements for legacy 4G network core.
+  outcome:
+    summary: >
+      Shifted engineering execution from ticket-based delivery to strategic product architecture.
+  scope:
+    level: product
+    role: lead
+  capabilityIds: []
+  technologies:
+    - 4G Network Core
+    - Java
+  evidenceIds: []
+
+- id: summa-telecom-modernization
+  experienceRef: 822fcbb8-f7c8-40a7-bc7d-cb61092c5861
+  summary: >
+    Drove modernization initiatives across critical telecom backend systems.
+  outcome:
+    summary: >
+      Upgraded platform capabilities without compromising live network stability.
+  scope:
+    level: product
+    role: contributor
+  capabilityIds: []
+  technologies:
+    - Java
+    - Spring
+  evidenceIds: []
+
+- id: summa-maintainability-velocity
+  experienceRef: 822fcbb8-f7c8-40a7-bc7d-cb61092c5861
+  summary: >
+    Streamlined architectural decisions and codebase maintainability across engineering workflows.
+  outcome:
+    summary: >
+      Reduced team friction and accelerated feature delivery velocity.
+  scope:
+    level: team
+    role: lead
+  capabilityIds: []
+  technologies: []
+  evidenceIds: []

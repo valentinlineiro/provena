@@ -62,8 +62,6 @@ export type { WorkspaceLoader } from './workspace.js'
 export { validate, formatValidationErrors } from './validate.js'
 export type { ValidationError } from './validate.js'
 
-export { createTestWorkspace, type SyntheticWorkspaceOptions } from './test-utils/createTestWorkspace.js'
-
 export type { Verdict, CriterionStatus, SignalStatus, CriterionCheck, SignalMatch, OpportunityEvaluation } from './opportunity.js'
 export { evaluateOpportunity, findMatchedRole, APPLY_COVERAGE_THRESHOLD, APPLY_INTERPRETATION_THRESHOLD } from './opportunity.js'
 

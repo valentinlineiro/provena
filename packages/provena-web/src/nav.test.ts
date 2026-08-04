@@ -20,3 +20,9 @@ test('siteNav never renders the reserved Career section', () => {
   assert.ok(!siteNav('story').includes('Career'))
   assert.ok(!siteNav('prepare').includes('Career'))
 })
+
+test('siteNav renders the Evaluate section', () => {
+  assert.ok(siteNav('story').includes('<a href="/evaluate">Evaluate</a>'))
+  assert.ok(siteNav('evaluate').includes('<a class="active" href="/evaluate">Evaluate</a>'))
+  assert.ok(!siteNav('evaluate').includes('class="active" href="/"'))
+})

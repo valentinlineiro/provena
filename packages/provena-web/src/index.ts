@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import { computeCareerCompass, narrateCompass, cvReadiness } from './compass.js'
-import { profileToTimeline, cvProjector } from '@provena/core'
+import { profileToTimeline, cvProjector, evaluateOpportunity } from '@provena/core'
 import type { CVContext, CVProjection } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
@@ -43,12 +43,13 @@ async function recordEvent(env: Env, name: EventName) {
   await env.PROVENA_KV.put('events', JSON.stringify({ events }))
 }
 
-export function siteNav(section: 'story' | 'prepare'): string {
+export function siteNav(section: 'story' | 'prepare' | 'evaluate'): string {
   const link = (label: string, href: string, active: boolean) =>
     '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
   const sections = [
     { label: 'Story', href: '/', id: 'story' as const },
     { label: 'Prepare', href: '/cv', id: 'prepare' as const },
+    { label: 'Evaluate', href: '/evaluate', id: 'evaluate' as const },
   ]
   return (
     '<nav class="site">' +
@@ -431,6 +432,99 @@ preview()
 </script>
 `
 
+const EVALUATE_PAGE = `<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provena — Evaluate</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
+@media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }
+main { max-width: 40rem; margin: 2rem auto; }
+h1 { font-size: 1.125rem; font-weight: 700; }
+.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
+textarea { width: 100%; min-height: 12rem; font-size: 0.875rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; resize: vertical; font-family: inherit; }
+button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+.card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-top: 1rem; }
+.card .verdict { font-size: 1.125rem; font-weight: 700; }
+.card .verdict.apply { color: #2e7d32; }
+.card .verdict.consider { color: #b26a00; }
+.card .verdict.skip { color: #c62828; }
+.card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 1rem; }
+.card ul { margin: 0.25rem 0 0 1.125rem; }
+.card li { font-size: 0.875rem; color: #333; margin-bottom: 0.375rem; }
+.card .trace { font-size: 0.8125rem; color: #555; margin-top: 0.25rem; }
+.meta { color: #777; font-size: 0.8125rem; margin-top: 0.5rem; }
+.site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
+.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
+.site .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
+.site .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
+.site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
+</style>
+<main>
+${siteNav('evaluate')}
+<h1>Evaluate an opportunity</h1>
+<p class="subtitle">Paste a job description. Provena looks for signals it can honestly evaluate against your profile.</p>
+<label for="jd">Job description</label>
+<textarea id="jd" placeholder="Staff Software Engineer..."></textarea>
+<button onclick="evaluate()">Evaluate</button>
+<div id="result"></div>
+</main>
+<script>
+const result = document.getElementById('result')
+let lastEv = null
+async function evaluate() {
+  const jd = document.getElementById('jd').value.trim()
+  if (!jd) return
+  result.innerHTML = '<p class="meta">Evaluating...</p>'
+  const res = await fetch('/api/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jd }),
+  })
+  if (!res.ok) { result.innerHTML = '<p class="meta">Error: ' + await res.text() + '</p>'; return }
+  const ev = await res.json()
+  lastEv = ev
+  result.innerHTML = renderResult(ev)
+}
+function checkIcon(status) {
+  return status === 'violated' ? '✗' : status === 'satisfied' ? '✓' : '?'
+}
+function renderResult(ev) {
+  const parts = []
+  parts.push('<div class="card"><div class="verdict ' + ev.verdict + '">' + ev.verdict.toUpperCase() + '</div>')
+  parts.push('<h3>Criteria</h3><ul>')
+  parts.push(ev.criteria.map(c => '<li>' + checkIcon(c.status) + ' <strong>' + c.criterion + '</strong> — ' + c.detail + '</li>').join(''))
+  parts.push('</ul>')
+  if (ev.demonstrated.length) {
+    parts.push('<h3>Can demonstrate</h3><ul>')
+    parts.push(ev.demonstrated.map(m => '<li>✓ <strong>' + m.capabilityName + '</strong>' +
+      '<div class="trace">JD: "' + m.matchedPhrases.join('", "') + '" → your evidence: ' + m.evidence.join('; ') + '</div></li>').join(''))
+    parts.push('</ul>')
+  }
+  if (ev.gaps.length) {
+    parts.push('<h3>Gaps</h3><ul>')
+    parts.push(ev.gaps.map(m => '<li>△ <strong>' + m.capabilityName + '</strong> — recognized but no recorded evidence</li>').join(''))
+    parts.push('</ul>')
+  }
+  parts.push('<h3>Not evaluated</h3>')
+  parts.push('<p class="meta">' + ev.notEvaluated + ' part(s) of the description could not be read against the profile vocabulary.</p>')
+  parts.push('<p class="meta">Coverage ' + Math.round(ev.coverage * 100) + '% · Interpreted ' + Math.round(ev.interpretationCoverage * 100) + '% · Confidence ' + Math.round(ev.confidence * 100) + '%</p>')
+  if (ev.verdict === 'apply') parts.push('<button onclick="prepare()">Prepare application</button>')
+  parts.push('</div>')
+  return parts.join('')
+}
+function prepare() {
+  const dc = lastEv ? lastEv.decisionContext || {} : {}
+  const q = new URLSearchParams()
+  if (dc.targetRole) q.set('role', dc.targetRole)
+  if (dc.emphasize && dc.emphasize.length) q.set('emphasize', dc.emphasize.join(','))
+  location.href = '/cv?' + q.toString()
+}
+</script>
+`
+
 async function renderCV(context: CVContext): Promise<CVProjection> {
   return cvProjector(profile, context)
 }
@@ -525,6 +619,26 @@ export default {
           markdown: markdownRenderer.render(cv),
           html: htmlRenderer.render(cv),
         }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
+    if (request.method === 'GET' && url.pathname === '/evaluate') {
+      return new Response(EVALUATE_PAGE, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/evaluate') {
+      try {
+        const body = (await request.json()) as { jd?: string }
+        if (!body.jd || typeof body.jd !== 'string') {
+          return new Response('Missing jd', { status: 400 })
+        }
+        return new Response(JSON.stringify(evaluateOpportunity(body.jd, profile)), {
           headers: { 'Content-Type': 'application/json' },
         })
       } catch (e) {

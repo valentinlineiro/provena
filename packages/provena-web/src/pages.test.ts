@@ -63,3 +63,30 @@ test('AppShell HTML templates include container queries and layout primitives', 
     assert.ok(html.includes('.bottom-sheet'), `Missing .bottom-sheet in ${route}`)
   }
 })
+
+test('Responsive validation gate assertions for /evaluate', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/evaluate'), env)
+  const html = await res.text()
+
+  // Assert that button touch targets meet minimum sizing (padding: 0.75rem or min-height: 44px)
+  assert.ok(
+    html.includes('padding: 0.75rem') || html.includes('min-height: 44px'),
+    'Button touch targets must meet minimum sizing (padding: 0.75rem or min-height: 44px)'
+  )
+
+  // Assert sticky positioning and backdrop styling for compact .action-bar rules
+  assert.ok(
+    html.includes('position: sticky') && (html.includes('backdrop-filter') || html.includes('background: rgba')),
+    '.action-bar must feature sticky positioning and backdrop styling'
+  )
+
+  // Assert no fixed pixel width constraints on input containers (textarea uses width 100%)
+  assert.ok(
+    html.includes('width: 100%'),
+    'Input containers (textarea) must use width 100%'
+  )
+  assert.ok(
+    !/textarea\s*\{[^}]*width:\s*\d+px/.test(html),
+    'Input containers (textarea) must not have fixed pixel width constraints'
+  )
+})

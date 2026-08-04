@@ -744,3 +744,45 @@ test('terminal formatting occurs only AFTER selection and budgeting', () => {
   const exp1 = cv.experiences.find(e => e.organization === 'Summa Networks')!
   assert.equal(exp1.achievements[0], 'Architected distributed systems proposal with technical leadership (Outcome: Adopted across all teams)')
 })
+
+test('cvProjector does NOT inject implicit leadership terms when context.emphasize is explicitly provided', () => {
+  const p: Profile = {
+    ...makeProfile(),
+    preferences: { interests: [] },
+    experiences: [
+      {
+        id: 'exp-1',
+        organization: 'Summa Networks',
+        title: 'Team Lead',
+        start: '2025-10',
+        achievements: ['Led a software engineering team and provided technical leadership'],
+        technologies: ['Java'],
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+    ],
+  }
+  const cv = cvProjector(p, { emphasize: ['Java'] })
+  assert.equal(cv.experiences[0]!.contribution, 'Historical')
+})
+
+test('when context.emphasize is an explicit empty array [], relevanceVocab is empty (0 terms)', () => {
+  const p: Profile = {
+    ...makeProfile(),
+    preferences: { interests: ['Software Architecture'] },
+    experiences: [
+      {
+        id: 'exp-1',
+        organization: 'Summa Networks',
+        title: 'Senior Software Engineer',
+        start: '2025-10',
+        achievements: ['Designed Clean Architecture and led software engineering team'],
+        technologies: ['Java'],
+        capabilityIds: [],
+        evidenceIds: [],
+      },
+    ],
+  }
+  const cv = cvProjector(p, { emphasize: [] })
+  assert.equal(cv.experiences[0]!.contribution, 'Historical')
+})

@@ -531,10 +531,7 @@ export function buildCvProjection(profile: Profile, context: CVContext = {}): CV
   // R2 — select before compress: rank by target relevance, then evidence
   // strength (stable), then cap. The budget removes from the weakest margin.
   const cap = (list: readonly string[], max: number): string[] => list.slice(0, max)
-  const relevanceVocab = [
-    ...(context.emphasize && context.emphasize.length > 0 ? context.emphasize : (profile.preferences?.interests ?? [])),
-    'Technical Leadership',
-  ]
+  const relevanceVocab = context.emphasize ?? profile.preferences?.interests ?? []
   const capEvidence = (list: readonly string[], max: number): string[] =>
     cap(rankAchievements(list, relevanceVocab), max)
 

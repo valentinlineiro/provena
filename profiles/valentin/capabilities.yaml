@@ -11,6 +11,14 @@
 - id: 72e03a49-5880-401e-8aec-c1f6c0b21efd
   name: Technical Leadership
   evidenceIds: []
+  signals:
+    - technical leadership
+    - technical direction
+    - technical ownership
+    - drive technical decisions
+    - mentor engineers
+    - lead engineering initiatives
+    - technical roadmap
   provenance: *ref_0
 - id: 140e92d7-f793-4001-a737-7acf8e319871
   name: Formal Verification
@@ -51,14 +59,38 @@
 - id: 49dd7b2b-0dc6-4d4a-86ba-5a409e0ac610
   name: Developer Productivity
   evidenceIds: []
+  signals:
+    - developer productivity
+    - developer experience
+    - devops
+    - ci/cd
+    - build tooling
+    - internal tools
+    - engineering efficiency
   provenance: *ref_0
 - id: 7ab84b2f-5ef0-4619-8784-c700f27c2694
   name: AI-Assisted Engineering
   evidenceIds: []
+  signals:
+    - ai-assisted engineering
+    - ai-assisted development
+    - ai engineering
+    - llm
+    - genai
+    - ai tools
   provenance: *ref_0
 - id: 420b07b6-c49e-43ee-a409-f569e60378ab
   name: Software Architecture
   evidenceIds: []
+  signals:
+    - software architecture
+    - system architecture
+    - architectural design
+    - architecture decisions
+    - architectural decisions
+    - design systems
+    - technical design
+    - clean architecture
   provenance: *ref_0
 - id: e04c4fe8-7f64-4b3a-96e6-e2b729b09b06
   name: Artificial Intelligence (AI)
@@ -71,6 +103,15 @@
 - id: 5cdea70c-e1b8-4699-abec-cbc326ba0ab1
   name: Distributed Systems
   evidenceIds: []
+  signals:
+    - distributed systems
+    - distributed architecture
+    - high availability
+    - fault tolerance
+    - scalability
+    - microservices
+    - messaging systems
+    - event-driven
   provenance: *ref_0
 - id: dbda0e3e-2592-4f27-98f6-147d341a8fc8
   name: Cloud-Native Architecture

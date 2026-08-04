@@ -11,4 +11,11 @@ describe('Canonical Profile Integration (profiles/valentin)', () => {
     assert.equal(workspace.identity.person.name, 'Valentín Liñeiro Barea')
     assert.ok(workspace.experiences.length > 0)
   })
+
+  it('capabilities carry signals for opportunity evaluation', async () => {
+    const profilePath = path.resolve(process.cwd(), 'profiles/valentin')
+    const loader = new YamlWorkspaceLoader()
+    const { profile } = await loader.load(profilePath)
+    assert.ok(profile.capabilities.some(c => (c.signals ?? []).length > 0))
+  })
 })

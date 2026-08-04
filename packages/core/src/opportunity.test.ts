@@ -289,6 +289,27 @@ Infrastructure containerised with Kubernetes and Docker.
   assert.ok(gapNames.includes('Artificial Intelligence (AI)'))
 })
 
+test('real JD evaluation #7 (Wiz): Principal Solutions Engineer JD evaluates Principal role, unknown workMode, and Cloud-Native Architecture as demonstrated', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+As a Principal Solutions Engineer you will work closely with Wiz's CTO.
+Career path focused on public cloud architecture (AWS, Azure, GCP) and cloud-native security.
+Demonstrable proficiency in high-level languages like Python and advanced shell scripting.
+SME level knowledge of Kubernetes and containers with technical leadership.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'unknown')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('Cloud-Native Architecture'))
+  assert.ok(demonstratedNames.includes('Python (Programming Language)'))
+  assert.ok(demonstratedNames.includes('Kubernetes'))
+  assert.ok(demonstratedNames.includes('Technical Leadership'))
+})
+
+
 
 
 

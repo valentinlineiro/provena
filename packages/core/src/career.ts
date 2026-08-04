@@ -51,8 +51,13 @@ export function deriveStrengths(profile: Profile): Strength[] {
     .sort((a, b) => b.count - a.count)
 }
 
+function experienceMilestones(profile: Profile, expId: string, achievements: number): number {
+  const linked = (profile.contributions ?? []).filter(c => c.experienceRef === expId).length
+  return achievements + linked
+}
+
 export function deriveEvidenceCount(profile: Profile): number {
-  return orderedExperiences(profile).reduce((sum, e) => sum + e.achievements.length, 0)
+  return orderedExperiences(profile).reduce((sum, e) => sum + experienceMilestones(profile, e.id, e.achievements.length), 0)
 }
 
 export function findEvidenceGaps(profile: Profile): Gap[] {
@@ -62,7 +67,7 @@ export function findEvidenceGaps(profile: Profile): Gap[] {
     .map(e => ({
       organization: e.organization,
       dates: e.start + (e.end ? ' — ' + e.end : ' — present'),
-      milestones: e.achievements.length,
+      milestones: experienceMilestones(profile, e.id, e.achievements.length),
     }))
     .sort((a, b) => a.milestones - b.milestones)
 }
@@ -76,7 +81,7 @@ export function profileToTimeline(profile: Profile, updatedAt: string): CareerTi
       title: e.title,
       start: e.start,
       end: e.end ?? null,
-      hitos: e.achievements.length,
+      hitos: experienceMilestones(profile, e.id, e.achievements.length),
       capabilities: capabilityNames(profile, e),
     })),
   }

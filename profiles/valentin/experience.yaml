@@ -48,7 +48,9 @@
     - "Apache Kafka"
     - "Kubernetes"
     - "Microsoft Azure"
-  capabilityIds: []
+  capabilityIds:
+    - f015666b-67f0-4f20-a0a2-de593c30761a
+    - 84f33db4-1a56-43ce-b04a-8db818a024c3
   evidenceIds: []
   provenance: *ref_0
 - id: 406503ae-63be-46e4-b7a1-c22f1bc473a8
@@ -71,7 +73,8 @@
     - "Spring Boot"
     - "Angular"
     - "Legacy Migration"
-  capabilityIds: []
+  capabilityIds:
+    - 84f33db4-1a56-43ce-b04a-8db818a024c3
   evidenceIds: []
   provenance: *ref_0
 - id: 7b6efa67-f0db-459c-a110-3ae58d6236a8
@@ -97,7 +100,8 @@
     - "Formal Concept Analysis"
     - "Python"
     - "Knowledge Extraction"
-  capabilityIds: []
+  capabilityIds:
+    - 86791087-2d38-4f45-8e0c-bbc7b2521176
   evidenceIds: []
   provenance: *ref_0
 - id: 477ec0bc-1636-4f5e-9923-1bd2316efffc

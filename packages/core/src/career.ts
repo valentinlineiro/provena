@@ -31,14 +31,11 @@ function orderedExperiences(profile: Profile) {
   return profile.identity.experienceIds.map(id => map.get(id)).filter((e): e is NonNullable<typeof e> => e !== undefined)
 }
 
-// ponytail: capabilityIds are empty in real data — technologies carry the signal.
-// Resolution uses ids when present, else falls back to technologies.
 function capabilityNames(profile: Profile, exp: { capabilityIds: readonly string[]; technologies: readonly string[] }): string[] {
-  if (exp.capabilityIds.length > 0) {
-    const map = new Map(profile.capabilities.map(c => [c.id, c]))
-    return exp.capabilityIds.map(id => map.get(id)?.name).filter((n): n is string => n !== undefined)
-  }
-  return [...exp.technologies]
+  const capMap = new Map(profile.capabilities.map(c => [c.id, c]))
+  const resolved = exp.capabilityIds.map(id => capMap.get(id)?.name).filter((n): n is string => n !== undefined)
+  const combined = new Set([...resolved, ...exp.technologies])
+  return [...combined]
 }
 
 export function deriveStrengths(profile: Profile): Strength[] {

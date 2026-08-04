@@ -167,7 +167,10 @@ export default {
         "Kubernetes",
         "Microsoft Azure"
       ],
-      "capabilityIds": [],
+      "capabilityIds": [
+        "f015666b-67f0-4f20-a0a2-de593c30761a",
+        "84f33db4-1a56-43ce-b04a-8db818a024c3"
+      ],
       "evidenceIds": [],
       "provenance": {
         "source": "linkedin",
@@ -192,7 +195,9 @@ export default {
         "Angular",
         "Legacy Migration"
       ],
-      "capabilityIds": [],
+      "capabilityIds": [
+        "84f33db4-1a56-43ce-b04a-8db818a024c3"
+      ],
       "evidenceIds": [],
       "provenance": {
         "source": "linkedin",
@@ -220,7 +225,9 @@ export default {
         "Python",
         "Knowledge Extraction"
       ],
-      "capabilityIds": [],
+      "capabilityIds": [
+        "86791087-2d38-4f45-8e0c-bbc7b2521176"
+      ],
       "evidenceIds": [],
       "provenance": {
         "source": "linkedin",

@@ -199,4 +199,24 @@ Flexible Remuneration for extra meal costs (up to €70/mo) and public transport
   assert.equal(ev.verdict, 'consider')
 })
 
+test('real JD evaluation #3 (Pleo): Staff Applied AI Engineer JD evaluates historical capabilities correctly', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+Staff Applied AI Engineer
+Build and ship multiple AI-powered product features across agentic workflows, spend intelligence, automated actions.
+Deep proficiency with Python, SQL, REST APIs and infrastructure containerised with Kubernetes.
+For our Team, we offer both hybrid and fully remote working options.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'satisfied')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('Python (Programming Language)'))
+  assert.ok(demonstratedNames.includes('Kubernetes'))
+  assert.ok(demonstratedNames.includes('REST APIs'))
+})
+
+
 

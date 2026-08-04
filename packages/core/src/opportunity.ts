@@ -155,6 +155,16 @@ function evidenceByCapability(profile: Profile): Map<string, string[]> {
       map.set(id, list)
     }
   }
+  for (const e of profile.experiences ?? []) {
+    for (const id of e.capabilityIds ?? []) {
+      const list = map.get(id) ?? []
+      const evText = e.achievements?.[0] ?? e.summary
+      if (evText && !list.includes(evText)) {
+        list.push(evText)
+        map.set(id, list)
+      }
+    }
+  }
   return map
 }
 

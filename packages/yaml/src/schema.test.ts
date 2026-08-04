@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseExperiences, parsePerson } from './schema.js'
+import { parseExperiences, parsePerson, parseCapabilities } from './schema.js'
 
 test('parseExperiences rejects a numeric start date with a descriptive error', () => {
   const raw = [
@@ -36,4 +36,21 @@ test('parseExperiences accepts a well-formed array', () => {
 
 test('parsePerson rejects a missing name', () => {
   assert.throws(() => parsePerson({ urls: {} }), /person\.yaml: invalid or missing field\(s\): name/)
+})
+
+test('parseCapabilities accepts an optional signals array', () => {
+  const raw = [{
+    id: 'cap-1',
+    name: 'Technical Leadership',
+    evidenceIds: [],
+    signals: ['technical leadership', 'mentor engineers'],
+  }]
+  const parsed = parseCapabilities(raw)
+  assert.equal(parsed.length, 1)
+  assert.deepEqual(parsed[0]!.signals, ['technical leadership', 'mentor engineers'])
+})
+
+test('parseCapabilities rejects a non-string signals array', () => {
+  const raw = [{ id: 'cap-1', name: 'X', evidenceIds: [], signals: [42] }]
+  assert.throws(() => parseCapabilities(raw), /capabilities\.yaml\[0\]: invalid or missing field\(s\): signals/)
 })

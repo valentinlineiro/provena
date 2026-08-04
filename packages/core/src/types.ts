@@ -24,6 +24,7 @@ export interface Evidence {
 export interface Capability {
   readonly id: string
   readonly name: string
+  readonly signals?: readonly string[]
   readonly description?: string
   readonly evidenceIds: readonly string[]
   readonly provenance?: Provenance

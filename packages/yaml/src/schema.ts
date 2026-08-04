@@ -115,13 +115,15 @@ export function parseRecommendations(raw: unknown, file = 'recommendations.yaml'
 }
 
 export function parseCapabilities(raw: unknown, file = 'capabilities.yaml'): Capability[] {
-  return parseArray<Capability>(raw, file, (v) =>
-    checks(v, [
+  return parseArray<Capability>(raw, file, (v) => {
+    const bad = checks(v, [
       ['id', isString],
       ['name', isString],
       ['evidenceIds', isStringArray],
-    ]),
-  )
+    ])
+    if ('signals' in v && !isStringArray(v['signals'])) bad.push('signals')
+    return bad
+  })
 }
 
 export function parseEvidence(raw: unknown, file = 'evidence.yaml'): Evidence[] {

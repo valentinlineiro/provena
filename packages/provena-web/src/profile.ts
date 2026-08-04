@@ -113,6 +113,13 @@ export default {
       "247c3df9-1f2e-48f1-87ad-fa824e2be3b2",
       "a7c5059b-bf5f-4ad1-85d6-450a159c2117",
       "a578edcf-f03d-4dd0-901d-1c0c9684fc50"
+    ],
+    "contributionIds": [
+      "summa-clean-architecture",
+      "summa-ai-assisted-engineering",
+      "summa-roadmap-ownership-4g-core",
+      "summa-telecom-modernization",
+      "summa-maintainability-velocity"
     ]
   },
   "experiences": [
@@ -123,13 +130,7 @@ export default {
       "start": "2025-10",
       "location": "Cádiz, Andalusia, Spain · Remote",
       "summary": "I design internal systems that improve how engineering teams build, review, onboard, and deliver software. My work combines software architecture, developer productivity, and AI-assisted engineering to reduce friction, improve decision-making, and help teams work with more leverage.",
-      "achievements": [
-        "Designed a Clean Architecture proposal for the HSS backend — adopted as the foundation for a separate product (SMSC)",
-        "Became the internal reference for AI-assisted engineering; the company's AI Lead shared experiments and sought input on internal training",
-        "Evolved from ticket-based development to owning the product roadmap, driving architectural improvements in a legacy 4G network core",
-        "Drove modernization of a critical telecom system without compromising stability",
-        "Reduced team friction by improving maintainability, simplifying decisions, and accelerating delivery velocity"
-      ],
+      "achievements": [],
       "technologies": [
         "Java",
         "Spring",
@@ -400,6 +401,15 @@ export default {
       "id": "72e03a49-5880-401e-8aec-c1f6c0b21efd",
       "name": "Technical Leadership",
       "evidenceIds": [],
+      "signals": [
+        "technical leadership",
+        "technical direction",
+        "technical ownership",
+        "drive technical decisions",
+        "mentor engineers",
+        "lead engineering initiatives",
+        "technical roadmap"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -490,6 +500,15 @@ export default {
       "id": "49dd7b2b-0dc6-4d4a-86ba-5a409e0ac610",
       "name": "Developer Productivity",
       "evidenceIds": [],
+      "signals": [
+        "developer productivity",
+        "developer experience",
+        "devops",
+        "ci/cd",
+        "build tooling",
+        "internal tools",
+        "engineering efficiency"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -499,6 +518,14 @@ export default {
       "id": "7ab84b2f-5ef0-4619-8784-c700f27c2694",
       "name": "AI-Assisted Engineering",
       "evidenceIds": [],
+      "signals": [
+        "ai-assisted engineering",
+        "ai-assisted development",
+        "ai engineering",
+        "llm",
+        "genai",
+        "ai tools"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -508,6 +535,16 @@ export default {
       "id": "420b07b6-c49e-43ee-a409-f569e60378ab",
       "name": "Software Architecture",
       "evidenceIds": [],
+      "signals": [
+        "software architecture",
+        "system architecture",
+        "architectural design",
+        "architecture decisions",
+        "architectural decisions",
+        "design systems",
+        "technical design",
+        "clean architecture"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -535,6 +572,16 @@ export default {
       "id": "5cdea70c-e1b8-4699-abec-cbc326ba0ab1",
       "name": "Distributed Systems",
       "evidenceIds": [],
+      "signals": [
+        "distributed systems",
+        "distributed architecture",
+        "high availability",
+        "fault tolerance",
+        "scalability",
+        "microservices",
+        "messaging systems",
+        "event-driven"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -1046,6 +1093,96 @@ export default {
     }
   ],
   "evidence": [],
+  "contributions": [
+    {
+      "id": "summa-clean-architecture",
+      "experienceRef": "822fcbb8-f7c8-40a7-bc7d-cb61092c5861",
+      "summary": "Designed a Clean Architecture proposal for the HSS backend.\n",
+      "outcome": {
+        "summary": "Adopted as the architectural foundation of the SMSC product.\n"
+      },
+      "scope": {
+        "level": "product",
+        "role": "initiator"
+      },
+      "capabilityIds": [
+        "420b07b6-c49e-43ee-a409-f569e60378ab"
+      ],
+      "technologies": [
+        "java",
+        "spring"
+      ],
+      "evidenceIds": []
+    },
+    {
+      "id": "summa-ai-assisted-engineering",
+      "experienceRef": "822fcbb8-f7c8-40a7-bc7d-cb61092c5861",
+      "summary": "Established AI-assisted engineering workflows and acted as internal technical reference.\n",
+      "outcome": {
+        "summary": "Partnered with company AI Lead to guide internal tooling experiments and team training.\n"
+      },
+      "scope": {
+        "level": "organization",
+        "role": "lead"
+      },
+      "capabilityIds": [],
+      "technologies": [
+        "AI-Assisted Engineering"
+      ],
+      "evidenceIds": []
+    },
+    {
+      "id": "summa-roadmap-ownership-4g-core",
+      "experienceRef": "822fcbb8-f7c8-40a7-bc7d-cb61092c5861",
+      "summary": "Evolved role to own the product roadmap and architectural improvements for legacy 4G network core.\n",
+      "outcome": {
+        "summary": "Shifted engineering execution from ticket-based delivery to strategic product architecture.\n"
+      },
+      "scope": {
+        "level": "product",
+        "role": "lead"
+      },
+      "capabilityIds": [],
+      "technologies": [
+        "4G Network Core",
+        "Java"
+      ],
+      "evidenceIds": []
+    },
+    {
+      "id": "summa-telecom-modernization",
+      "experienceRef": "822fcbb8-f7c8-40a7-bc7d-cb61092c5861",
+      "summary": "Drove modernization initiatives across critical telecom backend systems.\n",
+      "outcome": {
+        "summary": "Upgraded platform capabilities without compromising live network stability.\n"
+      },
+      "scope": {
+        "level": "product",
+        "role": "contributor"
+      },
+      "capabilityIds": [],
+      "technologies": [
+        "Java",
+        "Spring"
+      ],
+      "evidenceIds": []
+    },
+    {
+      "id": "summa-maintainability-velocity",
+      "experienceRef": "822fcbb8-f7c8-40a7-bc7d-cb61092c5861",
+      "summary": "Streamlined architectural decisions and codebase maintainability across engineering workflows.\n",
+      "outcome": {
+        "summary": "Reduced team friction and accelerated feature delivery velocity.\n"
+      },
+      "scope": {
+        "level": "team",
+        "role": "lead"
+      },
+      "capabilityIds": [],
+      "technologies": [],
+      "evidenceIds": []
+    }
+  ],
   "preferences": {
     "roles": [
       "Staff Engineer",

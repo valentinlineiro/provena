@@ -8,6 +8,9 @@ const env = {} as never
 test('Evaluate page renders the nav, title and paste box', async () => {
   const res = await worker.fetch(new Request('https://provena.example/evaluate'), env)
   const html = await res.text()
+  assert.ok(html.includes('<div class="app-shell">'))
+  assert.ok(html.includes('<div class="split-view" style="--split-threshold: 54rem;">'))
+  assert.ok(html.includes('<div class="action-bar">'))
   assert.ok(html.includes('<a class="active" href="/evaluate">Evaluate</a>'))
   assert.ok(html.includes('<h1>Evaluate an opportunity</h1>'))
   assert.ok(html.includes('<textarea id="jd"'))

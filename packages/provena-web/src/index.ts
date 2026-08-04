@@ -91,10 +91,11 @@ export const APP_SHELL_CSS = `
 .site-nav .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
 .site-nav .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 .page { flex: 1; padding: 0 var(--space-page-inline) 2rem; }
-.page-content { container-type: inline-size; container-name: page; width: 100%; max-width: 40rem; margin: 0 auto; }
+.page-content { container-type: inline-size; container-name: page; width: 100%; max-width: 60rem; margin: 0 auto; }
 .stack { display: flex; flex-direction: column; gap: var(--stack-gap, 1.25rem); }
 .readable { width: min(100%, 44rem); margin-inline: auto; }
 .split-view { display: flex; flex-direction: column; gap: 1.5rem; }
+.split-view > * { flex: 1; min-width: 0; }
 @container page (min-width: var(--split-threshold, 54rem)) {
   .split-view { flex-direction: row; align-items: flex-start; }
   .action-bar { position: static; background: none; backdrop-filter: none; padding: 0; border: none; }
@@ -522,14 +523,13 @@ const EVALUATE_PAGE = `<!DOCTYPE html>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
-@media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }
-main { max-width: 40rem; margin: 2rem auto; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
 h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
 label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
 textarea { width: 100%; min-height: 12rem; font-size: 0.875rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; resize: vertical; font-family: inherit; }
 button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+.action-bar button { margin-top: 0; }
 .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-top: 1rem; }
 .card .verdict { font-size: 1.125rem; font-weight: 700; }
 .card .verdict.apply { color: #2e7d32; }
@@ -540,21 +540,26 @@ button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; 
 .card li { font-size: 0.875rem; color: #333; margin-bottom: 0.375rem; }
 .card .trace { font-size: 0.8125rem; color: #555; margin-top: 0.25rem; }
 .meta { color: #777; font-size: 0.8125rem; margin-top: 0.5rem; }
-.site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
-.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
-.site .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
-.site .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
-.site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 </style>
-<main>
-${siteNav('evaluate')}
-<h1>Evaluate an opportunity</h1>
-<p class="subtitle">Paste a job description. Provena looks for signals it can honestly evaluate against your profile.</p>
-<label for="jd">Job description</label>
-<textarea id="jd" placeholder="Staff Software Engineer..."></textarea>
-<button onclick="evaluate()">Evaluate</button>
-<div id="result"></div>
-</main>
+${renderAppShell(
+  'evaluate',
+  '<div class="page-header">' +
+  '<h1>Evaluate an opportunity</h1>' +
+  '<p class="subtitle">Paste a job description. Provena looks for signals it can honestly evaluate against your profile.</p>' +
+  '</div>',
+  '<div class="split-view" style="--split-threshold: 54rem;">' +
+  '<div>' +
+  '<label for="jd">Job description</label>' +
+  '<textarea id="jd" placeholder="Staff Software Engineer..."></textarea>' +
+  '<div class="action-bar">' +
+  '<button onclick="evaluate()">Evaluate</button>' +
+  '</div>' +
+  '</div>' +
+  '<div>' +
+  '<div id="result"></div>' +
+  '</div>' +
+  '</div>'
+)}
 <script>
 const result = document.getElementById('result')
 let lastEv = null

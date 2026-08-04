@@ -371,8 +371,9 @@ document.getElementById('experiences').innerHTML = profile.identity.experienceId
 
 const capNames = [...suggestions.strengths]
 for (const name of prefillEmphasize) if (!capNames.includes(name)) capNames.push(name)
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]) }
 document.getElementById('caps').innerHTML = capNames.map(s =>
-  '<label><input type="checkbox" data-cap="' + s + '" checked> ' + s + '</label>'
+  '<label><input type="checkbox" data-cap="' + esc(s) + '" checked> ' + esc(s) + '</label>'
 ).join('')
 document.querySelectorAll('[data-cap]').forEach(el => {
   if (prefillEmphasize.length && !prefillEmphasize.includes(el.dataset.cap)) el.checked = false

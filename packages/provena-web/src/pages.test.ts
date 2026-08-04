@@ -48,3 +48,18 @@ test('POST /api/cv/preview returns docHtml along with markdown and cv', async ()
   assert.ok(json.cv)
   assert.ok(json.docHtml)
 })
+
+test('AppShell HTML templates include container queries and layout primitives', async () => {
+  const routes = ['/', '/cv', '/evaluate']
+  for (const route of routes) {
+    const res = await worker.fetch(new Request(`https://provena.example${route}`), env)
+    const html = await res.text()
+    assert.ok(html.includes('container-type: inline-size'), `Missing container-type in ${route}`)
+    assert.ok(html.includes('container-name: page'), `Missing container-name in ${route}`)
+    assert.ok(html.includes('.stack'), `Missing .stack in ${route}`)
+    assert.ok(html.includes('.readable'), `Missing .readable in ${route}`)
+    assert.ok(html.includes('.split-view'), `Missing .split-view in ${route}`)
+    assert.ok(html.includes('.action-bar'), `Missing .action-bar in ${route}`)
+    assert.ok(html.includes('.bottom-sheet'), `Missing .bottom-sheet in ${route}`)
+  }
+})

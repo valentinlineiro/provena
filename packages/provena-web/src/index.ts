@@ -91,7 +91,19 @@ export const APP_SHELL_CSS = `
 .site-nav .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
 .site-nav .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 .page { flex: 1; padding: 0 var(--space-page-inline) 2rem; }
-.page-content { max-width: 40rem; margin: 0 auto; }
+.page-content { container-type: inline-size; container-name: page; width: 100%; max-width: 40rem; margin: 0 auto; }
+.stack { display: flex; flex-direction: column; gap: var(--stack-gap, 1.25rem); }
+.readable { width: min(100%, 44rem); margin-inline: auto; }
+.split-view { display: flex; flex-direction: column; gap: 1.5rem; }
+@container page (min-width: var(--split-threshold, 54rem)) {
+  .split-view { flex-direction: row; align-items: flex-start; }
+  .action-bar { position: static; background: none; backdrop-filter: none; padding: 0; border: none; }
+}
+.action-bar { position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 0.75rem var(--space-page-inline); z-index: 10; border-top: 1px solid #e5e5e5; }
+.bottom-sheet { position: fixed; inset: auto 0 0 0; background: #fff; border-radius: 1rem 1rem 0 0; padding: 1.5rem; max-height: 85vh; overflow-y: auto; z-index: 100; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15); transform: translateY(100%); transition: transform 0.25s ease-out; }
+.bottom-sheet.open { transform: translateY(0); }
+.bottom-sheet-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.25s ease-out; }
+.bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; }
 `
 
 const PAGE = `<!DOCTYPE html>
@@ -319,6 +331,7 @@ const CV_PAGE = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Provena — Prepare</title>
 <style>
+${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
 .cv-workspace { display: flex; min-height: 100vh; background: #f1f5f9; }
@@ -507,6 +520,7 @@ const EVALUATE_PAGE = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Provena — Evaluate</title>
 <style>
+${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
 @media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }

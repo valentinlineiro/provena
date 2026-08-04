@@ -30,4 +30,21 @@ test('Prepare page renders the site nav with Prepare active and no back link', a
   assert.ok(html.includes('Download .md'))
   assert.ok(html.includes('Open HTML / Print PDF'))
   assert.ok(html.includes("addEventListener('input', preview)"))
+  assert.ok(html.includes('.cv-workspace'))
+  assert.ok(html.includes('.cv-workspace-sidebar'))
+  assert.ok(html.includes('.cv-canvas'))
+  assert.ok(html.includes('.cv-sheet'))
+  assert.ok(html.includes('@media print'))
+})
+
+test('POST /api/cv/preview returns docHtml along with markdown and cv', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/api/cv/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  }), env)
+  const json = await res.json() as any
+  assert.ok(json.markdown)
+  assert.ok(json.cv)
+  assert.ok(json.docHtml)
 })

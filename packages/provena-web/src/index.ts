@@ -284,9 +284,29 @@ const CV_PAGE = `<!DOCTYPE html>
 <title>Provena — Prepare</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
-@media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }
-main { max-width: 40rem; margin: 2rem auto; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+.cv-workspace { display: flex; min-height: 100vh; background: #f1f5f9; }
+.cv-workspace-sidebar { width: 340px; flex-shrink: 0; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 1.5rem; overflow-y: auto; }
+.cv-canvas { flex: 1; padding: 2rem; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+.cv-sheet { background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); }
+
+@media (max-width: 900px) {
+  .cv-workspace { flex-direction: column; }
+  .cv-workspace-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+  .cv-canvas { padding: 1rem; overflow-x: auto; }
+  .cv-sheet { max-width: 100%; transform: scale(min(1, calc((100vw - 2rem) / 800))); transform-origin: top center; }
+}
+
+@media print {
+  body { background: #ffffff; padding: 0; margin: 0; }
+  .cv-workspace { display: block; }
+  .cv-workspace-sidebar { display: none !important; }
+  .cv-canvas { display: contents; padding: 0; margin: 0; background: none; }
+  .cv-sheet { display: contents; box-shadow: none; padding: 0; margin: 0; background: none; transform: none; }
+}
+
+${htmlRenderer.renderStyles()}
+
 h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
 label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
@@ -306,55 +326,59 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 .site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 .your-cv { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
 </style>
-<main>
-${siteNav('prepare')}
-<h1>Prepare</h1>
-<p class="subtitle">Target a role, review suggestions, export.</p>
+<div class="cv-workspace">
+  <aside class="cv-workspace-sidebar">
+    ${siteNav('prepare')}
+    <h1>Prepare</h1>
+    <p class="subtitle">Target a role, review suggestions, export.</p>
 
-<section>
-  <label for="role">Target role</label>
-  <input id="role" list="roles" placeholder="Staff Software Engineer">
-  <datalist id="roles">
-    <option value="Senior Software Engineer">
-    <option value="Staff Software Engineer">
-    <option value="Principal Software Engineer">
-  </datalist>
-</section>
+    <section>
+      <label for="role">Target role</label>
+      <input id="role" list="roles" placeholder="Staff Software Engineer">
+      <datalist id="roles">
+        <option value="Senior Software Engineer">
+        <option value="Staff Software Engineer">
+        <option value="Principal Software Engineer">
+      </datalist>
+    </section>
 
-<section>
-  <label for="audience">Audience</label>
-  <select id="audience">
-    <option value="hiring-manager">Hiring manager</option>
-    <option value="recruiter">Recruiter</option>
-  </select>
-</section>
+    <section>
+      <label for="audience">Audience</label>
+      <select id="audience">
+        <option value="hiring-manager">Hiring manager</option>
+        <option value="recruiter">Recruiter</option>
+      </select>
+    </section>
 
-<section>
-  <label>Generate summary automatically</label>
-  <div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>
-</section>
+    <section>
+      <label>Generate summary automatically</label>
+      <div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>
+    </section>
 
-<section>
-  <label>Experiences (uncheck to exclude)</label>
-  <div class="check" id="experiences"></div>
-</section>
+    <section>
+      <label>Experiences (uncheck to exclude)</label>
+      <div class="check" id="experiences"></div>
+    </section>
 
-<section>
-  <label>Suggested emphasis (from your strengths — edit freely)</label>
-  <div class="check" id="caps"></div>
-</section>
+    <section>
+      <label>Suggested emphasis (from your strengths — edit freely)</label>
+      <div class="check" id="caps"></div>
+    </section>
 
-<div class="meta" id="meta"></div>
-<div class="meta" id="readiness"></div>
+    <div class="meta" id="meta"></div>
+    <div class="meta" id="readiness"></div>
 
-<div class="your-cv">Your CV</div>
-<div class="row">
-  <button onclick="exportMd()">Download .md</button>
-  <button onclick="exportHtml()">Open HTML / Print PDF</button>
+    <div class="your-cv">Your CV</div>
+    <div class="row">
+      <button onclick="exportMd()">Download .md</button>
+      <button onclick="exportHtml()">Open HTML / Print PDF</button>
+    </div>
+  </aside>
+
+  <main class="cv-canvas">
+    <div class="cv-sheet" id="sheet"></div>
+  </main>
 </div>
-
-<pre id="preview"></pre>
-</main>
 <script>
 const profile = ${JSON.stringify(profile)}
 const suggestions = ${JSON.stringify(SUGGESTIONS)}
@@ -403,9 +427,9 @@ async function preview() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(buildContext()),
   })
-  if (!res.ok) { document.getElementById('preview').textContent = 'Error: ' + await res.text(); return }
+  if (!res.ok) { document.getElementById('sheet').textContent = 'Error: ' + await res.text(); return }
   lastResult = await res.json()
-  document.getElementById('preview').textContent = lastResult.markdown
+  document.getElementById('sheet').innerHTML = lastResult.docHtml
   const cv = lastResult.cv
   const parts = []
   parts.push('Included ' + cv.experiences.length + ' of ' + profile.identity.experienceIds.length + ' experiences.')
@@ -628,6 +652,7 @@ export default {
           readiness: cvReadiness(context, compassForPage),
           markdown: markdownRenderer.render(cv),
           html: htmlRenderer.render(cv),
+          docHtml: htmlRenderer.renderDocument(cv),
         }), {
           headers: { 'Content-Type': 'application/json' },
         })

@@ -7,7 +7,9 @@ Status: Approved
 
 This specification shifts R6 relevance evaluation in Provena from coarse experience text blocks to fine-grained `Contribution` entities and their structural relationships (`capabilities`, `technologies`, `scope`).
 
-Key Architectural Principle: **Formatting is strictly terminal.** R6 relevance, scope ranking, and budgeting are computed directly on structured `Contribution` objects before string formatting.
+Key Architectural Principles:
+1. **Formatting is strictly terminal.** R6 relevance, scope ranking, and budgeting are computed directly on structured `Contribution` objects before string formatting.
+2. **Explicit Decision Context Vocabulary Authority.** `cvProjector` MUST NOT inject implicit relevance vocabulary (such as hardcoded leadership terms). Relevance vocabulary is taken from `DecisionContext.emphasize` when explicitly provided; otherwise, the existing `profile.preferences.interests` fallback applies.
 
 ---
 
@@ -88,4 +90,4 @@ const formattedBullet = contribution.outcome?.summary
 
 ## 6. Experimental Audit Validation
 
-Upon implementation, the audit experiment script (`packages/core/test/audit-contributions-experiment.test.ts`) will be re-run across the four baseline Decision Contexts (Staff, Senior Backend, AI/Productivity, Research) to record and compare the new selection matrix against baseline `commit 607b4d1`.
+Upon implementation, the audit experiment script (`packages/core/test/audit-contributions-experiment.test.ts`) will be re-run across the four baseline Decision Contexts (Staff, Senior Backend, AI/Productivity, Research) to record and compare the new selection matrix against baseline `commit 4d30c21`.

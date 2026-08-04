@@ -333,22 +333,24 @@ const CV_PAGE = `<!DOCTYPE html>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
-.cv-workspace { display: flex; min-height: 100vh; background: #f1f5f9; }
-.cv-workspace-sidebar { width: 340px; flex-shrink: 0; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 1.5rem; overflow-y: auto; }
-.cv-canvas { flex: 1; padding: 2rem; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
-.cv-sheet { background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); }
+.cv-workspace { display: flex; gap: 1.5rem; width: 100%; }
+.cv-workspace-sidebar { width: 340px; flex-shrink: 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; overflow-y: auto; }
+.cv-canvas { flex: 1; min-width: 0; padding: 1rem; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+.cv-sheet { background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); max-width: 100%; }
 
-@media (max-width: 900px) {
-  .cv-workspace { flex-direction: column; }
-  .cv-workspace-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
-  .cv-canvas { padding: 1rem; overflow-x: auto; }
-  .cv-sheet { max-width: 100%; transform: scale(min(1, calc((100vw - 2rem) / 800))); transform-origin: top center; }
+@container page (max-width: 63.9375rem) {
+  .cv-workspace-sidebar { display: none; }
+  .cv-sheet { transform: scale(min(1, calc((100vw - 3rem) / 800))); transform-origin: top center; }
+}
+
+@container page (min-width: 64rem) {
+  .cv-action-bar { display: none; }
 }
 
 @media print {
   body { background: #ffffff; padding: 0; margin: 0; }
+  .app-header, .site-nav, .cv-action-bar, .cv-workspace-sidebar, .bottom-sheet, .bottom-sheet-overlay { display: none !important; }
   .cv-workspace { display: block; }
-  .cv-workspace-sidebar { display: none !important; }
   .cv-canvas { display: contents; padding: 0; margin: 0; background: none; }
   .cv-sheet { display: contents; box-shadow: none; padding: 0; margin: 0; background: none; transform: none; }
 }
@@ -363,107 +365,177 @@ input, select { width: 100%; padding: 0.5rem; font-size: 0.875rem; border: 1px s
 .check label { display: flex; align-items: center; gap: 0.25rem; text-transform: none; letter-spacing: 0; color: #333; font-size: 0.8125rem; background: #efefef; border-radius: 999px; padding: 0.25rem 0.625rem; margin: 0; }
 .check input { width: auto; }
 button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+.action-bar button { margin-top: 0; }
 pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; font-size: 0.8125rem; white-space: pre-wrap; margin-top: 0.75rem; max-height: 24rem; overflow: auto; }
 .meta { background: #fffbe6; border: 1px solid #e6d98a; border-radius: 0.5rem; padding: 0.625rem; font-size: 0.8125rem; color: #6b5b00; margin-top: 1rem; display: none; }
 .row { display: flex; gap: 0.5rem; }
 .row button { flex: 1; }
-.site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
-.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
-.site .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
-.site .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
-.site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 .your-cv { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
 </style>
-<div class="cv-workspace">
-  <aside class="cv-workspace-sidebar">
-    ${siteNav('prepare')}
-    <h1>Prepare</h1>
-    <p class="subtitle">Target a role, review suggestions, export.</p>
-
-    <section>
-      <label for="role">Target role</label>
-      <input id="role" list="roles" placeholder="Staff Software Engineer">
-      <datalist id="roles">
-        <option value="Senior Software Engineer">
-        <option value="Staff Software Engineer">
-        <option value="Principal Software Engineer">
-      </datalist>
-    </section>
-
-    <section>
-      <label for="audience">Audience</label>
-      <select id="audience">
-        <option value="hiring-manager">Hiring manager</option>
-        <option value="recruiter">Recruiter</option>
-      </select>
-    </section>
-
-    <section>
-      <label>Generate summary automatically</label>
-      <div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>
-    </section>
-
-    <section>
-      <label>Experiences (uncheck to exclude)</label>
-      <div class="check" id="experiences"></div>
-    </section>
-
-    <section>
-      <label>Suggested emphasis (from your strengths — edit freely)</label>
-      <div class="check" id="caps"></div>
-    </section>
-
-    <div class="meta" id="meta"></div>
-    <div class="meta" id="readiness"></div>
-
-    <div class="your-cv">Your CV</div>
-    <div class="row">
-      <button onclick="exportMd()">Download .md</button>
-      <button onclick="exportHtml()">Open HTML / Print PDF</button>
-    </div>
-  </aside>
-
-  <main class="cv-canvas">
-    <div class="cv-sheet" id="sheet"></div>
-  </main>
-</div>
+${renderAppShell(
+  'prepare',
+  '<div class="page-header">' +
+  '<h1>Prepare</h1>' +
+  '<p class="subtitle">Target a role, review suggestions, export.</p>' +
+  '</div>',
+  '<div class="cv-workspace split-view" style="--split-threshold: 64rem;">' +
+  '<aside class="cv-workspace-sidebar">' +
+  '<section>' +
+  '<label for="role">Target role</label>' +
+  '<input id="role" list="roles" placeholder="Staff Software Engineer">' +
+  '<datalist id="roles">' +
+  '<option value="Senior Software Engineer">' +
+  '<option value="Staff Software Engineer">' +
+  '<option value="Principal Software Engineer">' +
+  '</datalist>' +
+  '</section>' +
+  '<section>' +
+  '<label for="audience">Audience</label>' +
+  '<select id="audience">' +
+  '<option value="hiring-manager">Hiring manager</option>' +
+  '<option value="recruiter">Recruiter</option>' +
+  '</select>' +
+  '</section>' +
+  '<section>' +
+  '<label>Generate summary automatically</label>' +
+  '<div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>' +
+  '</section>' +
+  '<section>' +
+  '<label>Experiences (uncheck to exclude)</label>' +
+  '<div class="check" id="experiences"></div>' +
+  '</section>' +
+  '<section>' +
+  '<label>Suggested emphasis (from your strengths — edit freely)</label>' +
+  '<div class="check" id="caps"></div>' +
+  '</section>' +
+  '<div class="meta" id="meta"></div>' +
+  '<div class="meta" id="readiness"></div>' +
+  '<div class="your-cv">Your CV</div>' +
+  '<div class="row">' +
+  '<button onclick="exportMd()">Download .md</button>' +
+  '<button onclick="exportHtml()">Open HTML / Print PDF</button>' +
+  '</div>' +
+  '</aside>' +
+  '<main class="cv-canvas">' +
+  '<div class="cv-sheet" id="sheet"></div>' +
+  '</main>' +
+  '</div>' +
+  '<div class="action-bar cv-action-bar">' +
+  '<div class="row">' +
+  '<button type="button" onclick="openCustomize()">Customize</button>' +
+  '<button type="button" onclick="exportHtml()">Open HTML / Print PDF</button>' +
+  '<button type="button" onclick="exportMd()">Download .md</button>' +
+  '</div>' +
+  '</div>' +
+  '<div class="bottom-sheet-overlay" onclick="closeCustomize()"></div>' +
+  '<div class="bottom-sheet">' +
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
+  '<h2 style="font-size:1rem;font-weight:700;">Customize CV</h2>' +
+  '<button type="button" onclick="closeCustomize()" style="width:auto;margin-top:0;padding:0.375rem 0.75rem;background:#e5e5e5;color:#1a1a1a;">Done</button>' +
+  '</div>' +
+  '<section>' +
+  '<label for="role">Target role</label>' +
+  '<input id="role" list="roles-bs" placeholder="Staff Software Engineer">' +
+  '<datalist id="roles-bs">' +
+  '<option value="Senior Software Engineer">' +
+  '<option value="Staff Software Engineer">' +
+  '<option value="Principal Software Engineer">' +
+  '</datalist>' +
+  '</section>' +
+  '<section>' +
+  '<label for="audience">Audience</label>' +
+  '<select id="audience">' +
+  '<option value="hiring-manager">Hiring manager</option>' +
+  '<option value="recruiter">Recruiter</option>' +
+  '</select>' +
+  '</section>' +
+  '<section>' +
+  '<label>Generate summary automatically</label>' +
+  '<div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>' +
+  '</section>' +
+  '<section>' +
+  '<label>Experiences (uncheck to exclude)</label>' +
+  '<div class="check" id="experiences"></div>' +
+  '</section>' +
+  '<section>' +
+  '<label>Suggested emphasis (from your strengths — edit freely)</label>' +
+  '<div class="check" id="caps"></div>' +
+  '</section>' +
+  '<div class="meta" id="meta"></div>' +
+  '<div class="meta" id="readiness"></div>' +
+  '</div>'
+)}
 <script>
 const profile = ${JSON.stringify(profile)}
 const suggestions = ${JSON.stringify(SUGGESTIONS)}
 const params = new URLSearchParams(location.search)
 const prefillRole = params.get('role')
-if (prefillRole) document.getElementById('role').value = prefillRole
+if (prefillRole) {
+  document.querySelectorAll('#role').forEach(el => { el.value = prefillRole })
+}
 const prefillEmphasize = (params.get('emphasize') || '').split(',').filter(Boolean)
 
-document.getElementById('experiences').innerHTML = profile.identity.experienceIds.map(id => {
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]) }
+
+const expHtml = profile.identity.experienceIds.map(id => {
   const e = profile.experiences.find(x => x.id === id)
   if (!e) return ''
   return '<label><input type="checkbox" data-exp="' + id + '" checked> ' + e.organization + '</label>'
 }).join('')
+document.querySelectorAll('#experiences').forEach(el => { el.innerHTML = expHtml })
 
 const capNames = [...suggestions.strengths]
 for (const name of prefillEmphasize) if (!capNames.includes(name)) capNames.push(name)
-function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]) }
-document.getElementById('caps').innerHTML = capNames.map(s =>
+const capsHtml = capNames.map(s =>
   '<label><input type="checkbox" data-cap="' + esc(s) + '" checked> ' + esc(s) + '</label>'
 ).join('')
+document.querySelectorAll('#caps').forEach(el => { el.innerHTML = capsHtml })
+
 document.querySelectorAll('[data-cap]').forEach(el => {
   if (prefillEmphasize.length && !prefillEmphasize.includes(el.dataset.cap)) el.checked = false
 })
 
+function syncElements(source) {
+  if (!source) return
+  if (source.id) {
+    document.querySelectorAll('#' + source.id).forEach(el => {
+      if (el !== source) {
+        if (el.type === 'checkbox') el.checked = source.checked
+        else el.value = source.value
+      }
+    })
+  }
+  if (source.dataset && source.dataset.exp) {
+    document.querySelectorAll('[data-exp="' + source.dataset.exp + '"]').forEach(el => {
+      if (el !== source) el.checked = source.checked
+    })
+  }
+  if (source.dataset && source.dataset.cap) {
+    document.querySelectorAll('[data-cap="' + source.dataset.cap + '"]').forEach(el => {
+      if (el !== source) el.checked = source.checked
+    })
+  }
+}
+
 function buildContext() {
-  const role = document.getElementById('role').value.trim()
-  const audience = document.getElementById('audience').value
+  const roleEl = [...document.querySelectorAll('#role')].find(el => el.value.trim()) || document.querySelector('#role')
+  const role = roleEl ? roleEl.value.trim() : ''
+  const audienceEl = document.querySelector('#audience')
+  const audience = audienceEl ? audienceEl.value : 'hiring-manager'
   const excludeExperienceIds = [...document.querySelectorAll('[data-exp]')]
     .filter(el => !el.checked).map(el => el.dataset.exp)
+    .filter((v, i, a) => a.indexOf(v) === i)
   const emphasize = [...document.querySelectorAll('[data-cap]')]
     .filter(el => el.checked).map(el => el.dataset.cap)
+    .filter((v, i, a) => a.indexOf(v) === i)
+  const autoSummaryEl = document.querySelector('#autoSummary')
+  const generateSummary = autoSummaryEl && autoSummaryEl.checked ? true : undefined
   return {
     targetRole: role || undefined,
     audience,
     excludeExperienceIds,
     emphasize,
-    generateSummary: document.getElementById('autoSummary').checked ? true : undefined,
+    generateSummary,
   }
 }
 
@@ -481,12 +553,14 @@ async function preview() {
   const cv = lastResult.cv
   const parts = []
   parts.push('Included ' + cv.experiences.length + ' of ' + profile.identity.experienceIds.length + ' experiences.')
-  const meta = document.getElementById('meta')
-  meta.textContent = parts.join(' ')
-  meta.style.display = parts.length ? 'block' : 'none'
-  const readiness = document.getElementById('readiness')
-  readiness.textContent = lastResult.readiness ? '⚠ ' + lastResult.readiness : ''
-  readiness.style.display = lastResult.readiness ? 'block' : 'none'
+  document.querySelectorAll('#meta').forEach(meta => {
+    meta.textContent = parts.join(' ')
+    meta.style.display = parts.length ? 'block' : 'none'
+  })
+  document.querySelectorAll('#readiness').forEach(readiness => {
+    readiness.textContent = lastResult.readiness ? '⚠ ' + lastResult.readiness : ''
+    readiness.style.display = lastResult.readiness ? 'block' : 'none'
+  })
 }
 
 function exportMd() {
@@ -504,11 +578,37 @@ function exportHtml() {
   if (w) { w.document.write(lastResult.html); w.document.close(); w.focus() }
 }
 
-document.getElementById('role').addEventListener('input', preview)
-document.getElementById('audience').addEventListener('change', preview)
-document.getElementById('autoSummary').addEventListener('change', preview)
-document.getElementById('experiences').addEventListener('change', preview)
-document.getElementById('caps').addEventListener('change', preview)
+function openCustomize() {
+  document.querySelector('.bottom-sheet')?.classList.add('open')
+  document.querySelector('.bottom-sheet-overlay')?.classList.add('open')
+}
+
+function closeCustomize() {
+  document.querySelector('.bottom-sheet')?.classList.remove('open')
+  document.querySelector('.bottom-sheet-overlay')?.classList.remove('open')
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeCustomize()
+  }
+})
+
+document.addEventListener('input', (e) => {
+  if (e.target && (e.target.id === 'role' || e.target.dataset.exp || e.target.dataset.cap)) {
+    syncElements(e.target)
+    preview()
+  }
+})
+
+document.addEventListener('change', (e) => {
+  if (e.target && (e.target.id === 'audience' || e.target.id === 'autoSummary' || e.target.dataset.exp || e.target.dataset.cap)) {
+    syncElements(e.target)
+    preview()
+  }
+})
+
+document.querySelectorAll('#role').forEach(el => el.addEventListener('input', preview))
 
 preview()
 </script>

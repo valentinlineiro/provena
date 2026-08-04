@@ -30,7 +30,7 @@ test('Prepare page renders the site nav with Prepare active and no back link', a
   const res = await worker.fetch(new Request('https://provena.example/cv'), env)
   const html = await res.text()
   assert.ok(html.includes('<a class="brand" href="/">Provena</a>'))
-  assert.equal((html.match(/<nav class="site">/g) || []).length, 1)
+  assert.equal((html.match(/<nav class="site-nav">/g) || []).length, 1)
   assert.ok(html.includes('<a href="/">Story</a>'))
   assert.ok(html.includes('<a class="active" href="/cv">Prepare</a>'))
   assert.ok(html.includes('<h1>Prepare</h1>'))

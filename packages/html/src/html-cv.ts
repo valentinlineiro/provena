@@ -83,8 +83,13 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
 
       .cv-document-article {
         margin-bottom: 0.85rem;
+      }
+
+      .cv-document-article-header {
         page-break-inside: avoid;
         break-inside: avoid;
+        page-break-after: avoid;
+        break-after: avoid;
       }
 
       .cv-document h3 {
@@ -115,6 +120,8 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
       .cv-document li {
         margin-bottom: 0.15rem;
         color: #222222;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
 
       .cv-document small.tech {
@@ -134,7 +141,13 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
           page-break-after: avoid;
           break-after: avoid;
         }
-        .cv-document-article {
+        .cv-document-article-header {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          page-break-after: avoid;
+          break-after: avoid;
+        }
+        .cv-document li {
           page-break-inside: avoid;
           break-inside: avoid;
         }
@@ -156,9 +169,11 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
       parts.push('<h2>Experience</h2>')
       for (const exp of model.experiences) {
         parts.push('<div class="cv-document-article">')
+        parts.push('<div class="cv-document-article-header">')
         parts.push('<h3>' + esc(exp.organization) + '</h3>')
         parts.push('<div class="cv-document-meta"><strong>' + esc(exp.title) + '</strong> — <time>' + fmtRange(exp.start, exp.end) + '</time></div>')
         if (exp.summary) parts.push('<p>' + esc(exp.summary) + '</p>')
+        parts.push('</div>')
         if (exp.achievements.length > 0) {
           parts.push('<ul>')
           for (const a of exp.achievements) parts.push('<li>' + esc(a) + '</li>')
@@ -175,9 +190,11 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
       parts.push('<h2>Projects</h2>')
       for (const proj of model.projects) {
         parts.push('<div class="cv-document-article">')
+        parts.push('<div class="cv-document-article-header">')
         const name = proj.url ? '<a href="' + esc(proj.url) + '">' + esc(proj.name) + '</a>' : esc(proj.name)
         parts.push('<h3>' + name + '</h3>')
         if (proj.role) parts.push('<div class="cv-document-meta"><em>' + esc(proj.role) + '</em></div>')
+        parts.push('</div>')
         parts.push('<p>' + esc(proj.description) + '</p>')
         if (proj.technologies.length > 0) parts.push('<small class="tech">Technologies: ' + proj.technologies.map(esc).join(', ') + '</small>')
         parts.push('</div>')
@@ -191,8 +208,10 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
       for (const edu of model.education) {
         const field = edu.field ? ' in ' + esc(edu.field) : ''
         parts.push('<div class="cv-document-article">')
+        parts.push('<div class="cv-document-article-header">')
         parts.push('<h3>' + esc(edu.degree) + field + '</h3>')
         parts.push('<div class="cv-document-meta">' + esc(edu.institution) + ' — <time>' + fmtRange(edu.start ?? '', edu.end) + '</time></div>')
+        parts.push('</div>')
         parts.push('</div>')
       }
       parts.push('</section>')

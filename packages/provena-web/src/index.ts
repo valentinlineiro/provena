@@ -114,20 +114,19 @@ const PAGE = `<!DOCTYPE html>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
-@media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }
-main { max-width: 34rem; margin: 2rem auto; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
 .hero { padding: 0.5rem 0 1rem; }
 h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
 section { margin-top: 1.5rem; }
+section:first-child { margin-top: 0; }
 h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 0.5rem; }
 .chapter { background: #1a1a1a; color: #fff; border-radius: 0.75rem; padding: 1.25rem; }
 .chapter .kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; }
 .chapter .role { font-size: 1.25rem; font-weight: 700; margin-top: 0.25rem; }
 .chapter .org { color: #ccc; font-size: 0.875rem; }
 .chapter .meta { color: #aaa; font-size: 0.875rem; margin-top: 0.5rem; }
-.chapter .continue { margin-top: 1rem; width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #fff; color: #1a1a1a; border: none; border-radius: 0.5rem; cursor: pointer; }
+.chapter .continue { margin-top: 1rem; width: 100%; padding: 0.75rem; min-height: 44px; font-size: 0.875rem; font-weight: 600; background: #fff; color: #1a1a1a; border: none; border-radius: 0.5rem; cursor: pointer; }
 .compass { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
 .compass .status { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.375rem; }
 .compass .status::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2e7d32; flex: 0 0 auto; }
@@ -154,62 +153,61 @@ details summary { cursor: pointer; font-size: 0.8125rem; color: #666; padding: 0
 .capture { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; }
 .capture p { font-size: 0.875rem; }
 .capture time { color: #999; font-size: 0.75rem; }
-button { width: 100%; padding: 0.75rem; font-size: 1rem; font-weight: 500; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 0.75rem; }
+button { width: 100%; padding: 0.75rem; min-height: 44px; font-size: 1rem; font-weight: 500; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 0.75rem; }
 button:active { opacity: 0.8; }
+.action-bar button { margin-top: 0; }
 textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; resize: vertical; font-family: inherit; }
 .quick { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.quick button { width: auto; padding: 0.375rem 0.75rem; font-size: 0.875rem; background: #fff; color: #1a1a1a; border: 1px solid #ccc; margin: 0; }
+.quick button { width: auto; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.875rem; background: #fff; color: #1a1a1a; border: 1px solid #ccc; margin: 0; }
 #status { margin-top: 0.75rem; font-size: 0.875rem; color: #666; }
 .hidden { display: none; }
-.site { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
-.site .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
-.site .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
-.site .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
-.site .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
 </style>
-<main>
-${siteNav('story')}
-<div class="hero">
-  <h1 id="name"></h1>
-  <p class="subtitle" id="title"></p>
-</div>
-
-<section>
-  <h2>Current chapter</h2>
-  <div class="chapter" id="chapter">
-    <div class="kicker">Now</div>
-    <div class="role" id="chapter-role"></div>
-    <div class="org" id="chapter-org"></div>
-    <div class="meta" id="chapter-meta"></div>
-    <button class="continue" onclick="chapterClick()">Continue this story</button>
-  </div>
-</section>
-
-<section id="add-form" class="hidden">
-  <div class="quick" id="quick"></div>
-  <textarea id="content" placeholder="I just..."></textarea>
-  <button onclick="save()">Add to my story</button>
-  <p id="status"></p>
-</section>
-
-<section>
-  <h2>Career Compass</h2>
-  <div class="compass" id="compass"></div>
-</section>
-
-<section>
-  <h2>Recent evidence</h2>
-  <div id="captures"></div>
-  <p id="captures-empty" class="hidden ok">✓ Story is up to date. Nothing pending.</p>
-</section>
-
-<section>
-  <details>
-    <summary id="experiences-summary"></summary>
-    <div id="experiences"></div>
-  </details>
-</section>
-</main>
+${renderAppShell(
+  'story',
+  '<div class="hero">' +
+  '<h1 id="name"></h1>' +
+  '<p class="subtitle" id="title"></p>' +
+  '</div>',
+  '<div class="split-view" style="--split-threshold: 56rem;">' +
+  '<div style="flex: 1.5;">' +
+  '<section>' +
+  '<h2>Current chapter</h2>' +
+  '<div class="chapter" id="chapter">' +
+  '<div class="kicker">Now</div>' +
+  '<div class="role" id="chapter-role"></div>' +
+  '<div class="org" id="chapter-org"></div>' +
+  '<div class="meta" id="chapter-meta"></div>' +
+  '<button class="continue" onclick="chapterClick()">Continue this story</button>' +
+  '</div>' +
+  '</section>' +
+  '<section id="add-form" class="hidden">' +
+  '<div class="quick" id="quick"></div>' +
+  '<textarea id="content" placeholder="I just..."></textarea>' +
+  '<div class="action-bar">' +
+  '<button onclick="save()">Add to my story</button>' +
+  '</div>' +
+  '<p id="status"></p>' +
+  '</section>' +
+  '<section>' +
+  '<h2>Recent evidence</h2>' +
+  '<div id="captures"></div>' +
+  '<p id="captures-empty" class="hidden ok">✓ Story is up to date. Nothing pending.</p>' +
+  '</section>' +
+  '<section>' +
+  '<details>' +
+  '<summary id="experiences-summary"></summary>' +
+  '<div id="experiences"></div>' +
+  '</details>' +
+  '</section>' +
+  '</div>' +
+  '<div style="flex: 1;">' +
+  '<section>' +
+  '<h2>Career Compass</h2>' +
+  '<div class="compass" id="compass"></div>' +
+  '</section>' +
+  '</div>' +
+  '</div>'
+)}
 <script>
 const profile = ${JSON.stringify(profile)}
 const timeline = ${JSON.stringify(TIMELINE)}

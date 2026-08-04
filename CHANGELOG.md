@@ -2,6 +2,26 @@
 
 All notable changes to Provena are documented here.
 
+## v0.6.0 — Evaluate, then prepare (2026-08-04)
+
+**From a story you maintain to a decision you can justify.** Provena looks at
+a real job offer and answers "should I apply?" using only what it already
+knows — with reasons traced to the canonical profile.
+
+- Opportunity Evaluation `/evaluate`: paste a job description → APPLY /
+  CONSIDER / SKIP, deterministic (no LLM), reasons traced to the canonical
+  profile; coverage / interpretation / confidence per offer
+- Capability `signals`: semantic vocabulary per capability; seeded across the
+  5 persona-relevant capabilities
+- Handoff: APPLY → "Prepare application" → `/cv` pre-filled from the decision
+  context (`role`, `emphasize`)
+- Canonical profile: contributions carry `capabilityIds` so evaluation reads
+  real evidence; contributions count as experience milestones
+- Invariants I-OE-1/2/3 (no recognition ≠ no evidence; claims trace; absent
+  criteria are unknown, never violated); three-way verdict always returned
+
+[Full release notes](docs/releases/v0.6.0.md)
+
 ## v0.5.0 — Use it, then interpret it (2026-08-03)
 
 **From a capture form to a decision surface.** The web becomes the place

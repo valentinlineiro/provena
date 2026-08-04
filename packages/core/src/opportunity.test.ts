@@ -60,6 +60,11 @@ test('SKIP: compensation below minimum is a violated criterion', () => {
   assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'violated')
 })
 
+test('compensation: a trailing period does not truncate the salary amount', () => {
+  const ev = evaluateOpportunity('Staff Engineer. €100,000 - €120,000.', makeProfile())
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'satisfied')
+})
+
 test('SKIP: on-site only violates a remote-required preference', () => {
   const ev = evaluateOpportunity('Staff Engineer. This role is on-site 5 days per week in Madrid.', makeProfile())
   assert.equal(ev.verdict, 'skip')

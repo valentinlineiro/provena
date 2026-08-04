@@ -55,7 +55,7 @@ function parseAmount(s: string): number {
 
 function extractSalaries(text: string): number[] {
   const out: number[] = []
-  const re = /(?:€|eur|euro)\s*([\d.,]+)\s*(k)?/gi
+  const re = /(?:€|eur|euro)\s*([\d]+(?:[.,][\d]+)*)\s*(k)?/gi
   let m: RegExpExecArray | null
   while ((m = re.exec(text)) !== null) {
     let n = parseAmount(m[1]!)

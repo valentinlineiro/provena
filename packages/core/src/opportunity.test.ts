@@ -218,5 +218,26 @@ For our Team, we offer both hybrid and fully remote working options.
   assert.ok(demonstratedNames.includes('REST APIs'))
 })
 
+test('real JD evaluation #4 (Pearson): Software Engineering Manager JD evaluates Software Development and Python as demonstrated', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+ROLE: Manager, Software Engineering
+As an Experienced Software Engineering Manager, you will play a vital role in leading and inspiring a team of software engineers.
+Proven experience in software engineering principles, development processes, technologies and software development.
+Hands-on experience with programming languages such as Java, PHP, Kotlin, Python, or C++.
+Workplace Type: Remote
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('Software Development'))
+  assert.ok(demonstratedNames.includes('Python (Programming Language)'))
+  const gapNames = ev.gaps.map(g => g.capabilityName)
+  assert.ok(!gapNames.includes('Software Development'))
+})
+
+
 
 

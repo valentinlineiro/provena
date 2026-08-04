@@ -65,6 +65,12 @@ test('compensation: a trailing period does not truncate the salary amount', () =
   assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'satisfied')
 })
 
+test('compensation: monthly allowance or perk amounts (/mo, /month) are not treated as annual salary', () => {
+  const ev = evaluateOpportunity('Staff Engineer. Meal Perk: €150/month allowance + Flexible Remuneration up to €70/mo.', makeProfile())
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'unknown')
+  assert.notEqual(ev.verdict, 'skip')
+})
+
 test('SKIP: on-site only violates a remote-required preference', () => {
   const ev = evaluateOpportunity('Staff Engineer. This role is on-site 5 days per week in Madrid.', makeProfile())
   assert.equal(ev.verdict, 'skip')

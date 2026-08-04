@@ -55,12 +55,17 @@ function parseAmount(s: string): number {
 
 function extractSalaries(text: string): number[] {
   const out: number[] = []
-  const re = /(?:€|eur|euro)\s*([\d]+(?:[.,][\d]+)*)\s*(k)?/gi
+  const re = /(?:€|eur|euro)\s*([\d]+(?:[.,][\d]+)*)\s*(k)?(?:\s*\/(?:mo|month|mes|m|day|d|hour|h|hora))?/gi
   let m: RegExpExecArray | null
   while ((m = re.exec(text)) !== null) {
+    const fullMatch = m[0]!
+    if (/\/(?:mo|month|mes|m|day|d|hour|h|hora)/i.test(fullMatch)) continue
+    const afterMatch = text.slice(m.index + fullMatch.length, m.index + fullMatch.length + 10).toLowerCase()
+    if (/^\s*\/(?:mo|month|mes|m|day|d|hour|h|hora)/.test(afterMatch)) continue
+
     let n = parseAmount(m[1]!)
     if (m[2]) n *= 1000
-    if (!Number.isNaN(n)) out.push(n)
+    if (!Number.isNaN(n) && n >= 10000) out.push(n)
   }
   return out
 }

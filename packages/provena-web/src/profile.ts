@@ -459,6 +459,10 @@ export default {
       "id": "efe55daf-2a9a-4ea6-bb79-0ce3228f5e8d",
       "name": "Data Analysis",
       "evidenceIds": [],
+      "signals": [
+        "data analysis",
+        "data analytics"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -563,6 +567,12 @@ export default {
       "id": "e04c4fe8-7f64-4b3a-96e6-e2b729b09b06",
       "name": "Artificial Intelligence (AI)",
       "evidenceIds": [],
+      "signals": [
+        "artificial intelligence",
+        "applied ai",
+        "generative ai",
+        "ai"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -673,6 +683,11 @@ export default {
       "id": "252fc0de-b99e-45dc-8ad0-0832f2c0d1c3",
       "name": "Software Quality",
       "evidenceIds": [],
+      "signals": [
+        "software quality",
+        "testing strategies",
+        "automated testing"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -911,6 +926,9 @@ export default {
       "id": "86791087-2d38-4f45-8e0c-bbc7b2521176",
       "name": "Python (Programming Language)",
       "evidenceIds": [],
+      "signals": [
+        "python"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -920,6 +938,9 @@ export default {
       "id": "4c906a6a-962b-4cb5-87f5-b59c501efd1f",
       "name": "Machine Learning",
       "evidenceIds": [],
+      "signals": [
+        "machine learning"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -1046,6 +1067,9 @@ export default {
       "id": "7c639d01-1906-417b-8b11-0252f80ee8b8",
       "name": "SQL",
       "evidenceIds": [],
+      "signals": [
+        "sql"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"

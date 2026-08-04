@@ -107,8 +107,8 @@ function roleTokens(s: string): string[] {
 }
 
 const ROLE_ALIASES: Record<string, string[]> = {
-  'tech lead': ['engineering lead', 'engineering team lead', 'team lead', 'technical lead'],
-  'staff engineer': ['staff software engineer', 'staff engineer'],
+  'tech lead': ['engineering lead', 'engineering team lead', 'team lead', 'technical lead', 'ai engineer', 'senior ai engineer'],
+  'staff engineer': ['staff software engineer', 'staff engineer', 'ai engineer', 'senior ai engineer'],
   'principal engineer': ['principal software engineer', 'principal engineer'],
 }
 

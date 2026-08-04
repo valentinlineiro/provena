@@ -180,3 +180,23 @@ A proactive and collaborative mindset, with the ability to learn new technologie
   assert.ok(ev.gaps.length > 0)
 })
 
+test('real JD evaluation #2 (Lodgify): Senior AI Engineer JD ignores meal perks compensation, evaluates to CONSIDER', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+We are seeking a Senior AI Engineer specializing in LLMs to lead the design, evaluation, and deployment of production-grade generative AI systems.
+Lead the design and development of LLM-powered applications (chatbots, copilots, agents, internal tools).
+Own and evolve the LLM evaluation (evals) strategy, including designing gold-standard datasets and benchmarks.
+5+ years of experience in software engineering, machine learning, and applied AI with a track record of driving projects to completion.
+Strong software engineering fundamentals (testing, modular design, dependency injection) in Python.
+Experience implementing automated testing strategies for non-deterministic systems.
+Solid experience in using Data Analytics techniques (SQL, analysis and visualizations) to inform Product decisions.
+Flexible Remuneration for extra meal costs (up to €70/mo) and public transport (up to €136/mo).
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'unknown')
+  assert.notEqual(ev.verdict, 'skip')
+  assert.equal(ev.verdict, 'consider')
+})
+
+

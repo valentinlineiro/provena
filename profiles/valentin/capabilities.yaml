@@ -43,6 +43,9 @@
 - id: efe55daf-2a9a-4ea6-bb79-0ce3228f5e8d
   name: Data Analysis
   evidenceIds: []
+  signals:
+    - data analysis
+    - data analytics
   provenance: *ref_0
 - id: aecf03a0-e35d-4b3a-aba9-aec91a862d5e
   name: Fuzzy Logic
@@ -104,6 +107,11 @@
 - id: e04c4fe8-7f64-4b3a-96e6-e2b729b09b06
   name: Artificial Intelligence (AI)
   evidenceIds: []
+  signals:
+    - artificial intelligence
+    - applied ai
+    - generative ai
+    - ai
   provenance: *ref_0
 - id: 96644e82-3f15-4d00-842c-207a9af76db9
   name: Agentic AI Development
@@ -161,6 +169,10 @@
 - id: 252fc0de-b99e-45dc-8ad0-0832f2c0d1c3
   name: Software Quality
   evidenceIds: []
+  signals:
+    - software quality
+    - testing strategies
+    - automated testing
   provenance: *ref_0
 - id: 5e6d4306-782a-462f-87ba-cef26e293f3d
   name: Research Skills
@@ -271,10 +283,14 @@
 - id: 86791087-2d38-4f45-8e0c-bbc7b2521176
   name: Python (Programming Language)
   evidenceIds: []
+  signals:
+    - python
   provenance: *ref_0
 - id: 4c906a6a-962b-4cb5-87f5-b59c501efd1f
   name: Machine Learning
   evidenceIds: []
+  signals:
+    - machine learning
   provenance: *ref_0
 - id: 9037cd02-b563-48ec-81ae-3eaa4ff9f3f9
   name: C++
@@ -331,6 +347,8 @@
 - id: 7c639d01-1906-417b-8b11-0252f80ee8b8
   name: SQL
   evidenceIds: []
+  signals:
+    - sql
   provenance: *ref_0
 - id: 73fb085e-3daf-4c87-9278-6d9699b95684
   name: JUnit

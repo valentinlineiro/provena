@@ -14,7 +14,7 @@ test('Evaluate page renders the nav, title and paste box', async () => {
   assert.ok(html.includes('<a class="active" href="/evaluate">Evaluate</a>'))
   assert.ok(html.includes('<h1>Evaluate an opportunity</h1>'))
   assert.ok(html.includes('<textarea id="jd"'))
-  assert.ok(html.includes('onclick="evaluate()"'))
+  assert.ok(html.includes('onclick="evaluateJD()"'))
 })
 
 test('POST /api/evaluate returns a traceable evaluation', async () => {

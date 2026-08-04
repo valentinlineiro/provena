@@ -664,7 +664,7 @@ ${renderAppShell(
   '<label for="jd">Job description</label>' +
   '<textarea id="jd" placeholder="Staff Software Engineer..."></textarea>' +
   '<div class="action-bar">' +
-  '<button onclick="evaluate()">Evaluate</button>' +
+  '<button onclick="evaluateJD()">Evaluate</button>' +
   '</div>' +
   '</div>' +
   '<div>' +
@@ -675,7 +675,7 @@ ${renderAppShell(
 <script>
 const result = document.getElementById('result')
 let lastEv = null
-async function evaluate() {
+async function evaluateJD() {
   const jd = document.getElementById('jd').value.trim()
   if (!jd) return
   result.innerHTML = '<p class="meta">Evaluating...</p>'

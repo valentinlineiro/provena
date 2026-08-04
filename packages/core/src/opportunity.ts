@@ -43,7 +43,7 @@ function normalizeText(s: string): string {
 // ---- criterion extractors -------------------------------------------------
 
 function parseAmount(s: string): number {
-  const t = s.trim()
+  const t = s.trim().replace(/\s+/g, '')
   if (t.includes(',') && !t.includes('.')) return parseFloat(t.replace(/,/g, ''))
   if (t.includes('.') && !t.includes(',')) {
     const [, dec] = t.split('.')
@@ -55,7 +55,8 @@ function parseAmount(s: string): number {
 
 function extractSalaries(text: string): number[] {
   const out: number[] = []
-  const re = /(?:€|eur|euro)\s*([\d]+(?:[.,][\d]+)*)\s*(k)?(?:\s*\/(?:mo|month|mes|m|day|d|hour|h|hora))?/gi
+  // Matches: €103 000, €103,000, 103 000 €, 103000 €, €103k, etc.
+  const re = /(?:(?:€|eur|euro)\s*([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)|([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)\s*(?:€|eur|euro))\s*(k)?(?:\s*\/(?:mo|month|mes|m|day|d|hour|h|hora))?/gi
   let m: RegExpExecArray | null
   while ((m = re.exec(text)) !== null) {
     const fullMatch = m[0]!
@@ -63,8 +64,10 @@ function extractSalaries(text: string): number[] {
     const afterMatch = text.slice(m.index + fullMatch.length, m.index + fullMatch.length + 10).toLowerCase()
     if (/^\s*\/(?:mo|month|mes|m|day|d|hour|h|hora)/.test(afterMatch)) continue
 
-    let n = parseAmount(m[1]!)
-    if (m[2]) n *= 1000
+    const digits = m[1] ?? m[2]
+    if (!digits) continue
+    let n = parseAmount(digits)
+    if (m[3]) n *= 1000
     if (!Number.isNaN(n) && n >= 10000) out.push(n)
   }
   return out

@@ -71,6 +71,11 @@ test('compensation: monthly allowance or perk amounts (/mo, /month) are not trea
   assert.notEqual(ev.verdict, 'skip')
 })
 
+test('compensation: space-separated thousands ranges (€103 000 - €139 000) are extracted as annual salary', () => {
+  const ev = evaluateOpportunity('Staff Engineer. ESP base pay range per year: €103 000 - €139 000.', makeProfile())
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'satisfied')
+})
+
 test('SKIP: on-site only violates a remote-required preference', () => {
   const ev = evaluateOpportunity('Staff Engineer. This role is on-site 5 days per week in Madrid.', makeProfile())
   assert.equal(ev.verdict, 'skip')
@@ -237,6 +242,29 @@ Workplace Type: Remote
   const gapNames = ev.gaps.map(g => g.capabilityName)
   assert.ok(!gapNames.includes('Software Development'))
 })
+
+test('real JD evaluation #5 (Affirm): Staff Full Stack Engineer JD evaluates space-separated compensation and SQL correctly', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+Affirm is seeking a Staff Full Stack Software Engineer to join the Acquisition & Onboarding team.
+As a Staff Engineer, you will set technical direction, drive architectural decisions, and elevate quality.
+Proficient in backend systems at scale using Python, Kotlin, AWS, MySQL, and Kubernetes.
+ESP base pay range per year: €103 000 - €139 000.
+Location - Remote Spain
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'satisfied')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('SQL'))
+  assert.ok(demonstratedNames.includes('Python (Programming Language)'))
+  assert.ok(demonstratedNames.includes('Kubernetes'))
+  assert.ok(demonstratedNames.includes('Technical Leadership'))
+})
+
 
 
 

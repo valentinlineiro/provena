@@ -170,7 +170,8 @@ export default {
       "capabilityIds": [
         "f015666b-67f0-4f20-a0a2-de593c30761a",
         "84f33db4-1a56-43ce-b04a-8db818a024c3",
-        "995557c1-b741-4e9b-bdfb-4e34dbf55989"
+        "995557c1-b741-4e9b-bdfb-4e34dbf55989",
+        "7c639d01-1906-417b-8b11-0252f80ee8b8"
       ],
       "evidenceIds": [],
       "provenance": {

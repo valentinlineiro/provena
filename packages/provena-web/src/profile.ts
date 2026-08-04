@@ -1125,7 +1125,9 @@ export default {
         "level": "organization",
         "role": "lead"
       },
-      "capabilityIds": [],
+      "capabilityIds": [
+        "7ab84b2f-5ef0-4619-8784-c700f27c2694"
+      ],
       "technologies": [
         "AI-Assisted Engineering"
       ],
@@ -1142,7 +1144,10 @@ export default {
         "level": "product",
         "role": "lead"
       },
-      "capabilityIds": [],
+      "capabilityIds": [
+        "72e03a49-5880-401e-8aec-c1f6c0b21efd",
+        "420b07b6-c49e-43ee-a409-f569e60378ab"
+      ],
       "technologies": [
         "4G Network Core",
         "Java"
@@ -1160,7 +1165,9 @@ export default {
         "level": "product",
         "role": "contributor"
       },
-      "capabilityIds": [],
+      "capabilityIds": [
+        "5cdea70c-e1b8-4699-abec-cbc326ba0ab1"
+      ],
       "technologies": [
         "Java",
         "Spring"
@@ -1178,7 +1185,9 @@ export default {
         "level": "team",
         "role": "lead"
       },
-      "capabilityIds": [],
+      "capabilityIds": [
+        "49dd7b2b-0dc6-4d4a-86ba-5a409e0ac610"
+      ],
       "technologies": [],
       "evidenceIds": []
     }

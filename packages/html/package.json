@@ -9,5 +9,8 @@
   },
   "dependencies": {
     "@provena/core": "*"
+  },
+  "scripts": {
+    "test": "node --import tsx --test src/*.test.ts"
   }
 }

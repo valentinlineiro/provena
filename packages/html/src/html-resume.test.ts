@@ -51,11 +51,11 @@ test('HTML renderer produces valid document structure', () => {
   assert.match(html, /<h2>Experience<\/h2>/)
   assert.match(html, /<h3>Acme Corp<\/h3>/)
   assert.match(html, /<section>/)
-  assert.match(html, /<article>/)
+  assert.match(html, /<article class="cv-document">/)
   assert.match(html, /<time>/)
   assert.match(html, /<\/html>/)
   assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1">/)
-  assert.match(html, /<style>[\s\S]*body\s*\{[\s\S]*<\/style>/)
+  assert.match(html, /<style>[\s\S]*\.cv-document[\s\S]*<\/style>/)
 })
 
 test('HTML renderer escapes special characters', () => {
@@ -79,4 +79,20 @@ test('HTML renderer renders expertise and technologies sections, not a snapshot 
   assert.doesNotMatch(html, /Career Snapshot/)
   assert.doesNotMatch(html, /<h2>Skills<\/h2>/)
   assert.doesNotMatch(html, /pieces of evidence/)
+})
+
+test('HtmlCvRenderer provides renderDocument and renderStyles methods', () => {
+  const profile = makeProfile()
+  const cv = cvProjector(profile, { targetRole: 'Engineer' })
+  const renderer = new HtmlCvRenderer()
+  const docHtml = renderer.renderDocument(cv)
+  const css = renderer.renderStyles()
+
+  assert.ok(docHtml.startsWith('<article class="cv-document">'))
+  assert.ok(docHtml.includes('</article>'))
+  assert.ok(!docHtml.includes('<!DOCTYPE html>'))
+
+  assert.ok(css.includes('.cv-document {'))
+  assert.ok(css.includes('.cv-document h1 {'))
+  assert.ok(css.includes('210mm'))
 })

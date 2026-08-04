@@ -83,10 +83,10 @@ function checkWorkMode(jd: string, prefs: Preferences | undefined): CriterionChe
   const pref = prefs?.work?.remote
   if (!pref) return { criterion: 'workMode', status: 'unknown', detail: 'no remote preference in profile' }
   if (pref === 'required') {
+    if (REMOTE_RE.test(jd)) return { criterion: 'workMode', status: 'satisfied', detail: 'JD allows remote' }
     if (ONSITE_RE.test(jd) || HYBRID_RE.test(jd)) {
       return { criterion: 'workMode', status: 'violated', detail: 'JD requires on-site or hybrid presence; you require fully remote' }
     }
-    if (REMOTE_RE.test(jd)) return { criterion: 'workMode', status: 'satisfied', detail: 'JD allows remote' }
     return { criterion: 'workMode', status: 'unknown', detail: 'JD does not state work mode' }
   }
   if (pref === 'hybrid') {

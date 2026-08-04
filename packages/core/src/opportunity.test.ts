@@ -71,6 +71,11 @@ test('SKIP: on-site only violates a remote-required preference', () => {
   assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'violated')
 })
 
+test('workMode: hybrid OR remote option does not violate remote-required preference', () => {
+  const ev = evaluateOpportunity('Staff Engineer. Location: hybrid in Barcelona / Remote in Spain.', makeProfile())
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+})
+
 test('SKIP: an avoid pattern in the JD is a violated criterion', () => {
   const ev = evaluateOpportunity('Staff Engineer. Expect six interview rounds.', makeProfile())
   assert.equal(ev.verdict, 'skip')

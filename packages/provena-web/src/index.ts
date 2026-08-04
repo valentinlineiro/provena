@@ -75,7 +75,21 @@ export function renderAppShell(
     pageContentHtml +
     '</div>' +
     '</main>' +
-    '</div>'
+    '</div>' +
+    '<script>' +
+    '(function(){' +
+    'const s=new Set([location.pathname]);' +
+    'function p(a){' +
+    'const h=a.getAttribute("href");' +
+    'if(!h||s.has(h)||a.classList.contains("active"))return;' +
+    's.add(h);' +
+    'fetch(h,{priority:"low"}).catch(function(){});' +
+    '}' +
+    'document.addEventListener("pointerenter",function(e){if(e.target&&e.target.closest&&e.target.closest(".site-nav a:not(.active)"))p(e.target.closest(".site-nav a:not(.active)"));},true);' +
+    'document.addEventListener("focusin",function(e){if(e.target&&e.target.closest&&e.target.closest(".site-nav a:not(.active)"))p(e.target.closest(".site-nav a:not(.active)"));},true);' +
+    'document.addEventListener("touchstart",function(e){if(e.target&&e.target.closest&&e.target.closest(".site-nav a:not(.active)"))p(e.target.closest(".site-nav a:not(.active)"));},{passive:true,capture:true});' +
+    '})();' +
+    '</script>'
   )
 }
 

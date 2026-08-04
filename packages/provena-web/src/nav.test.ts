@@ -54,3 +54,10 @@ test('renderAppShell outputs correct active section links for prepare and evalua
   assert.ok(evaluateHtml.includes('<a class="active" href="/evaluate">Evaluate</a>'))
   assert.ok(!evaluateHtml.includes('class="active" href="/"'))
 })
+
+test('renderAppShell includes intent-based navigation prefetch script', () => {
+  const html = renderAppShell('story', '<h1>Title</h1>', '<div>Content</div>')
+  assert.ok(html.includes('prefetched = new Set') || html.includes('s=new Set'))
+  assert.ok(html.includes('.site-nav a:not(.active)'))
+})
+

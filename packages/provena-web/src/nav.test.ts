@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { siteNav } from './index.js'
+import { siteNav, renderAppShell } from './index.js'
 
 test('siteNav renders the brand and both section links', () => {
   const html = siteNav('story')
@@ -25,4 +25,32 @@ test('siteNav renders the Evaluate section', () => {
   assert.ok(siteNav('story').includes('<a href="/evaluate">Evaluate</a>'))
   assert.ok(siteNav('evaluate').includes('<a class="active" href="/evaluate">Evaluate</a>'))
   assert.ok(!siteNav('evaluate').includes('class="active" href="/"'))
+})
+
+test('renderAppShell outputs structural wrapper with app-shell, app-header, site-nav, page, page-content, and header/content HTML', () => {
+  const headerHtml = '<div class="header-test">Header Content</div>'
+  const contentHtml = '<div class="content-test">Page Main Content</div>'
+  const html = renderAppShell('story', headerHtml, contentHtml)
+
+  assert.ok(html.includes('<div class="app-shell">'))
+  assert.ok(html.includes('<header class="app-header">'))
+  assert.ok(html.includes('<a class="brand" href="/">Provena</a>'))
+  assert.ok(html.includes('<nav class="site-nav">'))
+  assert.ok(html.includes('<a class="active" href="/">Story</a>'))
+  assert.ok(html.includes('<main class="page">'))
+  assert.ok(html.includes('<div class="page-content">'))
+  assert.ok(html.includes(headerHtml))
+  assert.ok(html.includes(contentHtml))
+})
+
+test('renderAppShell outputs correct active section links for prepare and evaluate', () => {
+  const prepareHtml = renderAppShell('prepare', '', '')
+  assert.ok(prepareHtml.includes('<nav class="site-nav">'))
+  assert.ok(prepareHtml.includes('<a class="active" href="/cv">Prepare</a>'))
+  assert.ok(!prepareHtml.includes('class="active" href="/"'))
+
+  const evaluateHtml = renderAppShell('evaluate', '', '')
+  assert.ok(evaluateHtml.includes('<nav class="site-nav">'))
+  assert.ok(evaluateHtml.includes('<a class="active" href="/evaluate">Evaluate</a>'))
+  assert.ok(!evaluateHtml.includes('class="active" href="/"'))
 })

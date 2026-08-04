@@ -43,7 +43,7 @@ async function recordEvent(env: Env, name: EventName) {
   await env.PROVENA_KV.put('events', JSON.stringify({ events }))
 }
 
-export function siteNav(section: 'story' | 'prepare' | 'evaluate'): string {
+export function siteNav(section: 'story' | 'prepare' | 'evaluate', navClass = 'site'): string {
   const link = (label: string, href: string, active: boolean) =>
     '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
   const sections = [
@@ -52,18 +52,54 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate'): string {
     { label: 'Evaluate', href: '/evaluate', id: 'evaluate' as const },
   ]
   return (
-    '<nav class="site">' +
+    '<nav class="' + navClass + '">' +
     '<a class="brand" href="/">Provena</a>' +
     '<div class="links">' + sections.map(s => link(s.label, s.href, s.id === section)).join('') + '</div>' +
     '</nav>'
   )
 }
 
+export function renderAppShell(
+  section: 'story' | 'prepare' | 'evaluate',
+  pageHeaderHtml: string,
+  pageContentHtml: string
+): string {
+  return (
+    '<div class="app-shell">' +
+    '<header class="app-header">' +
+    siteNav(section, 'site-nav') +
+    pageHeaderHtml +
+    '</header>' +
+    '<main class="page">' +
+    '<div class="page-content">' +
+    pageContentHtml +
+    '</div>' +
+    '</main>' +
+    '</div>'
+  )
+}
+
+export const APP_SHELL_CSS = `
+:root {
+  --space-page-inline: clamp(1rem, 3vw, 2rem);
+}
+.app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+.app-header { padding: 1rem var(--space-page-inline); }
+.site-nav { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
+.site-nav .brand { display: block; font-weight: 700; font-size: 1rem; color: #1a1a1a; text-decoration: none; margin-bottom: 0.625rem; }
+.site-nav .links { display: flex; flex-wrap: wrap; gap: 0.375rem 1.5rem; }
+.site-nav .links a { font-size: 0.875rem; color: #999; text-decoration: none; padding-bottom: 0.125rem; }
+.site-nav .links a.active { color: #1a1a1a; font-weight: 700; border-bottom: 1px solid #1a1a1a; }
+.page { flex: 1; padding: 0 var(--space-page-inline) 2rem; }
+.page-content { max-width: 40rem; margin: 0 auto; }
+`
+
 const PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Provena — Professional Journey</title>
 <style>
+${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 1rem; }
 @media (max-width: 480px) { body { padding: 0.75rem; } main { margin-top: 1rem; } }

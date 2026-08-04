@@ -101,11 +101,20 @@ function roleTokens(s: string): string[] {
   return s.toLowerCase().split(/[^a-z]+/).filter(t => t.length >= 3)
 }
 
+const ROLE_ALIASES: Record<string, string[]> = {
+  'tech lead': ['engineering lead', 'engineering team lead', 'team lead', 'technical lead'],
+  'staff engineer': ['staff software engineer', 'staff engineer'],
+  'principal engineer': ['principal software engineer', 'principal engineer'],
+}
+
 export function findMatchedRole(jd: string, roles: readonly string[]): string | null {
   const jdTokens = new Set(roleTokens(jd))
+  const lowerJd = jd.toLowerCase()
   return roles.find(r => {
     const rt = roleTokens(r)
-    return rt.length > 0 && rt.every(t => jdTokens.has(t))
+    if (rt.length > 0 && rt.every(t => jdTokens.has(t))) return true
+    const aliases = ROLE_ALIASES[r.toLowerCase()] ?? []
+    return aliases.some(alias => lowerJd.includes(alias))
   }) ?? null
 }
 

@@ -135,3 +135,42 @@ test('I-OE-2: every claim traces to a canonical capability', () => {
   const ev = evaluateOpportunity('Staff Engineer. Own architectural decisions.', profile)
   for (const m of [...ev.demonstrated, ...ev.gaps]) assert.ok(ids.has(m.capabilityId))
 })
+
+test('roles: recognizes Engineering Lead as matching Tech Lead role alias', () => {
+  const ev = evaluateOpportunity('Role: Engineering Lead. Hybrid in Barcelona / Remote in Spain.', {
+    ...makeProfile(),
+    preferences: {
+      work: { remote: 'required' },
+      roles: ['Tech Lead', 'Staff Engineer'],
+    },
+  })
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'satisfied')
+})
+
+test('real JD evaluation: Engineering Lead JD evaluates workMode, role, demonstrated capabilities and gaps', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+Role: Engineering Lead 
+Location: hybrid in Barcelona / Remote in Spain 
+Contract: full time 
+Language: English 
+
+Responsibilities:
+Contribute to the development and improvement of a cloud-native Data & AI platform, helping to design scalable architectures and integrate suitable technologies.
+Build and automate platform services by developing Kubernetes-based solutions and APIs that support the deployment, management, and interaction with cloud environments.
+Analyse and resolve technical challenges by identifying root causes and implementing reliable, long-term improvements.
+
+Profile:
+Strong experience in software development with Golang and a solid understanding of cloud-native technologies, Kubernetes, and software engineering best practices, including Infrastructure-as-Code concepts.
+Interest in Artificial Intelligence and familiarity with MLOps practices, such as workflow orchestration and model lifecycle management.
+A proactive and collaborative mindset, with the ability to learn new technologies quickly and communicate effectively in English.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'satisfied')
+  assert.notEqual(ev.verdict, 'skip')
+  assert.ok(ev.demonstrated.length > 0)
+  assert.ok(ev.gaps.length > 0)
+})
+

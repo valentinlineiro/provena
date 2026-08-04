@@ -19,6 +19,10 @@
     - mentor engineers
     - lead engineering initiatives
     - technical roadmap
+    - engineering lead
+    - technical challenges
+    - root causes
+    - long-term improvements
   provenance: *ref_0
 - id: 140e92d7-f793-4001-a737-7acf8e319871
   name: Formal Verification
@@ -78,6 +82,10 @@
     - llm
     - genai
     - ai tools
+    - artificial intelligence
+    - mlops
+    - workflow orchestration
+    - model lifecycle management
   provenance: *ref_0
 - id: 420b07b6-c49e-43ee-a409-f569e60378ab
   name: Software Architecture
@@ -91,6 +99,7 @@
     - design systems
     - technical design
     - clean architecture
+    - scalable architectures
   provenance: *ref_0
 - id: e04c4fe8-7f64-4b3a-96e6-e2b729b09b06
   name: Artificial Intelligence (AI)
@@ -116,10 +125,18 @@
 - id: dbda0e3e-2592-4f27-98f6-147d341a8fc8
   name: Cloud-Native Architecture
   evidenceIds: []
+  signals:
+    - cloud-native
+    - cloud-native platform
+    - cloud environments
+    - cloud-native technologies
   provenance: *ref_0
 - id: 995557c1-b741-4e9b-bdfb-4e34dbf55989
   name: Software Development
   evidenceIds: []
+  signals:
+    - software development
+    - software engineering best practices
   provenance: *ref_0
 - id: 463c0c30-d80b-4287-b435-e5aea69785fb
   name: Continuous Integration and Continuous Delivery (CI/CD)
@@ -152,6 +169,9 @@
 - id: 005e1053-dde3-4a5a-8360-f7a1d907866e
   name: Automation
   evidenceIds: []
+  signals:
+    - automate platform services
+    - automation
   provenance: *ref_0
 - id: fb1c751b-d2a6-4109-acbe-c5d7a4625abe
   name: Software Testing
@@ -176,6 +196,9 @@
 - id: 84f33db4-1a56-43ce-b04a-8db818a024c3
   name: REST APIs
   evidenceIds: []
+  signals:
+    - apis
+    - rest apis
   provenance: *ref_0
 - id: 37668881-f368-48c3-bb3c-66301f9ea573
   name: Apache Kafka
@@ -188,6 +211,10 @@
 - id: f015666b-67f0-4f20-a0a2-de593c30761a
   name: Kubernetes
   evidenceIds: []
+  signals:
+    - kubernetes
+    - k8s
+    - kubernetes-based solutions
   provenance: *ref_0
 - id: 83b0f4db-2236-4ddf-ad3d-755c18da12a4
   name: Microsoft Azure

@@ -1,4 +1,4 @@
-// Generated from profiles/valentin — regenerate with the command in docs/superpowers/plans/2026-07-31-cv-preparation.md (Task 3)
+// Generated from profiles/valentin — regenerate with command
 import type { Profile } from '@provena/core'
 export const updatedAt = '2026-07-30'
 export default {
@@ -408,7 +408,11 @@ export default {
         "drive technical decisions",
         "mentor engineers",
         "lead engineering initiatives",
-        "technical roadmap"
+        "technical roadmap",
+        "engineering lead",
+        "technical challenges",
+        "root causes",
+        "long-term improvements"
       ],
       "provenance": {
         "source": "linkedin",
@@ -524,7 +528,11 @@ export default {
         "ai engineering",
         "llm",
         "genai",
-        "ai tools"
+        "ai tools",
+        "artificial intelligence",
+        "mlops",
+        "workflow orchestration",
+        "model lifecycle management"
       ],
       "provenance": {
         "source": "linkedin",
@@ -543,7 +551,8 @@ export default {
         "architectural decisions",
         "design systems",
         "technical design",
-        "clean architecture"
+        "clean architecture",
+        "scalable architectures"
       ],
       "provenance": {
         "source": "linkedin",
@@ -591,6 +600,12 @@ export default {
       "id": "dbda0e3e-2592-4f27-98f6-147d341a8fc8",
       "name": "Cloud-Native Architecture",
       "evidenceIds": [],
+      "signals": [
+        "cloud-native",
+        "cloud-native platform",
+        "cloud environments",
+        "cloud-native technologies"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -600,6 +615,10 @@ export default {
       "id": "995557c1-b741-4e9b-bdfb-4e34dbf55989",
       "name": "Software Development",
       "evidenceIds": [],
+      "signals": [
+        "software development",
+        "software engineering best practices"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -672,6 +691,10 @@ export default {
       "id": "005e1053-dde3-4a5a-8360-f7a1d907866e",
       "name": "Automation",
       "evidenceIds": [],
+      "signals": [
+        "automate platform services",
+        "automation"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -726,6 +749,10 @@ export default {
       "id": "84f33db4-1a56-43ce-b04a-8db818a024c3",
       "name": "REST APIs",
       "evidenceIds": [],
+      "signals": [
+        "apis",
+        "rest apis"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -753,6 +780,11 @@ export default {
       "id": "f015666b-67f0-4f20-a0a2-de593c30761a",
       "name": "Kubernetes",
       "evidenceIds": [],
+      "signals": [
+        "kubernetes",
+        "k8s",
+        "kubernetes-based solutions"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"

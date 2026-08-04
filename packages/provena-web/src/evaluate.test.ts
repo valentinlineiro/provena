@@ -32,3 +32,12 @@ test('embedded profile carries capability signals for evaluation', async () => {
   const profile = (await import('./profile.js')).default
   assert.ok(profile.capabilities.some(c => (c.signals ?? []).length > 0))
 })
+
+test('Prepare page reads role/emphasize query params for the evaluate handoff', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/cv'), env)
+  const html = await res.text()
+  assert.ok(html.includes('new URLSearchParams(location.search)'))
+  assert.ok(html.includes("params.get('role')"))
+  assert.ok(html.includes("params.get('emphasize')"))
+  assert.ok(html.includes('prefillEmphasize.includes'))
+})

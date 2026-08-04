@@ -358,6 +358,10 @@ ${siteNav('prepare')}
 <script>
 const profile = ${JSON.stringify(profile)}
 const suggestions = ${JSON.stringify(SUGGESTIONS)}
+const params = new URLSearchParams(location.search)
+const prefillRole = params.get('role')
+if (prefillRole) document.getElementById('role').value = prefillRole
+const prefillEmphasize = (params.get('emphasize') || '').split(',').filter(Boolean)
 
 document.getElementById('experiences').innerHTML = profile.identity.experienceIds.map(id => {
   const e = profile.experiences.find(x => x.id === id)
@@ -365,9 +369,14 @@ document.getElementById('experiences').innerHTML = profile.identity.experienceId
   return '<label><input type="checkbox" data-exp="' + id + '" checked> ' + e.organization + '</label>'
 }).join('')
 
-document.getElementById('caps').innerHTML = suggestions.strengths.map(s =>
+const capNames = [...suggestions.strengths]
+for (const name of prefillEmphasize) if (!capNames.includes(name)) capNames.push(name)
+document.getElementById('caps').innerHTML = capNames.map(s =>
   '<label><input type="checkbox" data-cap="' + s + '" checked> ' + s + '</label>'
 ).join('')
+document.querySelectorAll('[data-cap]').forEach(el => {
+  if (prefillEmphasize.length && !prefillEmphasize.includes(el.dataset.cap)) el.checked = false
+})
 
 function buildContext() {
   const role = document.getElementById('role').value.trim()

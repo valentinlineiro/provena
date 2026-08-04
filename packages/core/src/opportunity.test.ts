@@ -265,6 +265,31 @@ Location - Remote Spain
   assert.ok(demonstratedNames.includes('Technical Leadership'))
 })
 
+test('real JD evaluation #6 (Health-Tech AI): AI Engineer (Backend) JD evaluates €80K salary, workMode, demonstrated stack and preserves AI gap', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+Salary: €80K – €150K
+Location: Remote-First (Spain/UK) with a vibrant hub in Barcelona
+As an AI Engineer (Backend), you will take end-to-end ownership of Cortex.
+Software engineering experience with expert-level Python, FastAPI, asyncio, pydantic.
+Architect, deploy, and maintain robust, modular backend systems using clean architectural principles and architectural design.
+Infrastructure containerised with Kubernetes and Docker.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'satisfied')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('Python (Programming Language)'))
+  assert.ok(demonstratedNames.includes('Kubernetes'))
+  assert.ok(demonstratedNames.includes('Software Architecture'))
+  const gapNames = ev.gaps.map(g => g.capabilityName)
+  assert.ok(gapNames.includes('Artificial Intelligence (AI)'))
+})
+
+
 
 
 

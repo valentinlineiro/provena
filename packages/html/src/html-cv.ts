@@ -22,7 +22,7 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
         box-sizing: border-box;
         width: 210mm;
         min-height: 297mm;
-        padding: 15mm 18mm;
+        padding: 10mm 12mm;
         margin: 0 auto;
         background: #ffffff;
         color: #111111;

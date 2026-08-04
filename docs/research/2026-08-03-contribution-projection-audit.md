@@ -1,6 +1,6 @@
 # Empirical Audit Report: Contribution Projections across Decision Contexts
 
-Date: 2026-08-03
+Date: 2026-08-04
 Profile: `profiles/valentin`
 
 ## Overview of Evaluated Decision Contexts
@@ -52,9 +52,6 @@ Headline: *"Senior Software Engineer"*
 **Experiences projected:**
 
 - **Summa Networks** (Senior Software Engineer) — *Contribution Level: Supporting*
-  - Established AI-assisted engineering workflows and acted as internal technical reference.
- (Outcome: Partnered with company AI Lead to guide internal tooling experiments and team training.
-)
   - Drove modernization initiatives across critical telecom backend systems.
  (Outcome: Upgraded platform capabilities without compromising live network stability.
 )
@@ -114,7 +111,7 @@ Headline: *"Software Quality Researcher"*
 
 **Experiences projected:**
 
-- **Summa Networks** (Senior Software Engineer) — *Contribution Level: Supporting*
+- **Summa Networks** (Senior Software Engineer) — *Contribution Level: Historical*
   - Established AI-assisted engineering workflows and acted as internal technical reference.
  (Outcome: Partnered with company AI Lead to guide internal tooling experiments and team training.
 )
@@ -138,31 +135,31 @@ Headline: *"Software Quality Researcher"*
 
 ---
 
-## Matrix: Contribution Relevance & Selection per Context (Contribution-Level R6)
+## Matrix: Contribution Relevance & Selection per Context (Explicit Vocabulary Authority - commit 320cf83)
 
 | Contribution ID | Scope | Context A (Staff) | Context B (Backend) | Context C (AI/Prod) | Context D (Research) |
 | --- | --- | --- | --- | --- | --- |
 | summa-clean-architecture | product (initiator) | ✅ Selected | ❌ Omitted | ❌ Omitted | ❌ Omitted |
-| summa-ai-assisted-engineering | organization (lead) | ✅ Selected | ✅ Selected | ✅ Selected | ✅ Selected |
+| summa-ai-assisted-engineering | organization (lead) | ✅ Selected | ❌ Omitted | ✅ Selected | ✅ Selected |
 | summa-roadmap-ownership-4g-core | product (lead) | ❌ Omitted | ❌ Omitted | ❌ Omitted | ❌ Omitted |
 | summa-telecom-modernization | product (contributor) | ❌ Omitted | ✅ Selected | ❌ Omitted | ❌ Omitted |
 | summa-maintainability-velocity | team (lead) | ❌ Omitted | ❌ Omitted | ✅ Selected | ❌ Omitted |
 
 ---
 
-## Empirical Comparison: Baseline (`commit 607b4d1`) vs New Contribution-Level R6 (`commit 97ca8aa`)
+## Progression Matrix: Baseline (`commit 607b4d1`) → Contribution R6 (`commit 97ca8aa`) → Explicit Vocabulary Authority (`commit 320cf83`)
 
-| Contribution ID | Scope | Context A (Staff)<br>Baseline → New | Context B (Backend)<br>Baseline → New | Context C (AI/Prod)<br>Baseline → New | Context D (Research)<br>Baseline → New | Change Summary |
+| Contribution ID | Scope | Context A (Staff)<br>Base → R6 → Vocab | Context B (Backend)<br>Base → R6 → Vocab | Context C (AI/Prod)<br>Base → R6 → Vocab | Context D (Research)<br>Base → R6 → Vocab | Empirical Impact & Rationale |
 | --- | --- | --- | --- | --- | --- | --- |
-| `summa-clean-architecture` | product (initiator) | ✅ → ✅ Selected | ❌ → ❌ Omitted | ✅ → ❌ Omitted | ✅ → ❌ Omitted | Omitted in C & D due to zero keyword hit ($H=0 \implies \text{Historical}$) |
-| `summa-ai-assisted-engineering` | organization (lead) | ✅ → ✅ Selected | ✅ → ✅ Selected | ✅ → ✅ Selected | ✅ → ✅ Selected | Consistently selected across all 4 contexts; ranked #1 by scope (`organization`) |
-| `summa-roadmap-ownership-4g-core` | product (lead) | ✅ → ❌ Omitted | ❌ → ❌ Omitted | ✅ → ❌ Omitted | ❌ → ❌ Omitted | Omitted in A due to budget compression (2 slots) and lower scope rank than `clean-architecture` |
-| `summa-telecom-modernization` | product (contributor) | ✅ → ❌ Omitted | ✅ → ✅ Selected | ❌ → ❌ Omitted | ❌ → ❌ Omitted | Retained in Backend context; pruned from Staff context due to budget cap |
-| `summa-maintainability-velocity` | team (lead) | ❌ → ❌ Omitted | ❌ → ❌ Omitted | ✅ → ✅ Selected | ❌ → ❌ Omitted | Retained strictly in AI/Productivity context where velocity/maintainability signals match |
+| `summa-clean-architecture` | product (initiator) | ✅ → ✅ → ✅ Selected | ❌ → ❌ → ❌ Omitted | ✅ → ❌ → ❌ Omitted | ✅ → ❌ → ❌ Omitted | Retained in Context A where `architecture` is explicitly emphasized; omitted in B, C, D ($H=0$). |
+| `summa-ai-assisted-engineering` | organization (lead) | ✅ → ✅ → ✅ Selected | ✅ → ✅ → ❌ Omitted | ✅ → ✅ → ✅ Selected | ✅ → ✅ → ✅ Selected | **Key Result**: Eliminates false-positive selection in Context B (Backend) where leadership was not emphasized. Retained in Context A & C (explicit AI emphasis) and Context D (Historical fallback). |
+| `summa-roadmap-ownership-4g-core` | product (lead) | ✅ → ❌ → ❌ Omitted | ❌ → ❌ → ❌ Omitted | ✅ → ❌ → ❌ Omitted | ❌ → ❌ → ❌ Omitted | Omitted in all contexts due to budget compression (2 slots) and lower scope rank than clean-architecture/AI. |
+| `summa-telecom-modernization` | product (contributor) | ✅ → ❌ → ❌ Omitted | ✅ → ✅ → ✅ Selected | ❌ → ❌ → ❌ Omitted | ❌ → ❌ → ❌ Omitted | Retained exclusively in Context B (Senior Backend) where backend/systems signals (`systems`) match. |
+| `summa-maintainability-velocity` | team (lead) | ❌ → ❌ → ❌ Omitted | ❌ → ❌ → ❌ Omitted | ✅ → ✅ → ✅ Selected | ❌ → ❌ → ❌ Omitted | Retained exclusively in Context C (AI/Productivity) where velocity/maintainability signals match. |
 
 ---
 
-## Diagnostic Analysis across Decision Contexts
+## Diagnostic Analysis across Decision Contexts under Explicit Vocabulary Authority
 
 ### 1. Context A (Staff Software Engineer)
 - **Observed Behavior**: Bullet budget for Summa Networks was compressed to 2 slots. The selected bullets were `summa-ai-assisted-engineering` (`scope: organization`, `role: lead`) and `summa-clean-architecture` (`scope: product`, `role: initiator`).
@@ -170,16 +167,16 @@ Headline: *"Software Quality Researcher"*
 - **System Impact**: Prevents bloated 4-bullet listings when higher-level organizational leadership signals (`organization` scope) are present.
 
 ### 2. Context B (Senior Backend Engineer)
-- **Observed Behavior**: Summa Networks selected 2 bullets: `summa-ai-assisted-engineering` and `summa-telecom-modernization`.
-- **Root Cause & Trace**: `summa-telecom-modernization` matched backend/systems relevance signals ($H=1$, `Supporting`), while `summa-ai-assisted-engineering` matched leadership signals ($H=1$, `Supporting`) and won on `organization` scope level rank (4 vs 3). Unrelated architecture/roadmap items had $H=0$ and were classified as `Historical`.
-- **System Impact**: Precision backend targeting without irrelevant strategic roadmap noise.
+- **Observed Behavior**: Summa Networks selected 1 bullet: `summa-telecom-modernization`. `summa-ai-assisted-engineering` was **omitted**.
+- **Root Cause & Trace**: Under Explicit Vocabulary Authority, implicit leadership terms (`technical-leadership`, `lead`, `leadership`) are no longer injected. Since Context B emphasizes `[Java, Spring, distributed systems, microservices, Kafka, backend]`, `summa-ai-assisted-engineering` scores $H=0$ (`Historical`). Non-historical candidate `summa-telecom-modernization` ($H=1$, `Supporting`) is selected, excluding $H=0$ items.
+- **System Impact**: Precision backend targeting without false-positive leadership noise when leadership is unrequested.
 
 ### 3. Context C (AI-Assisted Engineering / Productivity)
 - **Observed Behavior**: Summa Networks classified as `Core` (due to `summa-ai-assisted-engineering` having $H=2$), but selected only 2 bullets (`summa-ai-assisted-engineering` and `summa-maintainability-velocity`).
-- **Root Cause & Trace**: Unlike baseline `607b4d1` which padded all 4 budget slots with weakly matching achievements, Contribution-level R6 filters out $H=0$ (`Historical`) contributions from the candidate pool when non-historical candidates exist. The 3 unaligned contributions (`clean-architecture`, `roadmap-ownership`, `telecom-modernization`) were correctly classified as `Historical` and excluded.
+- **Root Cause & Trace**: Candidate pool excludes $H=0$ items when non-historical candidates exist. The 3 unaligned contributions (`clean-architecture`, `roadmap-ownership`, `telecom-modernization`) were correctly classified as `Historical` and excluded.
 - **System Impact**: Eliminates "budget padding" with unaligned bullets, ensuring high density of relevant evidence.
 
 ### 4. Context D (Software Quality / Research)
-- **Observed Behavior**: Summa Networks compressed to 1 selected bullet (`summa-ai-assisted-engineering`), while academic research projects (`Autoseed`, `WS-BPEL Mutation Operators`) and University experience were elevated to `Core`.
-- **Root Cause & Trace**: Industry contributions with zero research hits ($H=0$) were classified as `Historical`. Research context prioritizes academic mutation testing and formal verification over commercial engineering.
-- **System Impact**: Clean structural separation between research focus items and legacy industry work.
+- **Observed Behavior**: Summa Networks experience classified as `Historical` (budget = 1 bullet). `summa-ai-assisted-engineering` was selected as the single Historical fallback bullet.
+- **Root Cause & Trace**: All 5 Summa contributions scored $H=0$ against research terms (`formal methods`, `mutation testing`, `verification`, `testing`, `research`). With no non-historical candidates, candidate pool fell back to all 5 items. `summa-ai-assisted-engineering` won on `organization` scope level rank (4 vs 3 vs 1).
+- **System Impact**: Ensures single highest-scope historical continuity bullet is retained when an experience has zero target keyword matches.

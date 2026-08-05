@@ -689,6 +689,190 @@ export function projectProfessionalFit(
   }
 }
 
+// ---- K5B: Personal Fit Projection -----------------------------------------
+//
+// Invariant: assessPreferences and projectPersonalFit consume ONLY Preferences
+// and parsed JD attributes. They must NOT access the candidate Profile or any
+// K4 evidence. Personal Fit is orthogonal to Professional Fit.
+//
+// Eligibility vs Desirability:
+//   hard constraints (minimum salary, required remote) → Eligibility gate
+//   soft preferences (preferred salary, vacation, hours) → desirability score
+//
+// Status semantics:
+//   'preferred'    → opportunity attribute exceeds preference threshold
+//   'acceptable'   → opportunity attribute meets minimum, not preferred level
+//   'undesirable'  → opportunity attribute falls below minimum (eligibility violated)
+//   'unknown'      → attribute not stated in JD; treated as absent, not negative
+
+export type PreferenceDimension =
+  | 'compensation'
+  | 'work-mode'
+  | 'vacation'
+  | 'summer-hours'
+  | 'schedule'
+
+export type PreferenceStatus = 'preferred' | 'acceptable' | 'undesirable' | 'unknown'
+
+export interface PreferenceAssessment {
+  readonly dimension: PreferenceDimension
+  readonly status: PreferenceStatus
+  /** Whether this assessment produces an eligibility violation */
+  readonly eligibilityViolation: boolean
+  readonly detail: string
+}
+
+export interface PersonalFitProjection {
+  /** 0.0–10.0. Mean over assessable (non-unknown) preference dimensions. */
+  readonly score: number
+  /** Fraction of preference dimensions that produced an assessable result. */
+  readonly assessmentCoverage: number
+  /** Whether any dimension produced an eligibility violation. */
+  readonly eligible: boolean
+  /** Per-dimension breakdown for auditability. */
+  readonly breakdown: readonly PreferenceAssessment[]
+}
+
+const PREFERENCE_SCORE: Record<PreferenceStatus, number | null> = {
+  preferred:   1.0,
+  acceptable:  0.65,
+  undesirable: 0.0,
+  unknown:     null,   // excluded from score mean (same discipline as K5A)
+}
+
+export function assessPreferences(
+  jd: string,
+  prefs: Preferences | undefined,
+): readonly PreferenceAssessment[] {
+  const assessments: PreferenceAssessment[] = []
+
+  // ── Compensation ──────────────────────────────────────────────────────────
+  const min = prefs?.compensation?.minimum
+  if (min !== undefined) {
+    const salaries = extractSalaries(jd)
+    if (salaries.length === 0) {
+      assessments.push({
+        dimension: 'compensation',
+        status: 'unknown',
+        eligibilityViolation: false,
+        detail: 'JD does not state compensation; not penalising',
+      })
+    } else {
+      const eurSalaries = salaries.map(s => s.currency === 'USD' ? s.amount * 0.9 : s.amount)
+      const floor = Math.min(...eurSalaries)
+      const preferred = (prefs as any)?.compensation?.preferred as number | undefined
+      const displayFloor = `€${floor}`
+
+      if (floor < min) {
+        assessments.push({
+          dimension: 'compensation',
+          status: 'undesirable',
+          eligibilityViolation: true,
+          detail: `JD offers ${displayFloor}; below minimum €${min}`,
+        })
+      } else if (preferred !== undefined && floor >= preferred) {
+        assessments.push({
+          dimension: 'compensation',
+          status: 'preferred',
+          eligibilityViolation: false,
+          detail: `JD offers ${displayFloor}; meets preferred threshold €${preferred}`,
+        })
+      } else {
+        assessments.push({
+          dimension: 'compensation',
+          status: 'acceptable',
+          eligibilityViolation: false,
+          detail: `JD offers ${displayFloor}; above minimum €${min} but below preferred`,
+        })
+      }
+    }
+  }
+
+  // ── Work Mode ─────────────────────────────────────────────────────────────
+  const remotePref = prefs?.work?.remote
+  if (remotePref !== undefined) {
+    const parsed = parseWorkModeConstraint(jd)
+    if (!parsed) {
+      assessments.push({
+        dimension: 'work-mode',
+        status: 'unknown',
+        eligibilityViolation: false,
+        detail: 'JD does not state work mode; not penalising',
+      })
+    } else if (remotePref === 'required') {
+      const isFullRemote = parsed.mode === 'remote' && parsed.remoteAvailability === 'full'
+      assessments.push({
+        dimension: 'work-mode',
+        status: isFullRemote ? 'preferred' : 'undesirable',
+        eligibilityViolation: !isFullRemote,
+        detail: isFullRemote
+          ? `JD offers full remote: "${parsed.rawText}"`
+          : `JD requires ${parsed.mode} (${parsed.rawText}); candidate requires remote`,
+      })
+    } else if (remotePref === 'hybrid') {
+      const acceptable = parsed.mode === 'remote' || parsed.mode === 'hybrid'
+      const isFullRemote = parsed.mode === 'remote' && parsed.remoteAvailability === 'full'
+      assessments.push({
+        dimension: 'work-mode',
+        status: isFullRemote ? 'preferred' : acceptable ? 'acceptable' : 'undesirable',
+        eligibilityViolation: !acceptable,
+        detail: acceptable
+          ? `JD allows ${parsed.mode}: "${parsed.rawText}"`
+          : `JD is on-site only: "${parsed.rawText}"; candidate requires at least hybrid`,
+      })
+    } else {
+      // 'optional' — any work mode is acceptable, fully remote is preferred
+      const isFullRemote = parsed.mode === 'remote' && parsed.remoteAvailability === 'full'
+      assessments.push({
+        dimension: 'work-mode',
+        status: isFullRemote ? 'preferred' : 'acceptable',
+        eligibilityViolation: false,
+        detail: `JD states ${parsed.mode} (${parsed.rawText}); preference is optional`,
+      })
+    }
+  }
+
+  // ── Vacation / Summer hours / Schedule ───────────────────────────────────
+  // These are soft preferences — stated absence in JD means 'unknown', not violation.
+  // The infrastructure is here for K6+ when preferences become richer.
+  // No hard patterns to match currently → always unknown unless future pref fields exist.
+
+  return assessments
+}
+
+export function projectPersonalFit(
+  assessments: readonly PreferenceAssessment[],
+): PersonalFitProjection {
+  const total = assessments.length
+
+  if (total === 0) {
+    return { score: 0, assessmentCoverage: 0, eligible: true, breakdown: [] }
+  }
+
+  let sumPoints = 0
+  let assessedCount = 0
+  let hasViolation = false
+
+  for (const a of assessments) {
+    if (a.eligibilityViolation) hasViolation = true
+    const points = PREFERENCE_SCORE[a.status]
+    if (points !== null) {
+      sumPoints += points
+      assessedCount++
+    }
+  }
+
+  const score = assessedCount === 0 ? 0 : Math.round((sumPoints / assessedCount) * 100) / 10
+  const assessmentCoverage = Math.round((assessedCount / total) * 1000) / 1000
+
+  return {
+    score,
+    assessmentCoverage,
+    eligible: !hasViolation,
+    breakdown: assessments,
+  }
+}
+
 // ---- policy ---------------------------------------------------------------
 
 export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEvaluation {

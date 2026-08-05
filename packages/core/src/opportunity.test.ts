@@ -381,6 +381,118 @@ test('K5A Acceptance: projectProfessionalFit — breakdown is auditable per requ
   assert.equal(aspmBreakdown.pointsContributed, 0)
 })
 
+test('K5B Acceptance: assessPreferences — unknown compensation (JD silent) does NOT penalise', async () => {
+  const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
+
+  const prefs: import('./types.js').Preferences = {
+    compensation: { minimum: 80000, currency: 'EUR' },
+  }
+  const assessments = assessPreferences('Staff Software Engineer. Join our team.', prefs)
+  const comp = assessments.find(a => a.dimension === 'compensation')!
+  assert.equal(comp.status, 'unknown')
+  assert.equal(comp.eligibilityViolation, false)
+
+  const fit = projectPersonalFit(assessments)
+  // Coverage = 0 assessed / 1 total
+  assert.equal(fit.assessmentCoverage, 0)
+  // Unknown does NOT collapse to 0 score — same invariant as K5A
+  assert.equal(fit.eligible, true)
+})
+
+test('K5B Acceptance: assessPreferences — compensation below minimum → INELIGIBLE', async () => {
+  const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
+
+  const prefs: import('./types.js').Preferences = {
+    compensation: { minimum: 80000, currency: 'EUR' },
+  }
+  const jd = 'Software Engineer. Salary: €65,000.'
+  const assessments = assessPreferences(jd, prefs)
+  const comp = assessments.find(a => a.dimension === 'compensation')!
+  assert.equal(comp.status, 'undesirable')
+  assert.equal(comp.eligibilityViolation, true)
+
+  const fit = projectPersonalFit(assessments)
+  assert.equal(fit.eligible, false)
+  assert.equal(fit.score, 0)
+})
+
+test('K5B Acceptance: assessPreferences — compensation at minimum → acceptable, above preferred → preferred', async () => {
+  const { assessPreferences } = await import('./opportunity.js')
+
+  const prefs = { compensation: { minimum: 80000, preferred: 100000, currency: 'EUR' } } as any
+
+  const atMin   = assessPreferences('Software Engineer. Salary: €85,000.', prefs)
+  const atPref  = assessPreferences('Software Engineer. Salary: €105,000.', prefs)
+
+  assert.equal(atMin.find(a => a.dimension === 'compensation')!.status, 'acceptable')
+  assert.equal(atPref.find(a => a.dimension === 'compensation')!.status, 'preferred')
+})
+
+test('K5B Acceptance: assessPreferences — work mode: required remote + full remote JD → preferred + eligible', async () => {
+  const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
+
+  const prefs: import('./types.js').Preferences = { work: { remote: 'required' } }
+  const jd = 'Staff Engineer. Fully remote opportunity from Spain.'
+  const assessments = assessPreferences(jd, prefs)
+  const wm = assessments.find(a => a.dimension === 'work-mode')!
+  assert.equal(wm.status, 'preferred')
+  assert.equal(wm.eligibilityViolation, false)
+
+  const fit = projectPersonalFit(assessments)
+  assert.equal(fit.eligible, true)
+  assert.equal(fit.score, 10)
+})
+
+test('K5B Acceptance: assessPreferences — work mode: required remote + hybrid JD → undesirable + INELIGIBLE', async () => {
+  const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
+
+  const prefs: import('./types.js').Preferences = { work: { remote: 'required' } }
+  const jd = 'Software Engineer. Barcelona — Hybrid, 3 days onsite.'
+  const assessments = assessPreferences(jd, prefs)
+  const wm = assessments.find(a => a.dimension === 'work-mode')!
+  assert.equal(wm.status, 'undesirable')
+  assert.equal(wm.eligibilityViolation, true)
+
+  const fit = projectPersonalFit(assessments)
+  assert.equal(fit.eligible, false)
+})
+
+test('K5B Acceptance: assessPreferences — score and coverage separation: eligible preferred + unknown = score 10, coverage 50%', async () => {
+  const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
+
+  // Only work mode is stated in JD (preferred), compensation not stated → unknown
+  const prefs = { work: { remote: 'required' }, compensation: { minimum: 80000 } } as any
+  const jd = 'Fully remote opportunity.'  // no salary stated
+
+  const assessments = assessPreferences(jd, prefs)
+  const fit = projectPersonalFit(assessments)
+
+  // work-mode: preferred → 10.0; compensation: unknown → excluded
+  assert.equal(fit.score, 10)
+  assert.ok(fit.assessmentCoverage < 1, `Coverage(${fit.assessmentCoverage}) < 1 because compensation is unknown`)
+  assert.equal(fit.eligible, true)
+})
+
+test('K5B Acceptance: projectPersonalFit — monotonicity preferred > acceptable > undesirable', async () => {
+  const { projectPersonalFit } = await import('./opportunity.js')
+  type PA = import('./opportunity.js').PreferenceAssessment
+
+  const make = (status: import('./opportunity.js').PreferenceStatus): readonly PA[] => [{
+    dimension: 'compensation',
+    status,
+    eligibilityViolation: status === 'undesirable',
+    detail: '',
+  }]
+
+  const [pref, acc, und] = [
+    projectPersonalFit(make('preferred')),
+    projectPersonalFit(make('acceptable')),
+    projectPersonalFit(make('undesirable')),
+  ]
+  assert.ok(pref.score > acc.score, `preferred(${pref.score}) > acceptable(${acc.score})`)
+  assert.ok(acc.score > und.score, `acceptable(${acc.score}) > undesirable(${und.score})`)
+})
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',

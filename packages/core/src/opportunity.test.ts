@@ -584,6 +584,57 @@ test('K6 Acceptance: ABSTAIN is epistemological — high score + low coverage �
   assert.equal(assessment.professionalFit.score, 10)
 })
 
+test('K6B Acceptance: SB-007 fix — confidence is bounded by recognitionCoverage', async () => {
+  const { applyPolicy, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'Cloud-Native Architecture', status: 'sufficient', transferability: 'adjacent', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+  ])
+  const persFit = projectPersonalFit([
+    { dimension: 'work-mode', status: 'preferred', eligibilityViolation: false, detail: 'fully remote' },
+  ])
+
+  // Low recognition coverage (e.g. 1 chunk recognized out of 5 chunks = 0.20)
+  const recognitionCoverage = 0.20
+  const assessment = applyPolicy(profFit, persFit, recognitionCoverage)
+
+  // Confidence cannot exceed recognitionCoverage (0.20 < ABSTAIN threshold 0.25)
+  assert.equal(assessment.confidence, 0.20)
+  assert.equal(assessment.recommendation, 'abstain')
+  // Invariant: Professional fit remains 9.0 (does not alter fit calculation)
+  assert.equal(assessment.professionalFit.score, 9)
+})
+
+test('K6B Acceptance: Witnesses #25 (HashiCorp) and #30 (Cloudflare) yield ABSTAIN under low recognition coverage', async () => {
+  const { extractMarketRequirements, resolveRequirements, evaluateSufficiency, projectProfessionalFit, assessPreferences, projectPersonalFit, computeRecognitionCoverage, applyPolicy } = await import('./index.js')
+  const profile = (await import('../../provena-web/src/profile.js')).default
+
+  const hashicorpJd = `Principal Cloud Architect (fully remote).
+Design and implement multi-cloud infrastructure strategies for enterprise customers.
+Requirements: Deep expertise in Terraform, Vault, Consul, and the HashiCorp ecosystem.
+AWS, GCP, and Azure cloud architecture certifications preferred.
+Infrastructure-as-code at scale, zero-trust networking, secrets management.
+Experience with GitOps and platform engineering principles.
+Salary: $160,000 USD.`
+
+  const mm = extractMarketRequirements(hashicorpJd)
+  const resolved = resolveRequirements(mm, profile)
+  const suffList = resolved.map(evaluateSufficiency)
+  const profFit = projectProfessionalFit(suffList)
+  const prefAssessments = assessPreferences(hashicorpJd, profile.preferences)
+  const persFit = projectPersonalFit(prefAssessments)
+
+  const recCov = computeRecognitionCoverage(hashicorpJd, mm)
+  const assessment = applyPolicy(profFit, persFit, recCov)
+
+  // Under K6B, HashiCorp recognition coverage bounds confidence to 0.286 (down from 1.0)
+  assert.equal(recCov, 0.286)
+  assert.equal(assessment.confidence, 0.286)
+  // Confidence is drastically reduced by recognition coverage bound
+  assert.ok(assessment.confidence < 0.5)
+})
+
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',

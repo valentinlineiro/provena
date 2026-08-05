@@ -63,7 +63,7 @@ export { validate, formatValidationErrors } from './validate.js'
 export type { ValidationError } from './validate.js'
 
 export type { Verdict, CriterionStatus, SignalStatus, CriterionCheck, SignalMatch, OpportunityEvaluation, ResolvedRequirement, EvidenceSufficiencyAssessment, Transferability, ProfessionalFitProjection, PreferenceDimension, PreferenceStatus, PreferenceAssessment, PersonalFitProjection, Recommendation, OpportunityAssessment } from './opportunity.js'
-export { evaluateOpportunity, resolveRequirements, evaluateSufficiency, evaluateTransferability, projectProfessionalFit, assessPreferences, projectPersonalFit, computeConfidence, applyPolicy, findMatchedRole, APPLY_COVERAGE_THRESHOLD, APPLY_INTERPRETATION_THRESHOLD, ABSTAIN_CONFIDENCE_THRESHOLD, STRONG_FIT_THRESHOLD, ACCEPTABLE_PERSONAL_THRESHOLD } from './opportunity.js'
+export { evaluateOpportunity, resolveRequirements, evaluateSufficiency, evaluateTransferability, projectProfessionalFit, assessPreferences, projectPersonalFit, computeRecognitionCoverage, computeConfidence, applyPolicy, findMatchedRole, APPLY_COVERAGE_THRESHOLD, APPLY_INTERPRETATION_THRESHOLD, ABSTAIN_CONFIDENCE_THRESHOLD, STRONG_FIT_THRESHOLD, ACCEPTABLE_PERSONAL_THRESHOLD } from './opportunity.js'
 
 export type { MarketRequirement, MarketModel } from './market.js'
 export { extractMarketRequirements } from './market.js'

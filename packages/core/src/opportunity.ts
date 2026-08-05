@@ -922,9 +922,20 @@ export interface OpportunityAssessment {
   readonly rationale: string
 }
 
+export function computeRecognitionCoverage(jd: string, marketModel: MarketModel): number {
+  const chunks = jd.split(/\n+/).map(c => c.trim()).filter(Boolean)
+  if (chunks.length === 0) return 0
+  const recognizedCount = chunks.filter(chunk => {
+    const n = normalizeText(chunk)
+    return marketModel.requirements.some(req => n.includes(normalizeText(req.rawText)))
+  }).length
+  return Math.round((recognizedCount / chunks.length) * 1000) / 1000
+}
+
 export function computeConfidence(
   professionalFit: ProfessionalFitProjection,
   personalFit: PersonalFitProjection,
+  recognitionCoverage: number = 1.0,
 ): number {
   const profCov = professionalFit.assessmentCoverage
 
@@ -933,14 +944,18 @@ export function computeConfidence(
     ? 1
     : personalFit.assessmentCoverage
 
-  return Math.round(profCov * personalWeight * 1000) / 1000
+  const downstreamConfidence = profCov * personalWeight
+  // K6B Invariant: Confidence <= recognitionCoverage (no downstream layer can create certainty about unrecognized market requirements)
+  const calibrated = Math.min(downstreamConfidence, recognitionCoverage)
+  return Math.round(calibrated * 1000) / 1000
 }
 
 export function applyPolicy(
   professionalFit: ProfessionalFitProjection,
   personalFit: PersonalFitProjection,
+  recognitionCoverage: number = 1.0,
 ): OpportunityAssessment {
-  const confidence = computeConfidence(professionalFit, personalFit)
+  const confidence = computeConfidence(professionalFit, personalFit, recognitionCoverage)
   const eligible = personalFit.eligible
 
   // Hard gate: any eligibility violation → SKIP regardless of fit

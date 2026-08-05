@@ -362,6 +362,35 @@ Strong software development background and artificial intelligence interest.
   assert.ok(gapNames.includes('Artificial Intelligence (AI)'))
 })
 
+test('Evaluation Independence: evaluateOpportunity produces identical marketModel for distinct candidate profiles A and B', async () => {
+  const profileA = (await import('../../provena-web/src/profile.js')).default
+  const profileB = {
+    ...profileA,
+    identity: { ...profileA.identity, name: 'Profile B (Different Candidate)' },
+    capabilities: [], // Empty capabilities
+    contributions: [],
+  }
+
+  const jd = `
+Staff Applied AI Engineer
+Build and ship multiple AI-powered product features across agentic workflows.
+Deep proficiency with Python, SQL, REST APIs and infrastructure containerised with Kubernetes.
+For our Team, we offer both hybrid and fully remote working options.
+  `.trim()
+
+  const evA = evaluateOpportunity(jd, profileA)
+  const evB = evaluateOpportunity(jd, profileB)
+
+  // Invariant assertion: MarketModel is 100% profile-agnostic
+  assert.deepStrictEqual(evA.marketModel, evB.marketModel)
+  assert.ok(evA.marketModel?.requirements.length! >= 3)
+
+  // Resolution and claims legitimately differ by profile
+  assert.ok(evA.demonstrated.length > 0)
+  assert.equal(evB.demonstrated.length, 0)
+})
+
+
 
 
 

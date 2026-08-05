@@ -1,6 +1,7 @@
 import type { Profile } from './profile.js'
 import type { Preferences } from './types.js'
 import type { DecisionContext } from './cv-projector.js'
+import { extractMarketRequirements, type MarketModel } from './market.js'
 
 export type Verdict = 'apply' | 'consider' | 'skip'
 export type CriterionStatus = 'satisfied' | 'violated' | 'unknown'
@@ -23,6 +24,7 @@ export interface SignalMatch {
 export interface OpportunityEvaluation {
   readonly verdict: Verdict
   readonly criteria: readonly CriterionCheck[]
+  readonly marketModel?: MarketModel
   readonly demonstrated: readonly SignalMatch[]
   readonly gaps: readonly SignalMatch[]
   readonly notEvaluated: number
@@ -257,9 +259,12 @@ export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEv
     emphasize: demonstrated.map(m => m.capabilityName),
   }
 
+  const marketModel = extractMarketRequirements(jd)
+
   return {
     verdict,
     criteria,
+    marketModel,
     demonstrated,
     gaps,
     notEvaluated,

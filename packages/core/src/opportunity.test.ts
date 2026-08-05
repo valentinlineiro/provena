@@ -636,7 +636,7 @@ Salary: $160,000 USD.`
 
 test('K11 Acceptance: DeclarativeMarketRecognizer — domain recognition recovery via ADMIN_KNOWLEDGE without changing universal protocol', async () => {
   const { DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, resolveRequirements, evaluateSufficiency, projectProfessionalFit, assessPreferences, projectPersonalFit, computeRecognitionCoverage, applyPolicy } = await import('./index.js')
-  const { Profile } = await import('./types.js')
+  type Profile = import('./index.js').Profile
 
   const adminJd = `Responsable de Administración y Recepción (Presencial).
 Gestión completa de atención al cliente y pacientes en recepción.
@@ -644,18 +644,23 @@ Requisitos: Experiencia en gestión administrativa, facturación, y atención al
 Conocimientos de software de gestión médica y gestión de nóminas.
 Salario: €30.000 bruto/año.`
 
-  const lydiaProfile: import('./types.js').Profile = {
+  const lydiaProfile: Profile = {
     identity: {
-      person: { name: 'Lydia Pérez', title: 'Responsable de Administración' },
+      person: { name: 'Lydia Pérez', title: 'Responsable de Administración', urls: {} },
       experienceIds: ['e-1'], projectIds: [], educationIds: [], publicationIds: [], certificationIds: [], recommendationIds: [], capabilityIds: ['c-1', 'c-2'], contributionIds: [],
     },
-    person: { name: 'Lydia Pérez', title: 'Responsable de Administración' },
-    experiences: [{ id: 'e-1', organisation: 'Clínica', title: 'Administrativa', start: '2018-01', capabilityIds: ['c-1', 'c-2'], summary: '5 años supervisando facturación y atención al cliente' }],
+    experiences: [{ id: 'e-1', organization: 'Clínica', title: 'Administrativa', start: '2018-01', capabilityIds: ['c-1', 'c-2'], summary: '5 años supervisando facturación y atención al cliente', achievements: [], technologies: [], evidenceIds: [] }],
     capabilities: [
-      { id: 'c-1', name: 'Gestión Administrativa y Facturación', signals: ['gestión administrativa', 'facturación'], evidence: ['5 años supervisando facturación'] },
-      { id: 'c-2', name: 'Atención al Cliente y Recepción', signals: ['atención al cliente', 'recepción'], evidence: ['Atención telefónica y presencial'] },
+      { id: 'c-1', name: 'Gestión Administrativa y Facturación', signals: ['gestión administrativa', 'facturación'], evidenceIds: [] },
+      { id: 'c-2', name: 'Atención al Cliente y Recepción', signals: ['atención al cliente', 'recepción'], evidenceIds: [] },
     ],
+    projects: [],
+    education: [],
+    publications: [],
+    certifications: [],
+    recommendations: [],
     contributions: [],
+    evidence: [],
     preferences: { work: { remote: 'optional' }, compensation: { minimum: 25000 } },
   }
 

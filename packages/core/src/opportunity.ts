@@ -607,12 +607,7 @@ export interface ProfessionalFitProjection {
   }[]
 }
 
-const STATUS_BASE: Record<EvidenceSufficiencyAssessment['status'], number | null> = {
-  sufficient:   null,   // resolved per transferability below
-  partial:      null,   // resolved per transferability below
-  insufficient: 0.10,
-  unknown:      null,   // excluded from score
-}
+
 
 const TRANSFERABILITY_MODIFIER: Record<Transferability, number> = {
   direct:     0,      // no discount

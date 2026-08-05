@@ -1,3 +1,4 @@
+export { MLOPS_KNOWLEDGE } from './knowledge/mlops.js'
 import type { MarketKnowledge } from './market-knowledge.js'
 
 export const DEFAULT_SOFTWARE_KNOWLEDGE: MarketKnowledge = {

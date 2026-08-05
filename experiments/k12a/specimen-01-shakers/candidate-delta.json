@@ -1,0 +1,97 @@
+{
+  "specimen": "specimen-01-shakers",
+  "domain": "MLOps / Machine Learning Engineering",
+  "source": "Shakers Senior Machine Learning Engineer JD",
+  "knowledgeBaseVersion": "DEFAULT_SOFTWARE_KNOWLEDGE (K0)",
+  "extractedPatterns": [
+    {
+      "id": "mlops-platform-engineering",
+      "concept": "MLOps Platform Engineering & Pipelines",
+      "kind": "capability",
+      "matchers": [
+        "mlops",
+        "mlops end-to-end",
+        "plataforma de mlops",
+        "pipelines de entrenamiento",
+        "pipelines de entrenamiento y despliegue",
+        "machine learning engineer",
+        "modelos en cargas productivas"
+      ],
+      "qualifiers": [
+        "end-to-end",
+        "reutilizable",
+        "producción"
+      ],
+      "rationale": "Induced from Shakers residual chunks referencing MLOps platform creation, training pipelines, and productionizing ML models."
+    },
+    {
+      "id": "feature-store-model-serving",
+      "concept": "Feature Store & Model Serving Architecture",
+      "kind": "capability",
+      "matchers": [
+        "feature store",
+        "serving",
+        "feature/serving",
+        "versionado de modelos",
+        "versionado de modelos y datos",
+        "ciclo de vida por cliente"
+      ],
+      "qualifiers": [
+        "multitenant"
+      ],
+      "rationale": "Induced from residual requirements for feature store management, model serving infrastructure, and versioning of datasets/models."
+    },
+    {
+      "id": "model-drift-monitoring",
+      "concept": "Model Monitoring & Drift Detection",
+      "kind": "practice",
+      "matchers": [
+        "drift",
+        "monitorización de drift",
+        "detección de drift",
+        "reentrenamiento",
+        "reentrenamiento continuo"
+      ],
+      "qualifiers": [
+        "continuo",
+        "por señal"
+      ],
+      "rationale": "Induced from residual requirements regarding model performance monitoring, drift detection, and automated retraining."
+    },
+    {
+      "id": "data-governance-lineage",
+      "concept": "Data Lineage & Governance (Unity Catalog)",
+      "kind": "practice",
+      "matchers": [
+        "unity catalog",
+        "gobierno del dato",
+        "lineage",
+        "databricks",
+        "arquitectura medallion",
+        "dbt"
+      ],
+      "qualifiers": [
+        "medallion"
+      ],
+      "rationale": "Induced from residual technology mentions of Databricks Unity Catalog, dbt, data governance, and lineage."
+    },
+    {
+      "id": "ai-compliance-guardrails",
+      "concept": "AI Regulatory Compliance & Observability",
+      "kind": "practice",
+      "matchers": [
+        "opentelemetry",
+        "grafana",
+        "posthog",
+        "eu ai act",
+        "dora",
+        "gdpr",
+        "guardrails de seguridad"
+      ],
+      "qualifiers": [
+        "compliance"
+      ],
+      "rationale": "Induced from residual mentions of AI regulation (EU AI Act, DORA), observability tools, and security guardrails."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "recoveryGainSource": {
+    "k0": {
+      "recCov": 0.276,
+      "reqCount": 5
+    },
+    "k1": {
+      "recCov": 0.448,
+      "reqCount": 10
+    },
+    "gain": 0.172
+  },
+  "transferGainHoldout": {
+    "k0": {
+      "recCov": 0.412,
+      "reqCount": 5
+    },
+    "k1": {
+      "recCov": 0.765,
+      "reqCount": 9
+    },
+    "gain": 0.353
+  },
+  "specificityHashicorp": {
+    "k0": {
+      "recCov": 0.467,
+      "reqCount": 7
+    },
+    "k1": {
+      "recCov": 0.467,
+      "reqCount": 7
+    },
+    "deltaRequirements": 0
+  },
+  "isolationCeu": {
+    "k0": {
+      "recCov": 0,
+      "reqCount": 0
+    },
+    "k1": {
+      "recCov": 0,
+      "reqCount": 0
+    },
+    "deltaRequirements": 0
+  }
+}

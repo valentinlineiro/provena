@@ -1,0 +1,50 @@
+{
+  "sourceJdLength": 2882,
+  "totalMarketBearingChunks": 29,
+  "recognizedRequirements": [
+    {
+      "concept": "Python",
+      "rawText": "Python"
+    },
+    {
+      "concept": "DevOps / CI-CD",
+      "rawText": "CI/CD"
+    },
+    {
+      "concept": "Cloud-Native Architecture",
+      "rawText": "AWS"
+    },
+    {
+      "concept": "RAG & Retrieval",
+      "rawText": "RAG"
+    },
+    {
+      "concept": "Fintech / Proptech Operations",
+      "rawText": "fintech"
+    }
+  ],
+  "recognitionCoverage": 0.276,
+  "residualChunks": [
+    "# Specimen #1: Shakers — Senior Machine Learning Engineer / MLOps",
+    "About the job",
+    "Senior Machine Learning Engineer · MLOps end-to-end 🤖",
+    "El reto",
+    "Hoy existen modelos de análisis de riesgo validados en su primera versión, pero viven todavía cerca del notebook. Tu misión es llevarlos a producción con impacto a escala y, sobre todo, construir una vez la base reutilizable (pipelines de entrenamiento y despliegue, feature/serving, versionado de modelos y datos) para que generar el siguiente modelo sea rápido y no haya que rehacer el trabajo cada vez. Trabajarás codo a codo con el CTO y con Producto, Diseño y Data, con autonomía real sobre un área que hoy no tiene especialista.",
+    "Responsabilidades",
+    "Llevar a producción modelos de riesgo con impacto a escala.",
+    "Diseñar y construir la plataforma de MLOps reutilizable (pipelines, feature store, serving, versionado de modelos y datos).",
+    "Desplegar y reentrenar el mismo modelo en modo multitenant, gestionando el ciclo de vida por cliente.",
+    "Montar monitorización de drift, reentrenamiento (continuo o por señal) y métricas de performance.",
+    "Operar lo que construyes con observabilidad, auditabilidad y guardrails de seguridad and compliance como ciudadanos de primera clase.",
+    "Traducir necesidades de negocio y producto en propuestas técnicas y ejecutarlas.",
+    "Requisitos",
+    "Trayectoria senior como Machine Learning Engineer con modelos en cargas productivas reales, más allá de pruebas de concepto.",
+    "Ownership alto: entiendes el problema, lo diseñas y lo resuelves con guías mínimas.",
+    "Experiencia colaborando con Producto y stakeholders no técnicos, con capacidad de comunicar ideas complejas (también en pizarra).",
+    "Se valora",
+    "Observabilidad (OpenTelemetry, Grafana, PostHog) y gobierno del dato / lineage (Unity Catalog).",
+    "¿Por qué este proyecto?",
+    "Largo plazo, en remoto y full-time.",
+    "Eres la primera persona de ML: sientas las bases de la IA en la compañía y, potencialmente, lideras el equipo que crezca sobre ellas."
+  ]
+}

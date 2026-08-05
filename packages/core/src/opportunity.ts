@@ -563,6 +563,132 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
   }
 }
 
+// ---- K5A: Professional Fit Projection -------------------------------------
+//
+// Invariant: projectProfessionalFit consumes ONLY EvidenceSufficiencyAssessment[].
+// It must NOT access the JD, Profile, or raw evidence. If it needs to inspect
+// those to produce a score, a second interpretive authority has been created.
+//
+// Score semantics:
+//   - sufficient  + direct    → 1.0   (full credit)
+//   - sufficient  + adjacent  → 0.90  (slight context discount)
+//   - sufficient  + uncertain → 0.80
+//   - partial     + direct    → 0.65
+//   - partial     + adjacent  → 0.55
+//   - partial     + uncertain → 0.45
+//   - insufficient            → 0.10  (claim exists, no backing evidence)
+//   - unknown                 → excluded from score, counted in coverage gap
+//
+// Coverage = assessable / total_requirements
+// Score    = weighted mean over assessable assessments only (unknown excluded)
+// Confidence is computed downstream at K6 from score × coverage.
+
+export interface ProfessionalFitProjection {
+  /** 0.0–10.0. Computed only from assessable (non-unknown) requirements. */
+  readonly score: number
+  /**
+   * Fraction of market requirements that produced an assessable result.
+   * assessable = sufficient | partial | insufficient.
+   * 1.0 means every requirement had resolvable evidence; 0.0 means none did.
+   */
+  readonly assessmentCoverage: number
+  /** Total market requirements fed into this projection. */
+  readonly totalRequirements: number
+  /** Assessments that contributed to the score (status !== 'unknown'). */
+  readonly assessedCount: number
+  /** Assessments excluded from the score (status === 'unknown'). */
+  readonly unknownCount: number
+  /** Per-requirement breakdown for auditability. */
+  readonly breakdown: readonly {
+    requirementConcept: string
+    status: EvidenceSufficiencyAssessment['status']
+    transferability: Transferability
+    pointsContributed: number
+  }[]
+}
+
+const STATUS_BASE: Record<EvidenceSufficiencyAssessment['status'], number | null> = {
+  sufficient:   null,   // resolved per transferability below
+  partial:      null,   // resolved per transferability below
+  insufficient: 0.10,
+  unknown:      null,   // excluded from score
+}
+
+const TRANSFERABILITY_MODIFIER: Record<Transferability, number> = {
+  direct:     0,      // no discount
+  adjacent:   -0.10,  // slight context gap
+  uncertain:  -0.20,  // material context gap
+  mismatched: -0.50,  // strong context mismatch (not currently produced, reserved)
+}
+
+const SUFFICIENT_BASE = 1.0
+const PARTIAL_BASE    = 0.65
+
+function assessmentPoints(a: EvidenceSufficiencyAssessment): number | null {
+  if (a.status === 'unknown') return null          // excluded
+  if (a.status === 'insufficient') return 0.10
+
+  const base = a.status === 'sufficient' ? SUFFICIENT_BASE : PARTIAL_BASE
+  const modifier = TRANSFERABILITY_MODIFIER[a.transferability]
+  return Math.max(0, base + modifier)
+}
+
+export function projectProfessionalFit(
+  assessments: readonly EvidenceSufficiencyAssessment[],
+): ProfessionalFitProjection {
+  const total = assessments.length
+
+  if (total === 0) {
+    return {
+      score: 0,
+      assessmentCoverage: 0,
+      totalRequirements: 0,
+      assessedCount: 0,
+      unknownCount: 0,
+      breakdown: [],
+    }
+  }
+
+  const breakdown: ProfessionalFitProjection['breakdown'][number][] = []
+  let sumPoints = 0
+  let assessedCount = 0
+  let unknownCount = 0
+
+  for (const a of assessments) {
+    const points = assessmentPoints(a)
+    if (points === null) {
+      unknownCount++
+      breakdown.push({
+        requirementConcept: a.requirementConcept,
+        status: a.status,
+        transferability: a.transferability,
+        pointsContributed: 0,
+      })
+    } else {
+      assessedCount++
+      sumPoints += points
+      breakdown.push({
+        requirementConcept: a.requirementConcept,
+        status: a.status,
+        transferability: a.transferability,
+        pointsContributed: points,
+      })
+    }
+  }
+
+  const score = assessedCount === 0 ? 0 : Math.round((sumPoints / assessedCount) * 100) / 10
+  const assessmentCoverage = total === 0 ? 0 : Math.round((assessedCount / total) * 1000) / 1000
+
+  return {
+    score,
+    assessmentCoverage,
+    totalRequirements: total,
+    assessedCount,
+    unknownCount,
+    breakdown,
+  }
+}
+
 // ---- policy ---------------------------------------------------------------
 
 export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEvaluation {

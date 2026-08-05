@@ -291,6 +291,96 @@ test('K4B Acceptance: Evidence Contextual Transferability (Sateliot #15 & Health
   assert.equal(healthAiAssess.transferability, 'direct')
 })
 
+test('K5A Acceptance: projectProfessionalFit — empty assessments yields score 0 and coverage 0', async () => {
+  const { projectProfessionalFit } = await import('./opportunity.js')
+  const result = projectProfessionalFit([])
+  assert.equal(result.score, 0)
+  assert.equal(result.assessmentCoverage, 0)
+  assert.equal(result.totalRequirements, 0)
+})
+
+test('K5A Acceptance: projectProfessionalFit — monotonicity sufficient > partial > insufficient', async () => {
+  const { projectProfessionalFit } = await import('./opportunity.js')
+
+  const base: Omit<import('./opportunity.js').EvidenceSufficiencyAssessment, 'status' | 'rationale' | 'transferability' | 'matchedQualifiers' | 'evidenceCount'> = {
+    requirementId: 'mr-x',
+    requirementConcept: 'Python',
+  }
+
+  const [suffProj, partProj, insuffProj] = [
+    projectProfessionalFit([{ ...base, status: 'sufficient',   transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 }]),
+    projectProfessionalFit([{ ...base, status: 'partial',      transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 }]),
+    projectProfessionalFit([{ ...base, status: 'insufficient', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 0 }]),
+  ]
+  // sufficient > partial > insufficient (monotonicity)
+  assert.ok(suffProj.score > partProj.score, `sufficient(${suffProj.score}) > partial(${partProj.score})`)
+  assert.ok(partProj.score > insuffProj.score, `partial(${partProj.score}) > insufficient(${insuffProj.score})`)
+})
+
+test('K5A Acceptance: projectProfessionalFit — monotonicity direct > adjacent > uncertain for same status', async () => {
+  const { projectProfessionalFit } = await import('./opportunity.js')
+
+  const base: Omit<import('./opportunity.js').EvidenceSufficiencyAssessment, 'rationale' | 'matchedQualifiers' | 'evidenceCount' | 'transferability'> = {
+    requirementId: 'mr-x',
+    requirementConcept: 'LLM Evaluation',
+    status: 'sufficient',
+  }
+
+  const [dirProj, adjProj, uncProj] = [
+    projectProfessionalFit([{ ...base, transferability: 'direct',   rationale: '', matchedQualifiers: [], evidenceCount: 1 }]),
+    projectProfessionalFit([{ ...base, transferability: 'adjacent', rationale: '', matchedQualifiers: [], evidenceCount: 1 }]),
+    projectProfessionalFit([{ ...base, transferability: 'uncertain',rationale: '', matchedQualifiers: [], evidenceCount: 1 }]),
+  ]
+  assert.ok(dirProj.score > adjProj.score, `direct(${dirProj.score}) > adjacent(${adjProj.score})`)
+  assert.ok(adjProj.score > uncProj.score, `adjacent(${adjProj.score}) > uncertain(${uncProj.score})`)
+})
+
+test('K5A Acceptance: projectProfessionalFit — unknown excluded from score but counted in coverage gap', async () => {
+  const { projectProfessionalFit } = await import('./opportunity.js')
+
+  const assessments: import('./opportunity.js').EvidenceSufficiencyAssessment[] = [
+    { requirementId: 'mr-1', requirementConcept: 'Python',   status: 'sufficient', transferability: 'direct',   rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+    { requirementId: 'mr-2', requirementConcept: 'RAG',      status: 'unknown',    transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+    { requirementId: 'mr-3', requirementConcept: 'GraphQL',  status: 'unknown',    transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+  ]
+  const result = projectProfessionalFit(assessments)
+
+  // Score reflects only the 1 assessable requirement (Python SUFFICIENT DIRECT = 10.0)
+  assert.equal(result.score, 10)
+  // Coverage = 1 assessed / 3 total = 0.333
+  assert.ok(result.assessmentCoverage < 0.4, `assessmentCoverage(${result.assessmentCoverage}) should be ~0.333`)
+  assert.equal(result.totalRequirements, 3)
+  assert.equal(result.assessedCount, 1)
+  assert.equal(result.unknownCount, 2)
+
+  // Key: unknown should NOT collapse to zero — score is 10, not (10+0+0)/3 = 3.3
+  assert.ok(result.score > 5, `score(${result.score}) must not be diluted by unknown requirements`)
+})
+
+test('K5A Acceptance: projectProfessionalFit — breakdown is auditable per requirement', async () => {
+  const { projectProfessionalFit } = await import('./opportunity.js')
+
+  const assessments: import('./opportunity.js').EvidenceSufficiencyAssessment[] = [
+    { requirementId: 'mr-1', requirementConcept: 'Python',           status: 'sufficient', transferability: 'direct',   rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+    { requirementId: 'mr-2', requirementConcept: 'LLM Evaluation',   status: 'partial',    transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+    { requirementId: 'mr-3', requirementConcept: 'ASPM',             status: 'unknown',    transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+  ]
+  const result = projectProfessionalFit(assessments)
+
+  assert.equal(result.breakdown.length, 3)
+
+  const pyBreakdown  = result.breakdown.find(b => b.requirementConcept === 'Python')!
+  const llmBreakdown = result.breakdown.find(b => b.requirementConcept === 'LLM Evaluation')!
+  const aspmBreakdown = result.breakdown.find(b => b.requirementConcept === 'ASPM')!
+
+  // Python: sufficient + direct → points = 10.0
+  assert.equal(pyBreakdown.pointsContributed, 1.0)
+  // LLM Evaluation: partial + uncertain → 0.65 - 0.20 = 0.45
+  assert.equal(llmBreakdown.pointsContributed, 0.45)
+  // ASPM: unknown → excluded (pointsContributed = 0 by convention, but not counted in mean)
+  assert.equal(aspmBreakdown.pointsContributed, 0)
+})
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',

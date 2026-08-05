@@ -140,6 +140,30 @@ test('K2A Acceptance: WorkMode scoped semantics & cardinality evaluation', () =>
   assert.equal(ev15.criteria.find(c => c.criterion === 'workMode')!.status, 'violated')
 })
 
+test('K2B Acceptance: Role Family vs Role Level Semantics', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default // Preferences: roles = ['Staff Engineer', 'Tech Lead', 'Principal Engineer']
+
+  // Witness #14 (Entrust): Junior AI Engineer -> Family compatible (AI/Software Eng), Level incompatible (Junior vs Staff) -> VIOLATED
+  const ev14 = evaluateOpportunity('Junior AI Engineer. Remote Spain. Python, ML.', profile)
+  assert.equal(ev14.criteria.find(c => c.criterion === 'roles')!.status, 'violated')
+
+  // Witness #16 (Health AI): Senior Backend Engineer -> Family compatible, Level Senior (compatible adjacent for Staff) -> SATISFIED / UNKNOWN (not violated)
+  const ev16 = evaluateOpportunity('Senior Backend Engineer. Fully remote from Spain. Python.', profile)
+  assert.notEqual(ev16.criteria.find(c => c.criterion === 'roles')!.status, 'violated')
+
+  // Witness #17 (Project Manager IA): PM IA Senior -> Family incompatible (Project Management vs Software Engineering) -> VIOLATED
+  const ev17 = evaluateOpportunity('Jefe de Proyecto Senior / Project Manager IA Senior. Madrid.', profile)
+  assert.equal(ev17.criteria.find(c => c.criterion === 'roles')!.status, 'violated')
+
+  // Witness #11 (Executive/CEO): CEO / P&L Executive -> Family incompatible (Executive vs Engineering) -> VIOLATED
+  const ev11 = evaluateOpportunity('CEO / P&L Executive. Madrid.', profile)
+  assert.equal(ev11.criteria.find(c => c.criterion === 'roles')!.status, 'violated')
+
+  // Witness #20 (Univ CEU): Docente Universitario -> Family incompatible (Academia vs Engineering) -> VIOLATED
+  const ev20 = evaluateOpportunity('Docente Universitario en Ingeniería Informática. Sistemas distribuidos.', profile)
+  assert.equal(ev20.criteria.find(c => c.criterion === 'roles')!.status, 'violated')
+})
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',

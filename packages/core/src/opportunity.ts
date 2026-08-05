@@ -230,6 +230,45 @@ function roleTokens(s: string): string[] {
   return s.toLowerCase().split(/[^a-z]+/).filter(t => t.length >= 3)
 }
 
+export interface RoleRequirement {
+  readonly rawTitle: string
+  readonly family: 'software-engineering' | 'ai-engineering' | 'project-management' | 'executive-management' | 'academia' | 'unknown'
+  readonly level: 'junior' | 'mid' | 'senior' | 'staff' | 'principal' | 'executive' | 'unknown'
+}
+
+export function parseRoleRequirement(jd: string): RoleRequirement {
+  const lower = jd.toLowerCase()
+
+  // 1. Level extraction
+  let level: RoleRequirement['level'] = 'unknown'
+  if (/\bjunior\b/i.test(lower)) level = 'junior'
+  else if (/\bmid-?level\b/i.test(lower)) level = 'mid'
+  else if (/\bstaff\b/i.test(lower)) level = 'staff'
+  else if (/\bprincipal\b/i.test(lower)) level = 'principal'
+  else if (/\b(?:ceo|cto|cpo|executive|vice president|vp)\b/i.test(lower)) level = 'executive'
+  else if (/\b(?:senior|lead|head of)\b/i.test(lower)) level = 'senior'
+
+  // 2. Family extraction
+  let family: RoleRequirement['family'] = 'unknown'
+  if (/\b(?:project manager|jefe de proyecto|pmp|program manager)\b/i.test(lower)) {
+    family = 'project-management'
+  } else if (/\b(?:ceo|cpo|p&l executive)\b/i.test(lower)) {
+    family = 'executive-management'
+  } else if (/\b(?:docente|profesor|catedrático|universitario|aneca)\b/i.test(lower)) {
+    family = 'academia'
+  } else if (/\b(?:ai engineer|applied ai|machine learning engineer|ml engineer)\b/i.test(lower)) {
+    family = 'ai-engineering'
+  } else if (/\b(?:software engineer|backend engineer|fullstack|full-stack|cto|solutions engineer|tech lead|engineering manager)\b/i.test(lower)) {
+    family = 'software-engineering'
+  }
+
+  // Extract candidate raw title line if present
+  const titleLine = jd.split('\n').find(l => /^(?:role|position|job title):/i.test(l)) ?? ''
+  const rawTitle = titleLine.replace(/^(?:role|position|job title):\s*/i, '').trim() || jd.slice(0, 60).trim()
+
+  return { rawTitle, family, level }
+}
+
 const ROLE_ALIASES: Record<string, string[]> = {
   'tech lead': ['engineering lead', 'engineering team lead', 'team lead', 'technical lead', 'ai engineer', 'senior ai engineer'],
   'staff engineer': ['staff software engineer', 'staff engineer', 'ai engineer', 'senior ai engineer'],
@@ -237,6 +276,16 @@ const ROLE_ALIASES: Record<string, string[]> = {
 }
 
 export function findMatchedRole(jd: string, roles: readonly string[]): string | null {
+  const roleReq = parseRoleRequirement(jd)
+
+  // Level mismatch guard: junior levels do not match senior/staff preferences
+  if (roleReq.level === 'junior' || roleReq.level === 'mid') return null
+
+  // Incompatible family guard: non-engineering families do not match engineering preferences
+  if (roleReq.family === 'project-management' || roleReq.family === 'executive-management' || roleReq.family === 'academia') {
+    return null
+  }
+
   const jdTokens = new Set(roleTokens(jd))
   const lowerJd = jd.toLowerCase()
   return roles.find(r => {
@@ -250,12 +299,30 @@ export function findMatchedRole(jd: string, roles: readonly string[]): string | 
 function checkRoles(jd: string, prefs: Preferences | undefined): CriterionCheck {
   const roles = prefs?.roles ?? []
   if (roles.length === 0) return { criterion: 'roles', status: 'unknown', detail: 'no preferred roles in profile' }
+
+  const roleReq = parseRoleRequirement(jd)
+
+  // 1. Incompatible Family Check
+  if (roleReq.family === 'project-management' || roleReq.family === 'executive-management' || roleReq.family === 'academia') {
+    return {
+      criterion: 'roles',
+      status: 'violated',
+      detail: `Role family "${roleReq.family}" is incompatible with preferred engineering roles (${roles.join(', ')})`,
+    }
+  }
+
+  // 2. Incompatible Level Check (Junior level explicitly violates Staff/Senior/Lead preferences)
+  if (roleReq.level === 'junior') {
+    return {
+      criterion: 'roles',
+      status: 'violated',
+      detail: `Role level "junior" is incompatible with preferred leadership/senior levels (${roles.join(', ')})`,
+    }
+  }
+
   const matched = findMatchedRole(jd, roles)
   if (matched) return { criterion: 'roles', status: 'satisfied', detail: 'JD matches preferred role ' + matched }
-  const lower = jd.toLowerCase()
-  if (/(junior|mid-?level)/i.test(lower) || roleTokens(lower).includes('senior')) {
-    return { criterion: 'roles', status: 'violated', detail: 'JD targets a level below preferred (' + roles.join(', ') + ')' }
-  }
+
   return { criterion: 'roles', status: 'unknown', detail: 'JD role not recognizable vs preferred: ' + roles.join(', ') }
 }
 

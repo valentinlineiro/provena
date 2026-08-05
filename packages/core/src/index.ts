@@ -71,3 +71,6 @@ export { extractMarketRequirements } from './market.js'
 export type { MarketPatternDefinition, MarketKnowledge, IMarketRecognizer } from './market-knowledge.js'
 export { DeclarativeMarketRecognizer, composeKnowledge } from './market-knowledge.js'
 export { DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE } from './default-knowledge.js'
+
+export type { RawOpportunity, OpportunitySourceInput, OpportunitySource, SafeFetchOptions } from './opportunity-source.js'
+export { validateSafeUrl, fetchSafeContent, extractJobFromHtml, UrlOpportunitySource } from './opportunity-source.js'

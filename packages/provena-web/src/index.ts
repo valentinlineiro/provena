@@ -8,6 +8,8 @@ import {
   composeKnowledge,
   DEFAULT_SOFTWARE_KNOWLEDGE,
   ADMIN_KNOWLEDGE,
+  MLOPS_KNOWLEDGE,
+  DATA_AGENTIC_KNOWLEDGE,
   resolveRequirements,
   evaluateSufficiency,
   projectProfessionalFit,
@@ -15,6 +17,7 @@ import {
   projectPersonalFit,
   computeRecognitionCoverage,
   applyPolicy,
+  UrlOpportunitySource,
 } from '@provena/core'
 import type { CVContext, CVProjection } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
@@ -680,21 +683,26 @@ ${renderAppShell(
   'evaluate',
   '<div class="page-header">' +
   '<h1>Evaluate an opportunity</h1>' +
-  '<p class="subtitle">K11-LIVE Experimental Laboratorio: Intervention Test for Market Knowledge Architecture</p>' +
+  '<p class="subtitle">O1.1 Opportunity Ingestion: Paste a job description or enter a job posting URL</p>' +
   '</div>',
   '<div class="split-view" style="--split-threshold: 54rem;">' +
   '<div>' +
-  '<label for="jd">Job description</label>' +
-  '<textarea id="jd" placeholder="Paste job description here..."></textarea>' +
+  '<label for="jobUrl">Job Posting URL (O1.1 Ingestion)</label>' +
+  '<div style="display:flex;gap:0.5rem;margin-top:0.25rem;">' +
+  '<input id="jobUrl" type="url" placeholder="https://boards.greenhouse.io/..." style="flex:1;padding:0.625rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.375rem;">' +
+  '<button style="width:auto;margin-top:0;padding:0.625rem 1rem;" onclick="evaluateUrl()">Fetch & Evaluate</button>' +
+  '</div>' +
+  '<label for="jd">Or Paste Job Description</label>' +
+  '<textarea id="jd" placeholder="Paste job description text here..."></textarea>' +
   '<label for="knowledgeMode">Market Knowledge (Experimental Intervention)</label>' +
   '<select id="knowledgeMode" onchange="evaluateJD()">' +
   '<option value="software">Software Knowledge (Default)</option>' +
   '<option value="admin">Administration Knowledge (Lydia)</option>' +
-  '<option value="composed">Composed (Software + Administration)</option>' +
-  '<option value="off">Knowledge: OFF (0 patterns - Test Abstention)</option>' +
+  '<option value="composed">Composed ($K^*$ All Domains)</option>' +
+  '<option value="off">Knowledge: OFF (0 patterns — Test Abstention)</option>' +
   '</select>' +
   '<div class="action-bar">' +
-  '<button onclick="evaluateJD()">Evaluate</button>' +
+  '<button onclick="evaluateJD()">Evaluate Manual Text</button>' +
   '</div>' +
   '</div>' +
   '<div>' +
@@ -705,6 +713,24 @@ ${renderAppShell(
 <script>
 const result = document.getElementById('result')
 let lastEv = null
+async function evaluateUrl() {
+  const url = document.getElementById('jobUrl').value.trim()
+  const knowledgeMode = document.getElementById('knowledgeMode').value
+  if (!url) return
+  result.innerHTML = '<p class="meta">Safe Fetching & Extracting URL via OpportunitySource...</p>'
+  const res = await fetch('/api/evaluate-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url, knowledgeMode }),
+  })
+  if (!res.ok) { result.innerHTML = '<p class="meta">Error: ' + await res.text() + '</p>'; return }
+  const ev = await res.json()
+  lastEv = ev
+  if (ev.rawOpportunity && ev.rawOpportunity.description) {
+    document.getElementById('jd').value = ev.rawOpportunity.description
+  }
+  result.innerHTML = renderResult(ev)
+}
 async function evaluateJD() {
   const jd = document.getElementById('jd').value.trim()
   const knowledgeMode = document.getElementById('knowledgeMode').value
@@ -890,6 +916,59 @@ export default {
       return new Response(EVALUATE_PAGE, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
       })
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/evaluate-url') {
+      try {
+        const body = (await request.json()) as { url?: string; knowledgeMode?: string }
+        if (!body.url || typeof body.url !== 'string') {
+          return new Response('Missing url', { status: 400 })
+        }
+
+        const source = new UrlOpportunitySource()
+        const rawOpportunity = await source.fetch({ url: body.url })
+
+        const mode = body.knowledgeMode || 'software'
+        let knowledge
+        if (mode === 'off') {
+          knowledge = { name: 'none', version: '0.0.0', patterns: [] }
+        } else if (mode === 'admin') {
+          knowledge = ADMIN_KNOWLEDGE
+        } else if (mode === 'composed') {
+          knowledge = composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE)
+        } else {
+          knowledge = DEFAULT_SOFTWARE_KNOWLEDGE
+        }
+
+        const recognizer = new DeclarativeMarketRecognizer(knowledge)
+        const marketModel = recognizer.extractMarketRequirements(rawOpportunity.description)
+        const resolved = resolveRequirements(marketModel, profile)
+        const suffList = resolved.map(evaluateSufficiency)
+        const profFit = projectProfessionalFit(suffList)
+        const prefAssessments = assessPreferences(rawOpportunity.description, profile.preferences)
+        const persFit = projectPersonalFit(prefAssessments)
+        const recCov = computeRecognitionCoverage(rawOpportunity.description, marketModel)
+        const assessment = applyPolicy(profFit, persFit, recCov)
+
+        const legacyEv = evaluateOpportunity(rawOpportunity.description, profile)
+
+        return new Response(JSON.stringify({
+          ...legacyEv,
+          rawOpportunity,
+          marketModel,
+          professionalFit: profFit,
+          personalFit: persFit,
+          assessment,
+          recognitionCoverage: recCov,
+          knowledgeMode: mode,
+          knowledgeName: knowledge.name,
+          knowledgePatternsCount: knowledge.patterns.length,
+        }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Failed to fetch/evaluate URL', { status: 400 })
+      }
     }
 
     if (request.method === 'POST' && url.pathname === '/api/evaluate') {

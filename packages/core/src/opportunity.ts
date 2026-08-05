@@ -917,14 +917,25 @@ export interface OpportunityAssessment {
   readonly rationale: string
 }
 
+export function isMarketBearingChunk(chunk: string): boolean {
+  const lower = chunk.toLowerCase()
+  if (/^(about (us|fever|shakers|the process|you|the role|our company)|benefits|perks|process|our mission|how we work|interview|about the process|about you)/i.test(chunk)) return false
+  if (/(40% discount|health insurance|payflow|wellhub|privacy notice|inclusive workspace|relocation package|english lessons|attract compensation package)/i.test(lower)) return false
+  return true
+}
+
 export function computeRecognitionCoverage(jd: string, marketModel: MarketModel): number {
   const chunks = jd.split(/\n+/).map(c => c.trim()).filter(Boolean)
   if (chunks.length === 0) return 0
-  const recognizedCount = chunks.filter(chunk => {
+  const marketBearing = chunks.filter(isMarketBearingChunk)
+  const evaluationTarget = marketBearing.length === 0 ? chunks : marketBearing
+
+  const recognizedCount = evaluationTarget.filter(chunk => {
     const n = normalizeText(chunk)
     return marketModel.requirements.some(req => n.includes(normalizeText(req.rawText)))
   }).length
-  return Math.round((recognizedCount / chunks.length) * 1000) / 1000
+
+  return Math.round((recognizedCount / evaluationTarget.length) * 1000) / 1000
 }
 
 export function computeConfidence(
@@ -934,8 +945,9 @@ export function computeConfidence(
 ): number {
   const profCov = professionalFit.assessmentCoverage
 
-  // If no preferences are declared, personal coverage doesn't penalise confidence
-  const personalWeight = personalFit.totalRequirements === 0
+  // CONF-001 Fix: If no preferences are declared OR JD does not disclose preference info (assessedCount === 0),
+  // personal coverage does NOT penalise confidence. Unknown preferences are neutral, not a veto.
+  const personalWeight = (personalFit.totalRequirements === 0 || personalFit.assessedCount === 0)
     ? 1
     : personalFit.assessmentCoverage
 

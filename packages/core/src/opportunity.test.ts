@@ -493,6 +493,97 @@ test('K5B Acceptance: projectPersonalFit — monotonicity preferred > acceptable
   assert.ok(acc.score > und.score, `acceptable(${acc.score}) > undesirable(${und.score})`)
 })
 
+test('K6 Acceptance: applyPolicy — INELIGIBLE → SKIP regardless of professional fit', async () => {
+  const { applyPolicy, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'Python', status: 'sufficient', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+  ])
+  const persFit = projectPersonalFit([
+    { dimension: 'compensation', status: 'undesirable', eligibilityViolation: true, detail: 'below minimum' },
+  ])
+  const assessment = applyPolicy(profFit, persFit)
+  assert.equal(assessment.recommendation, 'skip')
+  assert.equal(assessment.eligibility, 'ineligible')
+})
+
+test('K6 Acceptance: applyPolicy — ELIGIBLE + zero coverage → ABSTAIN (epistemological, not bad score)', async () => {
+  const { applyPolicy, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'ASPM', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+    { requirementId: 'mr-2', requirementConcept: 'SBOM', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+  ])
+  const persFit = projectPersonalFit([])
+  const assessment = applyPolicy(profFit, persFit)
+  assert.equal(assessment.recommendation, 'abstain')
+  assert.equal(assessment.eligibility, 'eligible')
+})
+
+test('K6 Acceptance: applyPolicy — STRONG_CANDIDATE when both fits exceed thresholds', async () => {
+  const { applyPolicy, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'Python', status: 'sufficient', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+    { requirementId: 'mr-2', requirementConcept: 'Distributed Systems', status: 'sufficient', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 2 },
+  ])
+  const persFit = projectPersonalFit([
+    { dimension: 'work-mode', status: 'preferred', eligibilityViolation: false, detail: 'fully remote' },
+    { dimension: 'compensation', status: 'preferred', eligibilityViolation: false, detail: '€105k' },
+  ])
+  const assessment = applyPolicy(profFit, persFit)
+  assert.equal(assessment.recommendation, 'strong-candidate')
+  assert.equal(assessment.eligibility, 'eligible')
+  assert.ok(assessment.confidence > 0.25)
+})
+
+test('K6 Acceptance: applyPolicy — CONSIDER when professional fit below STRONG threshold (Pleo witness)', async () => {
+  const { applyPolicy, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'Python (ML context)', status: 'partial', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+  ])
+  const persFit = projectPersonalFit([
+    { dimension: 'work-mode', status: 'preferred', eligibilityViolation: false, detail: 'fully remote' },
+  ])
+  const assessment = applyPolicy(profFit, persFit)
+  assert.equal(assessment.recommendation, 'consider')
+  assert.equal(assessment.eligibility, 'eligible')
+})
+
+test('K6 Acceptance: computeConfidence — no personal preferences does NOT penalise confidence', async () => {
+  const { computeConfidence, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'Python', status: 'sufficient', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+  ])
+  const persFit = projectPersonalFit([])
+
+  const confidence = computeConfidence(profFit, persFit)
+  assert.equal(confidence, 1.0)
+})
+
+test('K6 Acceptance: ABSTAIN is epistemological — high score + low coverage → abstain, not skip or consider', async () => {
+  const { applyPolicy, projectProfessionalFit, projectPersonalFit } = await import('./opportunity.js')
+
+  const profFit = projectProfessionalFit([
+    { requirementId: 'mr-1', requirementConcept: 'Python', status: 'sufficient', transferability: 'direct', rationale: '', matchedQualifiers: [], evidenceCount: 1 },
+    { requirementId: 'mr-2', requirementConcept: 'RAG', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+    { requirementId: 'mr-3', requirementConcept: 'ASPM', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+    { requirementId: 'mr-4', requirementConcept: 'SBOM', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+    { requirementId: 'mr-5', requirementConcept: 'Prompt Engineering', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+    { requirementId: 'mr-6', requirementConcept: 'LLM Finetuning', status: 'unknown', transferability: 'uncertain', rationale: '', matchedQualifiers: [], evidenceCount: 0 },
+  ])
+  const persFit = projectPersonalFit([])
+
+  const assessment = applyPolicy(profFit, persFit)
+  // score = 10/10 (only Python assessed), coverage = 1/6 → ABSTAIN
+  assert.equal(assessment.recommendation, 'abstain')
+  assert.ok(assessment.confidence < 0.25)
+  // Key invariant: ABSTAIN is not a bad score — professional fit is still 10
+  assert.equal(assessment.professionalFit.score, 10)
+})
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',

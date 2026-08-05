@@ -727,6 +727,10 @@ export interface PersonalFitProjection {
   readonly score: number
   /** Fraction of preference dimensions that produced an assessable result. */
   readonly assessmentCoverage: number
+  /** Total preference dimensions evaluated (0 = no preferences declared). */
+  readonly totalRequirements: number
+  /** Dimensions that contributed to the score (status !== 'unknown'). */
+  readonly assessedCount: number
   /** Whether any dimension produced an eligibility violation. */
   readonly eligible: boolean
   /** Per-dimension breakdown for auditability. */
@@ -846,7 +850,7 @@ export function projectPersonalFit(
   const total = assessments.length
 
   if (total === 0) {
-    return { score: 0, assessmentCoverage: 0, eligible: true, breakdown: [] }
+    return { score: 0, assessmentCoverage: 0, totalRequirements: 0, assessedCount: 0, eligible: true, breakdown: [] }
   }
 
   let sumPoints = 0
@@ -868,12 +872,129 @@ export function projectPersonalFit(
   return {
     score,
     assessmentCoverage,
+    totalRequirements: total,
+    assessedCount,
     eligible: !hasViolation,
     breakdown: assessments,
   }
 }
 
-// ---- policy ---------------------------------------------------------------
+// ---- K6: Policy Projection ------------------------------------------------
+//
+// Invariant: applyPolicy consumes ONLY the outputs of K5A and K5B.
+// It must NOT read JD, Profile, Evidence, or Preferences.
+// K6 measures nothing — it projects.
+//
+// Recommendation semantics:
+//   STRONG_CANDIDATE → eligible, high professional fit, acceptable personal fit
+//   CONSIDER         → eligible, moderate fit in at least one dimension
+//   ABSTAIN          → eligible but insufficient confidence to distinguish
+//   SKIP             → ineligible (hard constraint violated)
+//
+// Confidence is a function of how much of the market requirement space was
+// assessable. Low coverage means we cannot distinguish a good fit from a
+// gap we haven't seen yet.
+//
+// Confidence formula:
+//   C = professionalCoverage × personalCoverageWeight
+//   where personalCoverageWeight = personalCoverage if personalDimensions > 0, else 1
+//   (no personal preferences declared → doesn't penalise confidence)
+//
+// Thresholds (calibration hypotheses — tune after K7 holdout):
+//   ABSTAIN if confidence < ABSTAIN_CONFIDENCE_THRESHOLD
+//   STRONG_CANDIDATE if professionalFit >= STRONG_FIT_THRESHOLD and personalFit >= ACCEPTABLE_PERSONAL_THRESHOLD
+//   CONSIDER otherwise
+
+export const ABSTAIN_CONFIDENCE_THRESHOLD = 0.25
+export const STRONG_FIT_THRESHOLD = 7.5
+export const ACCEPTABLE_PERSONAL_THRESHOLD = 6.0
+
+export type Recommendation = 'strong-candidate' | 'consider' | 'abstain' | 'skip'
+
+export interface OpportunityAssessment {
+  readonly professionalFit: ProfessionalFitProjection
+  readonly personalFit: PersonalFitProjection
+  /** [0, 1]. Fraction of the evaluation space that produced an assessable result. */
+  readonly confidence: number
+  readonly eligibility: 'eligible' | 'ineligible'
+  readonly recommendation: Recommendation
+  /** Human-readable rationale for the recommendation. */
+  readonly rationale: string
+}
+
+export function computeConfidence(
+  professionalFit: ProfessionalFitProjection,
+  personalFit: PersonalFitProjection,
+): number {
+  const profCov = professionalFit.assessmentCoverage
+
+  // If no preferences are declared, personal coverage doesn't penalise confidence
+  const personalWeight = personalFit.totalRequirements === 0
+    ? 1
+    : personalFit.assessmentCoverage
+
+  return Math.round(profCov * personalWeight * 1000) / 1000
+}
+
+export function applyPolicy(
+  professionalFit: ProfessionalFitProjection,
+  personalFit: PersonalFitProjection,
+): OpportunityAssessment {
+  const confidence = computeConfidence(professionalFit, personalFit)
+  const eligible = personalFit.eligible
+
+  // Hard gate: any eligibility violation → SKIP regardless of fit
+  if (!eligible) {
+    return {
+      professionalFit,
+      personalFit,
+      confidence,
+      eligibility: 'ineligible',
+      recommendation: 'skip',
+      rationale: 'Ineligible: a hard constraint (compensation, work mode, or role) was violated.',
+    }
+  }
+
+  // Epistemological gate: too little information to distinguish → ABSTAIN
+  if (confidence < ABSTAIN_CONFIDENCE_THRESHOLD) {
+    return {
+      professionalFit,
+      personalFit,
+      confidence,
+      eligibility: 'eligible',
+      recommendation: 'abstain',
+      rationale: `Insufficient assessment coverage (${Math.round(confidence * 100)}%) to produce a reliable recommendation.`,
+    }
+  }
+
+  // Policy projection
+  const profScore = professionalFit.score
+  const persScore = personalFit.assessedCount === 0
+    ? 10  // No preferences declared → personal fit is neutral (doesn't block)
+    : personalFit.score
+
+  if (profScore >= STRONG_FIT_THRESHOLD && persScore >= ACCEPTABLE_PERSONAL_THRESHOLD) {
+    return {
+      professionalFit,
+      personalFit,
+      confidence,
+      eligibility: 'eligible',
+      recommendation: 'strong-candidate',
+      rationale: `Professional Fit ${profScore.toFixed(1)}/10 and Personal Fit ${persScore.toFixed(1)}/10 both exceed thresholds at ${Math.round(confidence * 100)}% confidence.`,
+    }
+  }
+
+  return {
+    professionalFit,
+    personalFit,
+    confidence,
+    eligibility: 'eligible',
+    recommendation: 'consider',
+    rationale: `Eligible with Professional Fit ${profScore.toFixed(1)}/10 and Personal Fit ${persScore.toFixed(1)}/10 at ${Math.round(confidence * 100)}% confidence.`,
+  }
+}
+
+// ---- legacy policy --------------------------------------------------------
 
 export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEvaluation {
   const prefs = profile.preferences

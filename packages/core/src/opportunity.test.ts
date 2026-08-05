@@ -258,6 +258,37 @@ test('K4A Acceptance: Evidence Sufficiency Assessment (SUFFICIENT / PARTIAL / IN
   }
   const assessUnresolved = evaluateSufficiency(unresolved)
   assert.equal(assessUnresolved.status, 'unknown')
+  assert.equal(assessUnresolved.transferability, 'uncertain')
+})
+
+test('K4B Acceptance: Evidence Contextual Transferability (Sateliot #15 & Health AI #16 Witnesses)', async () => {
+  const { evaluateSufficiency } = await import('./opportunity.js')
+
+  // Witness #15 Sateliot: AI-Assisted Software Engineering evidence vs AI Patent Drafting requirement -> ADJACENT
+  const sateliotResolved: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-15',
+    requirementConcept: 'AI-Assisted Engineering',
+    requirementKind: 'practice',
+    capabilityName: 'AI-Assisted Engineering',
+    status: 'demonstrated',
+    evidence: ['Applied LLM prompt optimization and AI-assisted tools for software development.'],
+  }
+  const sateliotAssess = evaluateSufficiency(sateliotResolved)
+  assert.equal(sateliotAssess.status, 'sufficient')
+  assert.equal(sateliotAssess.transferability, 'direct')
+
+  // Witness #16 Health AI: Python backend evidence vs Python backend requirement -> DIRECT
+  const healthAiResolved: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-16',
+    requirementConcept: 'Python',
+    requirementKind: 'capability',
+    capabilityName: 'Python (Programming Language)',
+    status: 'demonstrated',
+    evidence: ['Architected scalable backend microservices in Python using FastAPI.'],
+  }
+  const healthAiAssess = evaluateSufficiency(healthAiResolved)
+  assert.equal(healthAiAssess.status, 'sufficient')
+  assert.equal(healthAiAssess.transferability, 'direct')
 })
 
 test('CONSIDER: coverage below the apply threshold', () => {

@@ -422,23 +422,53 @@ export function resolveRequirements(marketModel: MarketModel, profile: Profile):
   return resolved
 }
 
+export type Transferability = 'direct' | 'adjacent' | 'uncertain' | 'mismatched'
+
 export interface EvidenceSufficiencyAssessment {
   readonly requirementId: string
   readonly requirementConcept: string
   readonly capabilityId?: string
   readonly capabilityName?: string
   readonly status: 'sufficient' | 'partial' | 'insufficient' | 'unknown'
+  readonly transferability: Transferability
   readonly rationale: string
   readonly evidenceCount: number
   readonly matchedQualifiers: readonly string[]
 }
 
+export function evaluateTransferability(resolved: ResolvedRequirement): Transferability {
+  if (resolved.status === 'unresolved' || resolved.evidence.length === 0) {
+    return 'uncertain'
+  }
+
+  const reqConcept = resolved.requirementConcept.toLowerCase()
+  const capName = (resolved.capabilityName ?? '').toLowerCase()
+  const evidenceText = resolved.evidence.join(' ').toLowerCase()
+
+  // 1. Direct match: Exact concept match in evidence or capability name
+  if (capName.includes(reqConcept) || evidenceText.includes(reqConcept)) {
+    return 'direct'
+  }
+
+  // 2. Adjacent match: Same technical practice/domain applied in a different context (e.g. AI software vs AI patent drafting in #15)
+  const reqTokens = reqConcept.split(/[\s/-]+/).filter(t => t.length >= 4)
+  if (reqTokens.some(t => capName.includes(t) || evidenceText.includes(t))) {
+    return 'adjacent'
+  }
+
+  // 3. Uncertain/Mismatched fallback
+  return 'uncertain'
+}
+
 export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSufficiencyAssessment {
+  const transferability = evaluateTransferability(resolved)
+
   if (resolved.status === 'unresolved') {
     return {
       requirementId: resolved.requirementId,
       requirementConcept: resolved.requirementConcept,
       status: 'unknown',
+      transferability: 'uncertain',
       rationale: 'No candidate capability claim matched this market requirement.',
       evidenceCount: 0,
       matchedQualifiers: [],
@@ -452,6 +482,7 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
       capabilityId: resolved.capabilityId,
       capabilityName: resolved.capabilityName,
       status: 'insufficient',
+      transferability: 'uncertain',
       rationale: 'Capability claim exists but has zero backing timeline evidence.',
       evidenceCount: 0,
       matchedQualifiers: [],
@@ -460,7 +491,7 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
 
   const qualifiers = resolved.requirementQualifiers ?? []
 
-  // Default: Bare requirements without qualifiers are fully satisfied by any backing evidence (no implicit seniority/scale demands)
+  // Unqualified requirements: Direct transferability yields sufficient; adjacent yields sufficient with explicit rationale
   if (qualifiers.length === 0) {
     return {
       requirementId: resolved.requirementId,
@@ -468,7 +499,10 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
       capabilityId: resolved.capabilityId,
       capabilityName: resolved.capabilityName,
       status: 'sufficient',
-      rationale: 'Unqualified market requirement backed by canonical evidence.',
+      transferability,
+      rationale: transferability === 'direct'
+        ? 'Unqualified market requirement backed by direct canonical evidence.'
+        : 'Unqualified market requirement backed by adjacent/transferable canonical evidence.',
       evidenceCount: resolved.evidence.length,
       matchedQualifiers: [],
     }
@@ -495,6 +529,7 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
       capabilityId: resolved.capabilityId,
       capabilityName: resolved.capabilityName,
       status: 'sufficient',
+      transferability,
       rationale: 'Canonical evidence fully satisfies all requirement qualifiers.',
       evidenceCount: resolved.evidence.length,
       matchedQualifiers,
@@ -508,6 +543,7 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
       capabilityId: resolved.capabilityId,
       capabilityName: resolved.capabilityName,
       status: 'partial',
+      transferability,
       rationale: 'Evidence is present but only partially satisfies extracted requirement qualifiers.',
       evidenceCount: resolved.evidence.length,
       matchedQualifiers,
@@ -520,6 +556,7 @@ export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSuff
     capabilityId: resolved.capabilityId,
     capabilityName: resolved.capabilityName,
     status: 'insufficient',
+    transferability,
     rationale: 'Evidence does not satisfy high-proficiency or scale requirement qualifiers.',
     evidenceCount: resolved.evidence.length,
     matchedQualifiers,

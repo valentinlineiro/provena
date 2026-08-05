@@ -19,12 +19,13 @@ import {
   applyPolicy,
   UrlOpportunitySource,
   GreenhousePublicSource,
-  hashOpportunityKey,
+  reconcileBoardSync,
 } from '@provena/core'
-import type { CVContext, CVProjection, ProcessedOpportunity, OpportunityUserDecision } from '@provena/core'
+import type { CVContext, CVProjection, OpportunityUserDecision } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import profile, { updatedAt } from './profile.js'
+import { KvOpportunityRepository } from './kv-opportunity-repository.js'
 
 const TIMELINE = profileToTimeline(profile, updatedAt)
 
@@ -1083,8 +1084,8 @@ async function loadInbox() {
     const persScore = ev.personalFit && ev.personalFit.assessedCount > 0 ? ev.personalFit.score.toFixed(1) : '—'
     const conf = Math.round((ev.assessment ? ev.assessment.confidence : (ev.confidence || 0)) * 100) + '%'
 
-    html += '<tr>'
-    html += '<td><strong>' + (raw.title || 'Job Opportunity') + '</strong>' + (raw.company ? ' <span class="meta">at ' + raw.company + '</span>' : '') + '<br><a class="meta" href="' + raw.url + '" target="_blank">View Source</a></td>'
+    html += '<tr' + (o.active === false ? ' style="opacity:0.55;"' : '') + '>'
+    html += '<td><strong>' + (raw.title || 'Job Opportunity') + '</strong>' + (raw.company ? ' <span class="meta">at ' + raw.company + '</span>' : '') + (o.active === false ? ' <span class="meta">(closed)</span>' : '') + '<br><a class="meta" href="' + raw.url + '" target="_blank">View Source</a></td>'
     html += '<td>' + profScore + '</td>'
     html += '<td>' + persScore + '</td>'
     html += '<td>' + conf + '</td>'
@@ -1132,8 +1133,7 @@ loadInbox()
     }
 
     if (request.method === 'GET' && url.pathname === '/api/opportunities') {
-      const raw = await env.PROVENA_KV.get('opportunities_memory', 'json')
-      const opps = (raw as { opportunities: ProcessedOpportunity[] } | null)?.opportunities ?? []
+      const opps = await new KvOpportunityRepository(env.PROVENA_KV).list()
       return new Response(JSON.stringify({ opportunities: opps }), {
         headers: { 'Content-Type': 'application/json' },
       })
@@ -1144,14 +1144,7 @@ loadInbox()
         const body = (await request.json()) as { id?: string; decision?: OpportunityUserDecision }
         if (!body.id || !body.decision) return new Response('Missing id or decision', { status: 400 })
 
-        const raw = await env.PROVENA_KV.get('opportunities_memory', 'json')
-        const opps = (raw as { opportunities: ProcessedOpportunity[] } | null)?.opportunities ?? []
-        const item = opps.find(o => o.id === body.id)
-        if (item) {
-          (item as any).userDecision = body.decision;
-          (item as any).updatedAt = new Date().toISOString()
-          await env.PROVENA_KV.put('opportunities_memory', JSON.stringify({ opportunities: opps }))
-        }
+        await new KvOpportunityRepository(env.PROVENA_KV).updateDecision(body.id, body.decision)
         return new Response('ok', { status: 200 })
       } catch (e) {
         return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
@@ -1165,58 +1158,53 @@ loadInbox()
         const source = new GreenhousePublicSource(boardToken)
         const fetchedRawJobs = await source.fetchAllBoardJobs()
 
-        const rawMemory = await env.PROVENA_KV.get('opportunities_memory', 'json')
-        const opps = (rawMemory as { opportunities: ProcessedOpportunity[] } | null)?.opportunities ?? []
+        const repository = new KvOpportunityRepository(env.PROVENA_KV)
+        const existing = await repository.list()
 
         const composedK = composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE)
         const recognizer = new DeclarativeMarketRecognizer(composedK)
 
-        let newlyAddedCount = 0
-        for (const rawOpp of fetchedRawJobs) {
-          const key = hashOpportunityKey(rawOpp)
-          if (opps.some(o => o.id === key)) continue // already ingested & evaluated — idempotent skip
+        const { opportunities, newlyAddedCount } = reconcileBoardSync(
+          existing,
+          fetchedRawJobs,
+          raw => raw.source === 'greenhouse' && raw.company === boardToken,
+          rawOpp => {
+            const marketModel = recognizer.extractMarketRequirements(rawOpp.description)
+            const resolved = resolveRequirements(marketModel, profile)
+            const suffList = resolved.map(evaluateSufficiency)
+            const profFit = projectProfessionalFit(suffList)
+            const prefAssessments = assessPreferences(rawOpp.description, profile.preferences)
+            const persFit = projectPersonalFit(prefAssessments)
+            const recCov = computeRecognitionCoverage(rawOpp.description, marketModel)
+            const assessment = applyPolicy(profFit, persFit, recCov)
+            const legacyEv = evaluateOpportunity(rawOpp.description, profile)
 
-          const marketModel = recognizer.extractMarketRequirements(rawOpp.description)
-          const resolved = resolveRequirements(marketModel, profile)
-          const suffList = resolved.map(evaluateSufficiency)
-          const profFit = projectProfessionalFit(suffList)
-          const prefAssessments = assessPreferences(rawOpp.description, profile.preferences)
-          const persFit = projectPersonalFit(prefAssessments)
-          const recCov = computeRecognitionCoverage(rawOpp.description, marketModel)
-          const assessment = applyPolicy(profFit, persFit, recCov)
-          const legacyEv = evaluateOpportunity(rawOpp.description, profile)
+            return {
+              evaluation: {
+                ...legacyEv,
+                rawOpportunity: rawOpp,
+                marketModel,
+                professionalFit: profFit,
+                personalFit: persFit,
+                assessment,
+                recognitionCoverage: recCov,
+                knowledgeMode: 'composed',
+                knowledgeName: composedK.name,
+                knowledgePatternsCount: composedK.patterns.length,
+              },
+              knowledgeVersion: composedK.version,
+            }
+          },
+          new Date().toISOString()
+        )
 
-          const evaluation = {
-            ...legacyEv,
-            rawOpportunity: rawOpp,
-            marketModel,
-            professionalFit: profFit,
-            personalFit: persFit,
-            assessment,
-            recognitionCoverage: recCov,
-            knowledgeMode: 'composed',
-            knowledgeName: composedK.name,
-            knowledgePatternsCount: composedK.patterns.length,
-          }
-
-          opps.unshift({
-            id: key,
-            raw: rawOpp,
-            evaluation,
-            userDecision: 'new',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          })
-          newlyAddedCount++
-        }
-
-        await env.PROVENA_KV.put('opportunities_memory', JSON.stringify({ opportunities: opps }))
+        await repository.saveMany(opportunities)
 
         return new Response(JSON.stringify({
           boardToken,
           fetchedCount: fetchedRawJobs.length,
           newlyAddedCount,
-          totalMemoryCount: opps.length,
+          totalMemoryCount: opportunities.length,
         }), {
           headers: { 'Content-Type': 'application/json' },
         })

@@ -11,10 +11,18 @@ export interface RawOpportunity {
 
 export type OpportunityUserDecision = 'new' | 'seen' | 'interested' | 'applied' | 'dismissed'
 
-export interface ProcessedOpportunity {
+export interface StoredOpportunity {
   readonly id: string
   readonly raw: RawOpportunity
+  // Market observation: when a source first/last reported this posting, and whether it's still listed there.
+  readonly firstSeenAt: string
+  readonly lastSeenAt: string
+  readonly active: boolean
+  // Assessment snapshot: which knowledge produced this evaluation, so a later re-run under different K* is traceable.
   readonly evaluation: import('./opportunity.js').OpportunityEvaluation
+  readonly evaluatedAt: string
+  readonly knowledgeVersion: string
+  // User state
   readonly userDecision: OpportunityUserDecision
   readonly userFeedbackReason?: string
   readonly createdAt: string
@@ -316,5 +324,110 @@ export class GreenhousePublicSource implements OpportunitySource {
       description: stripHtmlTags(job.content || ''),
     }))
   }
+}
+
+// ---- OpportunityRepository (Durable Opportunity Memory) --------------------
+//
+// The Greenhouse/URL sources and the K* evaluators never talk to storage
+// directly — they hand a StoredOpportunity to this contract. Swapping KV for
+// SQLite/D1 later only means writing a new implementation of this interface.
+
+export interface OpportunityRepository {
+  findById(id: string): Promise<StoredOpportunity | null>
+  findByDedupeKey(key: string): Promise<StoredOpportunity | null>
+  list(): Promise<StoredOpportunity[]>
+  save(opportunity: StoredOpportunity): Promise<void>
+  // Bulk write for reconcileBoardSync results — avoids N read-modify-write
+  // round trips against a single-blob store when a sync touches many items.
+  saveMany(opportunities: readonly StoredOpportunity[]): Promise<void>
+  updateDecision(id: string, decision: OpportunityUserDecision): Promise<void>
+}
+
+// ponytail: id and dedupeKey are the same value today (both = hashOpportunityKey(raw)).
+// findByDedupeKey exists as its own contract method so a future surrogate id
+// (e.g. a KV-generated key) doesn't require an interface change.
+export class MemoryOpportunityRepository implements OpportunityRepository {
+  private readonly byId = new Map<string, StoredOpportunity>()
+
+  async findById(id: string): Promise<StoredOpportunity | null> {
+    return this.byId.get(id) ?? null
+  }
+
+  async findByDedupeKey(key: string): Promise<StoredOpportunity | null> {
+    return this.findById(key)
+  }
+
+  async list(): Promise<StoredOpportunity[]> {
+    return [...this.byId.values()]
+  }
+
+  async save(opportunity: StoredOpportunity): Promise<void> {
+    this.byId.set(opportunity.id, opportunity)
+  }
+
+  async saveMany(opportunities: readonly StoredOpportunity[]): Promise<void> {
+    for (const o of opportunities) this.byId.set(o.id, o)
+  }
+
+  async updateDecision(id: string, decision: OpportunityUserDecision): Promise<void> {
+    const existing = this.byId.get(id)
+    if (!existing) return
+    this.byId.set(id, { ...existing, userDecision: decision, updatedAt: new Date().toISOString() })
+  }
+}
+
+// ---- Sync reconciliation ----------------------------------------------------
+//
+// Turns a source's current listing into a diff against remembered market
+// state: new postings get evaluated and added, postings seen again get
+// lastSeenAt bumped, and postings that disappeared from the source are
+// marked inactive — never deleted, so a user decision (e.g. "applied")
+// survives the position closing.
+
+export function reconcileBoardSync(
+  existing: readonly StoredOpportunity[],
+  fetchedRaw: readonly RawOpportunity[],
+  isInScope: (raw: RawOpportunity) => boolean,
+  evaluate: (raw: RawOpportunity) => { evaluation: import('./opportunity.js').OpportunityEvaluation; knowledgeVersion: string },
+  now: string
+): { opportunities: StoredOpportunity[]; newlyAddedCount: number } {
+  const byId = new Map(existing.map(o => [o.id, o]))
+  const fetchedIds = new Set<string>()
+  const newlyAdded: StoredOpportunity[] = []
+
+  for (const raw of fetchedRaw) {
+    const id = hashOpportunityKey(raw)
+    fetchedIds.add(id)
+    const current = byId.get(id)
+    if (current) {
+      byId.set(id, { ...current, raw, lastSeenAt: now, active: true, updatedAt: now })
+    } else {
+      const { evaluation, knowledgeVersion } = evaluate(raw)
+      const stored: StoredOpportunity = {
+        id,
+        raw,
+        firstSeenAt: now,
+        lastSeenAt: now,
+        active: true,
+        evaluation,
+        evaluatedAt: now,
+        knowledgeVersion,
+        userDecision: 'new',
+        createdAt: now,
+        updatedAt: now,
+      }
+      byId.set(id, stored)
+      newlyAdded.push(stored)
+    }
+  }
+
+  for (const [id, o] of byId) {
+    if (o.active && isInScope(o.raw) && !fetchedIds.has(id)) {
+      byId.set(id, { ...o, active: false, updatedAt: now })
+    }
+  }
+
+  const rest = existing.map(o => byId.get(o.id)!).filter(o => !newlyAdded.includes(o))
+  return { opportunities: [...newlyAdded, ...rest], newlyAddedCount: newlyAdded.length }
 }
 

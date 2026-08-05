@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { validateSafeUrl, extractJobFromHtml, DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, MLOPS_KNOWLEDGE, GreenhousePublicSource, hashOpportunityKey } from './index.js'
+import { validateSafeUrl, extractJobFromHtml, DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, MLOPS_KNOWLEDGE, GreenhousePublicSource, hashOpportunityKey, reconcileBoardSync, MemoryOpportunityRepository } from './index.js'
+import type { RawOpportunity } from './index.js'
 
 test('validateSafeUrl accepts valid public HTTP/HTTPS URLs', () => {
   const url1 = validateSafeUrl('https://boards.greenhouse.io/company/jobs/12345')
@@ -147,6 +148,115 @@ test('GreenhousePublicSource.fetchAllBoardJobs maps the board jobs list to RawOp
   } finally {
     globalThis.fetch = originalFetch
   }
+})
+
+function fakeRaw(id: number, title = `Job ${id}`): RawOpportunity {
+  return {
+    externalId: String(id),
+    source: 'greenhouse',
+    url: `https://boards.greenhouse.io/acme/jobs/${id}`,
+    title,
+    company: 'acme',
+    description: `Requirements for ${title}`,
+  }
+}
+
+const fakeEvaluate = (raw: RawOpportunity) => ({
+  evaluation: { rawOpportunity: raw } as any,
+  knowledgeVersion: 'test-1.0.0',
+})
+
+const inScopeAcme = (raw: RawOpportunity) => raw.source === 'greenhouse' && raw.company === 'acme'
+
+test('reconcileBoardSync: O1.3A market memory invariant — A,B,C then A,C,D reconciles seen/lastSeen/active correctly', () => {
+  const t0 = '2026-08-05T00:00:00Z'
+  const first = reconcileBoardSync([], [fakeRaw(1), fakeRaw(2), fakeRaw(3)], inScopeAcme, fakeEvaluate, t0)
+  assert.equal(first.newlyAddedCount, 3)
+  assert.ok(first.opportunities.every(o => o.active && o.firstSeenAt === t0 && o.lastSeenAt === t0))
+
+  const t1 = '2026-08-06T00:00:00Z'
+  const second = reconcileBoardSync(first.opportunities, [fakeRaw(1), fakeRaw(3), fakeRaw(4)], inScopeAcme, fakeEvaluate, t1)
+
+  const byId = new Map(second.opportunities.map(o => [o.id, o]))
+  const a = byId.get(hashOpportunityKey(fakeRaw(1)))!
+  const b = byId.get(hashOpportunityKey(fakeRaw(2)))!
+  const c = byId.get(hashOpportunityKey(fakeRaw(3)))!
+  const d = byId.get(hashOpportunityKey(fakeRaw(4)))!
+
+  assert.equal(second.newlyAddedCount, 1, 'only D is new')
+  assert.equal(a.active, true)
+  assert.equal(a.lastSeenAt, t1, 'A was seen again, lastSeenAt bumped')
+  assert.equal(a.firstSeenAt, t0, 'A firstSeenAt must not change')
+
+  assert.equal(b.active, false, 'B disappeared from the board, marked inactive not deleted')
+  assert.equal(b.lastSeenAt, t0, 'B was not re-observed, lastSeenAt stays at t0')
+  assert.ok(byId.has(b.id), 'B must still be present in memory, never deleted')
+
+  assert.equal(c.active, true)
+  assert.equal(c.lastSeenAt, t1)
+
+  assert.equal(d.active, true)
+  assert.equal(d.firstSeenAt, t1)
+  assert.equal(d.userDecision, 'new')
+})
+
+test('reconcileBoardSync: a human decision on an opportunity survives it disappearing from the source', () => {
+  const t0 = '2026-08-05T00:00:00Z'
+  const first = reconcileBoardSync([], [fakeRaw(1)], inScopeAcme, fakeEvaluate, t0)
+  const applied = { ...first.opportunities[0]!, userDecision: 'applied' as const }
+
+  const t1 = '2026-08-06T00:00:00Z'
+  const second = reconcileBoardSync([applied], [], inScopeAcme, fakeEvaluate, t1)
+
+  assert.equal(second.opportunities.length, 1)
+  assert.equal(second.opportunities[0]!.userDecision, 'applied', 'decision must not be lost when position closes')
+  assert.equal(second.opportunities[0]!.active, false)
+})
+
+test('reconcileBoardSync only deactivates opportunities in scope for this sync, leaving other sources untouched', () => {
+  const t0 = '2026-08-05T00:00:00Z'
+  const acmeOpp = reconcileBoardSync([], [fakeRaw(1)], inScopeAcme, fakeEvaluate, t0).opportunities[0]!
+  const urlOpp = {
+    ...acmeOpp,
+    id: 'opp-hash-example_com_jobs_9',
+    raw: { source: 'url-fetch', url: 'https://example.com/jobs/9', title: 'Unrelated Job', description: 'x' } as RawOpportunity,
+  }
+
+  const t1 = '2026-08-06T00:00:00Z'
+  const result = reconcileBoardSync([acmeOpp, urlOpp], [], inScopeAcme, fakeEvaluate, t1)
+  const byId = new Map(result.opportunities.map(o => [o.id, o]))
+
+  assert.equal(byId.get(acmeOpp.id)!.active, false, 'acme board sync deactivates its own missing posting')
+  assert.equal(byId.get(urlOpp.id)!.active, true, 'unrelated url-sourced opportunity must not be touched by an acme board sync')
+})
+
+test('MemoryOpportunityRepository: save/findById/findByDedupeKey/updateDecision round trip without losing evaluation history', async () => {
+  const repo = new MemoryOpportunityRepository()
+  const raw = fakeRaw(1)
+  const id = hashOpportunityKey(raw)
+  const stored = {
+    id,
+    raw,
+    firstSeenAt: '2026-08-05T00:00:00Z',
+    lastSeenAt: '2026-08-05T00:00:00Z',
+    active: true,
+    evaluation: { rawOpportunity: raw } as any,
+    evaluatedAt: '2026-08-05T00:00:00Z',
+    knowledgeVersion: 'test-1.0.0',
+    userDecision: 'new' as const,
+    createdAt: '2026-08-05T00:00:00Z',
+    updatedAt: '2026-08-05T00:00:00Z',
+  }
+
+  await repo.save(stored)
+  assert.deepEqual(await repo.findById(id), stored)
+  assert.deepEqual(await repo.findByDedupeKey(id), stored)
+
+  await repo.updateDecision(id, 'interested')
+  const updated = await repo.findById(id)
+  assert.equal(updated!.userDecision, 'interested')
+  assert.deepEqual(updated!.evaluation, stored.evaluation, 'evaluation snapshot must survive a decision update')
+  assert.equal(updated!.firstSeenAt, stored.firstSeenAt)
 })
 
 test('GreenhousePublicSource.fetchAllBoardJobs returns empty array when jobs field is missing', async () => {

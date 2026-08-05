@@ -200,32 +200,64 @@ function evidenceByCapability(profile: Profile): Map<string, string[]> {
   return map
 }
 
-function matchSignals(jd: string, profile: Profile): { matches: SignalMatch[]; notEvaluated: number } {
-  const normJd = normalizeText(jd)
+import type { MarketRequirement, MarketModel } from './market.js'
+
+export interface ResolvedRequirement {
+  readonly requirementId: string
+  readonly requirementConcept: string
+  readonly requirementKind: MarketRequirement['kind']
+  readonly capabilityId?: string
+  readonly capabilityName?: string
+  readonly status: 'demonstrated' | 'gap' | 'unresolved'
+  readonly evidence: readonly string[]
+}
+
+export function resolveRequirements(marketModel: MarketModel, profile: Profile): readonly ResolvedRequirement[] {
   const evidenceByCap = evidenceByCapability(profile)
-  const matches: SignalMatch[] = []
-  for (const cap of profile.capabilities ?? []) {
-    const matchedPhrases: string[] = []
-    for (const signal of cap.signals ?? []) {
-      if (normJd.includes(normalizeText(signal))) matchedPhrases.push(signal)
-    }
-    if (matchedPhrases.length === 0) continue
-    const evidence = evidenceByCap.get(cap.id) ?? []
-    matches.push({
-      capabilityId: cap.id,
-      capabilityName: cap.name,
-      matchedPhrases,
-      evidence,
-      status: evidence.length > 0 ? 'demonstrated' : 'no-evidence',
+  const resolved: ResolvedRequirement[] = []
+
+  for (const req of marketModel.requirements) {
+    if (req.kind === 'constraint') continue // Constraints are handled by policy/criteria
+
+    const normConcept = normalizeText(req.concept)
+    const normRaw = normalizeText(req.rawText)
+
+    let matchedCap = (profile.capabilities ?? []).find(cap => {
+      const normCapName = normalizeText(cap.name)
+      const cleanCapName = normCapName.replace(/\s*\([^)]*\)/g, '').trim()
+      if (normConcept.includes(cleanCapName) || cleanCapName.includes(normConcept) || normRaw.includes(cleanCapName)) return true
+      return (cap.signals ?? []).some(s => {
+        const normSignal = normalizeText(s)
+        if (normSignal.length < 2) return false
+        if (normConcept.includes(normSignal) || normRaw.includes(normSignal) || normSignal.includes(normConcept) || normSignal.includes(normRaw)) return true
+        const sigTokens = normSignal.split(/[\s/-]+/).filter(t => t.length >= 2)
+        return sigTokens.length > 0 && sigTokens.some(t => normConcept.includes(t) || normRaw.includes(t))
+      })
     })
+
+    if (matchedCap) {
+      const evidence = evidenceByCap.get(matchedCap.id) ?? []
+      resolved.push({
+        requirementId: req.id,
+        requirementConcept: req.concept,
+        requirementKind: req.kind,
+        capabilityId: matchedCap.id,
+        capabilityName: matchedCap.name,
+        status: evidence.length > 0 ? 'demonstrated' : 'gap',
+        evidence,
+      })
+    } else {
+      resolved.push({
+        requirementId: req.id,
+        requirementConcept: req.concept,
+        requirementKind: req.kind,
+        status: 'unresolved',
+        evidence: [],
+      })
+    }
   }
-  // ponytail: newline chunks as interpretation units; revisit if real offers disagree
-  const chunks = jd.split(/\n+/).map(c => c.trim()).filter(Boolean)
-  const notEvaluated = chunks.filter(chunk => {
-    const n = normalizeText(chunk)
-    return !matches.some(m => m.matchedPhrases.some(p => n.includes(normalizeText(p))))
-  }).length
-  return { matches, notEvaluated }
+
+  return resolved
 }
 
 // ---- policy ---------------------------------------------------------------
@@ -238,9 +270,36 @@ export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEv
     checkRoles(jd, prefs),
     checkAvoid(jd, prefs),
   ]
-  const { matches, notEvaluated } = matchSignals(jd, profile)
-  const demonstrated = matches.filter(m => m.status === 'demonstrated')
-  const gaps = matches.filter(m => m.status === 'no-evidence')
+
+  const marketModel = extractMarketRequirements(jd)
+  const resolved = resolveRequirements(marketModel, profile)
+
+  const demonstrated: SignalMatch[] = resolved
+    .filter(r => r.status === 'demonstrated' && r.capabilityId && r.capabilityName)
+    .map(r => ({
+      capabilityId: r.capabilityId!,
+      capabilityName: r.capabilityName!,
+      matchedPhrases: [r.requirementConcept],
+      evidence: r.evidence,
+      status: 'demonstrated',
+    }))
+
+  const gaps: SignalMatch[] = resolved
+    .filter(r => r.status === 'gap' && r.capabilityId && r.capabilityName)
+    .map(r => ({
+      capabilityId: r.capabilityId!,
+      capabilityName: r.capabilityName!,
+      matchedPhrases: [r.requirementConcept],
+      evidence: [],
+      status: 'no-evidence',
+    }))
+
+  const chunks = jd.split(/\n+/).map(c => c.trim()).filter(Boolean)
+  const notEvaluated = chunks.filter(chunk => {
+    const n = normalizeText(chunk)
+    return !marketModel.requirements.some(req => n.includes(normalizeText(req.rawText)))
+  }).length
+
   const recognized = demonstrated.length + gaps.length
   const coverage = recognized === 0 ? 0 : demonstrated.length / recognized
   const interpretationCoverage = recognized + notEvaluated === 0 ? 0 : recognized / (recognized + notEvaluated)
@@ -258,8 +317,6 @@ export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEv
     audience: 'hiring-manager',
     emphasize: demonstrated.map(m => m.capabilityName),
   }
-
-  const marketModel = extractMarketRequirements(jd)
 
   return {
     verdict,

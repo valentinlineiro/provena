@@ -120,6 +120,26 @@ test('CONSIDER: mostly unrecognized JD is never a fabricated gap (I-OE-1)', () =
   assert.equal(ev.interpretationCoverage, 0)
 })
 
+test('K2A Acceptance: WorkMode scoped semantics & cardinality evaluation', () => {
+  const profile = makeProfile({ preferences: { compensation: { minimum: 80000, currency: '€' }, work: { remote: 'required' }, roles: ['Staff Engineer'] } })
+
+  // Witness #16: Fully Remote / Remote-First -> SATISFIED
+  const ev16 = evaluateOpportunity('Fully remote from Spain. Senior Backend Engineer.', profile)
+  assert.equal(ev16.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+
+  // Witness #12: Partial Remote -> VIOLATED (candidate requires fully remote)
+  const ev12 = evaluateOpportunity('Software Engineer. Up to two days per week remote in Dublin.', profile)
+  assert.equal(ev12.criteria.find(c => c.criterion === 'workMode')!.status, 'violated')
+
+  // Witness #14: Mandatory On-Site / Corporate Boilerplate Scope Overlap -> VIOLATED
+  const ev14 = evaluateOpportunity('Barcelona — Hybrid, 3 days onsite.\nWhether you are remote, hybrid or on-site, we value inclusion.', profile)
+  assert.equal(ev14.criteria.find(c => c.criterion === 'workMode')!.status, 'violated')
+
+  // Witness #15: Hybrid Work -> VIOLATED
+  const ev15 = evaluateOpportunity('Hybrid work model based in Madrid.', profile)
+  assert.equal(ev15.criteria.find(c => c.criterion === 'workMode')!.status, 'violated')
+})
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',
@@ -378,6 +398,7 @@ test('K1 Single Authority Invariant: Every resolved requirement traces to an ori
 
   assert.ok(ev.marketModel)
   const reqIds = new Set(ev.marketModel.requirements.map(r => r.id))
+  assert.ok(reqIds.size > 0)
 
   for (const m of [...ev.demonstrated, ...ev.gaps]) {
     // Every demonstrated/gap claim originates strictly from a recognized MarketRequirement

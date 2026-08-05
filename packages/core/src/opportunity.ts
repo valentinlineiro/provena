@@ -112,25 +112,117 @@ function checkCompensation(jd: string, prefs: Preferences | undefined): Criterio
   return { criterion: 'compensation', status, detail: `JD states ${displayAmount}; minimum is €${min}` }
 }
 
-const REMOTE_RE = /remote|work from home|\bwfh\b|remote-?first/i
-const ONSITE_RE = /on[- ]site|in (?:the )?office|per week in|relocation/i
-const HYBRID_RE = /hybrid/i
+export interface WorkModeConstraint {
+  readonly mode: 'remote' | 'hybrid' | 'onsite'
+  readonly remoteAvailability: 'full' | 'partial' | 'none'
+  readonly mandatoryOnsiteDays?: number
+  readonly rawText: string
+}
+
+export function parseWorkModeConstraint(jd: string): WorkModeConstraint | null {
+  const sentences = jd.split(/(?:\n+|\.\s+|\;\s+)/).map(s => s.trim()).filter(Boolean)
+
+  // 1. Filter out generic corporate culture statement clauses
+  const specificSentences = sentences.filter(s => !/whether (?:you'?re|you are)?\s*(?:remote|hybrid|on-?site)/i.test(s))
+
+  // 2. Partial remote or mandatory onsite presence takes precedence if present in sentence (e.g. "up to two days remote", "3 days onsite")
+  const partialRemoteMatch = specificSentences.find(s =>
+    /up to (?:[\d]+|one|two|three|four) days? (?:per week )?remote/i.test(s) ||
+    /(?:[\d]+|one|two|three|four) days? (?:per week )?(?:on-?site|in (?:the )?office)/i.test(s)
+  )
+
+  if (partialRemoteMatch) {
+    const daysMatch = /(\d+)\s*days?\s*(?:per week\s*)?(?:on-?site|in (?:the )?office)/i.exec(partialRemoteMatch)
+    const mandatoryDays = daysMatch ? parseInt(daysMatch[1]!, 10) : undefined
+    return {
+      mode: 'hybrid',
+      remoteAvailability: 'partial',
+      mandatoryOnsiteDays: mandatoryDays,
+      rawText: partialRemoteMatch,
+    }
+  }
+
+  // 3. Explicit full remote or remote alternative options (e.g. "hybrid in Barcelona / Remote in Spain", "fully remote", "remote-first")
+  const fullRemoteMatch = specificSentences.find(s =>
+    /\b(?:fully|100%)\s*remote\b/i.test(s) ||
+    /\bremote-?first\b/i.test(s) ||
+    /\b(?:hybrid|on-?site)\b.*(?:\/|\bor\b).*\bremote\b/i.test(s) ||
+    /\bremote\b.*(?:\/|\bor\b).*\b(?:hybrid|on-?site)\b/i.test(s) ||
+    /\bremote (?:from|opportunity|working options)\b/i.test(s) ||
+    /^\s*remote\s*$/i.test(s)
+  )
+
+  if (fullRemoteMatch) {
+    return {
+      mode: 'remote',
+      remoteAvailability: 'full',
+      rawText: fullRemoteMatch,
+    }
+  }
+
+  // 4. Hybrid match
+  const hybridMatch = specificSentences.find(s => /\bhybrid\b/i.test(s))
+  if (hybridMatch) {
+    return {
+      mode: 'hybrid',
+      remoteAvailability: 'partial',
+      rawText: hybridMatch,
+    }
+  }
+
+  // 4. On-site mandatory
+  const onsiteMatch = specificSentences.find(s =>
+    /\bon-?site\b/i.test(s) ||
+    /\bpresencial\b/i.test(s) ||
+    /\bin (?:the )?office\b/i.test(s)
+  )
+
+  if (onsiteMatch) {
+    return {
+      mode: 'onsite',
+      remoteAvailability: 'none',
+      rawText: onsiteMatch,
+    }
+  }
+
+  // 5. Fallback for general un-scoped "remote" mention if no other constraint was parsed
+  const genericRemote = specificSentences.find(s => /\bremote\b/i.test(s))
+  if (genericRemote) {
+    return {
+      mode: 'remote',
+      remoteAvailability: 'full',
+      rawText: genericRemote,
+    }
+  }
+
+  return null
+}
 
 function checkWorkMode(jd: string, prefs: Preferences | undefined): CriterionCheck {
   const pref = prefs?.work?.remote
   if (!pref) return { criterion: 'workMode', status: 'unknown', detail: 'no remote preference in profile' }
+
+  const parsed = parseWorkModeConstraint(jd)
+  if (!parsed) return { criterion: 'workMode', status: 'unknown', detail: 'JD does not state work mode' }
+
   if (pref === 'required') {
-    if (REMOTE_RE.test(jd)) return { criterion: 'workMode', status: 'satisfied', detail: 'JD allows remote' }
-    if (ONSITE_RE.test(jd) || HYBRID_RE.test(jd)) {
-      return { criterion: 'workMode', status: 'violated', detail: 'JD requires on-site or hybrid presence; you require fully remote' }
+    if (parsed.mode === 'remote' && parsed.remoteAvailability === 'full') {
+      return { criterion: 'workMode', status: 'satisfied', detail: `JD allows fully remote: "${parsed.rawText}"` }
     }
-    return { criterion: 'workMode', status: 'unknown', detail: 'JD does not state work mode' }
+    return {
+      criterion: 'workMode',
+      status: 'violated',
+      detail: `JD requires ${parsed.mode} work (${parsed.rawText}); candidate requires fully remote`,
+    }
   }
+
   if (pref === 'hybrid') {
-    if (REMOTE_RE.test(jd) || HYBRID_RE.test(jd)) return { criterion: 'workMode', status: 'satisfied', detail: 'JD allows remote/hybrid' }
-    if (ONSITE_RE.test(jd)) return { criterion: 'workMode', status: 'violated', detail: 'JD is on-site only' }
-    return { criterion: 'workMode', status: 'unknown', detail: 'JD does not state work mode' }
+    if (parsed.mode === 'remote' || parsed.mode === 'hybrid') {
+      return { criterion: 'workMode', status: 'satisfied', detail: `JD allows remote/hybrid: "${parsed.rawText}"` }
+    }
+    return { criterion: 'workMode', status: 'violated', detail: `JD is on-site only: "${parsed.rawText}"` }
   }
+
   return { criterion: 'workMode', status: 'unknown', detail: 'remote is optional' }
 }
 
@@ -200,7 +292,7 @@ function evidenceByCapability(profile: Profile): Map<string, string[]> {
   return map
 }
 
-import type { MarketRequirement, MarketModel } from './market.js'
+import type { MarketRequirement } from './market.js'
 
 export interface ResolvedRequirement {
   readonly requirementId: string

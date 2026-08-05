@@ -1,0 +1,74 @@
+{
+  "specimen": "specimen-02-agentic",
+  "domain": "Data Engineering & Enterprise Agentic AI",
+  "source": "Senior Consultant - Agentic AI Engineer JD",
+  "knowledgeBaseVersion": "DEFAULT_SOFTWARE_KNOWLEDGE (K0)",
+  "extractedPatterns": [
+    {
+      "id": "pyspark-etl-modernization",
+      "concept": "PySpark & Big Data Infrastructure Modernization",
+      "kind": "capability",
+      "matchers": [
+        "pyspark",
+        "aws glue",
+        "ab initio",
+        "etl",
+        "large-scale data processing",
+        "pipeline conversions",
+        "data infrastructure modernization"
+      ],
+      "qualifiers": [
+        "cloud-native",
+        "large-scale"
+      ],
+      "rationale": "Induced from residual chunks referencing PySpark, AWS Glue, Ab Initio ETL migration, and 1,000+ job data processing."
+    },
+    {
+      "id": "claude-api-llm-orchestration",
+      "concept": "Claude API & LLM Orchestration",
+      "kind": "capability",
+      "matchers": [
+        "claude api",
+        "claude code",
+        "llm orchestration",
+        "claude api integration",
+        "lead llm integration"
+      ],
+      "qualifiers": [
+        "expert-level"
+      ],
+      "rationale": "Induced from residual chunks specifically requiring Claude API integration and LLM orchestration."
+    },
+    {
+      "id": "multi-agent-reasoning-patterns",
+      "concept": "Multi-Agent AI Reasoning & Workflows",
+      "kind": "practice",
+      "matchers": [
+        "multi-agent",
+        "agentic ai patterns",
+        "autonomous multi-step ai reasoning",
+        "agentic ai patterns and orchestration"
+      ],
+      "qualifiers": [
+        "autonomous",
+        "multi-step"
+      ],
+      "rationale": "Induced from residual requirements for multi-agent reasoning, agentic AI patterns, and workflow orchestration."
+    },
+    {
+      "id": "high-availability-ai-resilience",
+      "concept": "High-Availability AI Resilience & Observability",
+      "kind": "practice",
+      "matchers": [
+        "resilience protocols",
+        "high-availability ai systems",
+        "error handling and resilience",
+        "complex debugging expertise"
+      ],
+      "qualifiers": [
+        "high-availability"
+      ],
+      "rationale": "Induced from residual chunks demanding error handling, resilience protocols, and high-availability AI operation."
+    }
+  ]
+}

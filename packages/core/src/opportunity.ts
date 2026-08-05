@@ -422,6 +422,110 @@ export function resolveRequirements(marketModel: MarketModel, profile: Profile):
   return resolved
 }
 
+export interface EvidenceSufficiencyAssessment {
+  readonly requirementId: string
+  readonly requirementConcept: string
+  readonly capabilityId?: string
+  readonly capabilityName?: string
+  readonly status: 'sufficient' | 'partial' | 'insufficient' | 'unknown'
+  readonly rationale: string
+  readonly evidenceCount: number
+  readonly matchedQualifiers: readonly string[]
+}
+
+export function evaluateSufficiency(resolved: ResolvedRequirement): EvidenceSufficiencyAssessment {
+  if (resolved.status === 'unresolved') {
+    return {
+      requirementId: resolved.requirementId,
+      requirementConcept: resolved.requirementConcept,
+      status: 'unknown',
+      rationale: 'No candidate capability claim matched this market requirement.',
+      evidenceCount: 0,
+      matchedQualifiers: [],
+    }
+  }
+
+  if (resolved.evidence.length === 0) {
+    return {
+      requirementId: resolved.requirementId,
+      requirementConcept: resolved.requirementConcept,
+      capabilityId: resolved.capabilityId,
+      capabilityName: resolved.capabilityName,
+      status: 'insufficient',
+      rationale: 'Capability claim exists but has zero backing timeline evidence.',
+      evidenceCount: 0,
+      matchedQualifiers: [],
+    }
+  }
+
+  const qualifiers = resolved.requirementQualifiers ?? []
+
+  // Default: Bare requirements without qualifiers are fully satisfied by any backing evidence (no implicit seniority/scale demands)
+  if (qualifiers.length === 0) {
+    return {
+      requirementId: resolved.requirementId,
+      requirementConcept: resolved.requirementConcept,
+      capabilityId: resolved.capabilityId,
+      capabilityName: resolved.capabilityName,
+      status: 'sufficient',
+      rationale: 'Unqualified market requirement backed by canonical evidence.',
+      evidenceCount: resolved.evidence.length,
+      matchedQualifiers: [],
+    }
+  }
+
+  // Evaluate evidence alignment against extracted qualifiers (proficiency, scale, context, duration)
+  const evidenceText = resolved.evidence.join(' ').toLowerCase()
+  let satisfiedQualifiersCount = 0
+  const matchedQualifiers: string[] = []
+
+  for (const q of qualifiers) {
+    const normValue = q.value.toLowerCase()
+    // Check if evidence text explicitly matches or backs the qualifier
+    if (evidenceText.includes(normValue) || normValue.split(/\s+/).some(word => word.length >= 4 && evidenceText.includes(word))) {
+      satisfiedQualifiersCount++
+      matchedQualifiers.push(`${q.kind}: ${q.rawText}`)
+    }
+  }
+
+  if (satisfiedQualifiersCount === qualifiers.length) {
+    return {
+      requirementId: resolved.requirementId,
+      requirementConcept: resolved.requirementConcept,
+      capabilityId: resolved.capabilityId,
+      capabilityName: resolved.capabilityName,
+      status: 'sufficient',
+      rationale: 'Canonical evidence fully satisfies all requirement qualifiers.',
+      evidenceCount: resolved.evidence.length,
+      matchedQualifiers,
+    }
+  }
+
+  if (satisfiedQualifiersCount > 0 || resolved.evidence.length > 0) {
+    return {
+      requirementId: resolved.requirementId,
+      requirementConcept: resolved.requirementConcept,
+      capabilityId: resolved.capabilityId,
+      capabilityName: resolved.capabilityName,
+      status: 'partial',
+      rationale: 'Evidence is present but only partially satisfies extracted requirement qualifiers.',
+      evidenceCount: resolved.evidence.length,
+      matchedQualifiers,
+    }
+  }
+
+  return {
+    requirementId: resolved.requirementId,
+    requirementConcept: resolved.requirementConcept,
+    capabilityId: resolved.capabilityId,
+    capabilityName: resolved.capabilityName,
+    status: 'insufficient',
+    rationale: 'Evidence does not satisfy high-proficiency or scale requirement qualifiers.',
+    evidenceCount: resolved.evidence.length,
+    matchedQualifiers,
+  }
+}
+
 // ---- policy ---------------------------------------------------------------
 
 export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEvaluation {

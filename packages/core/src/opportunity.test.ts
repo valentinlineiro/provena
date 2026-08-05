@@ -192,6 +192,74 @@ test('K3 Acceptance: MarketRequirement Qualifiers & Unresolved Concept Preservat
   assert.equal(resolvedEvals.status, 'unresolved')
 })
 
+test('K4A Acceptance: Evidence Sufficiency Assessment (SUFFICIENT / PARTIAL / INSUFFICIENT / UNKNOWN)', async () => {
+  const { evaluateSufficiency } = await import('./opportunity.js')
+
+  // 1. Bare Unqualified Requirement + Canonical Evidence -> SUFFICIENT (No implicit seniority/scale demands)
+  const bareResolved: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-1',
+    requirementConcept: 'Python',
+    requirementKind: 'capability',
+    status: 'demonstrated',
+    evidence: ['Developed core data pipeline using Python.'],
+  }
+  const assessBare = evaluateSufficiency(bareResolved)
+  assert.equal(assessBare.status, 'sufficient')
+
+  // 2. Qualified Requirement + Full Evidence Alignment (Pleo Witness: Deep proficiency with Python for data engineering) -> SUFFICIENT
+  const qualifiedFull: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-2',
+    requirementConcept: 'Python',
+    requirementKind: 'capability',
+    requirementQualifiers: [
+      { kind: 'proficiency', value: 'deep proficiency', rawText: 'deep proficiency' },
+      { kind: 'context', value: 'for data and ml engineering', rawText: 'for data and ml engineering' },
+    ],
+    status: 'demonstrated',
+    evidence: ['Demonstrated deep proficiency in Python for data engineering pipelines.'],
+  }
+  const assessFull = evaluateSufficiency(qualifiedFull)
+  assert.equal(assessFull.status, 'sufficient')
+  assert.equal(assessFull.matchedQualifiers.length, 2)
+
+  // 3. Qualified Requirement + Partial Evidence Alignment (Lodgify Witness: LLM Evals at scale) -> PARTIAL
+  const qualifiedPartial: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-3',
+    requirementConcept: 'LLM Evaluation & Benchmarking',
+    requirementKind: 'practice',
+    requirementQualifiers: [
+      { kind: 'scale', value: 'at scale', rawText: 'at scale' },
+      { kind: 'proficiency', value: 'expert-level', rawText: 'expert-level' },
+    ],
+    status: 'demonstrated',
+    evidence: ['Implemented LLM evaluation benchmarks for internal tools.'], // Missing explicit 'at scale' or 'expert-level'
+  }
+  const assessPartial = evaluateSufficiency(qualifiedPartial)
+  assert.equal(assessPartial.status, 'partial')
+
+  // 4. Zero Evidence backing capability claim -> INSUFFICIENT
+  const zeroEvidence: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-4',
+    requirementConcept: 'Kubernetes',
+    requirementKind: 'capability',
+    status: 'gap',
+    evidence: [],
+  }
+  const assessZero = evaluateSufficiency(zeroEvidence)
+  assert.equal(assessZero.status, 'insufficient')
+
+  // 5. Unresolved Market Requirement -> UNKNOWN
+  const unresolved: import('./opportunity.js').ResolvedRequirement = {
+    requirementId: 'mr-5',
+    requirementConcept: 'ASPM',
+    requirementKind: 'domain',
+    status: 'unresolved',
+    evidence: [],
+  }
+  const assessUnresolved = evaluateSufficiency(unresolved)
+  assert.equal(assessUnresolved.status, 'unknown')
+})
+
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [
     'Staff Software Engineer.',

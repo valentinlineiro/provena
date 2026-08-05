@@ -62,8 +62,8 @@ export type { WorkspaceLoader } from './workspace.js'
 export { validate, formatValidationErrors } from './validate.js'
 export type { ValidationError } from './validate.js'
 
-export type { Verdict, CriterionStatus, SignalStatus, CriterionCheck, SignalMatch, OpportunityEvaluation, ResolvedRequirement } from './opportunity.js'
-export { evaluateOpportunity, resolveRequirements, findMatchedRole, APPLY_COVERAGE_THRESHOLD, APPLY_INTERPRETATION_THRESHOLD } from './opportunity.js'
+export type { Verdict, CriterionStatus, SignalStatus, CriterionCheck, SignalMatch, OpportunityEvaluation, ResolvedRequirement, EvidenceSufficiencyAssessment } from './opportunity.js'
+export { evaluateOpportunity, resolveRequirements, evaluateSufficiency, findMatchedRole, APPLY_COVERAGE_THRESHOLD, APPLY_INTERPRETATION_THRESHOLD } from './opportunity.js'
 
 export type { MarketRequirement, MarketModel } from './market.js'
 export { extractMarketRequirements } from './market.js'

@@ -309,6 +309,25 @@ SME level knowledge of Kubernetes and containers with technical leadership.
   assert.ok(demonstratedNames.includes('Technical Leadership'))
 })
 
+test('real JD evaluation #8 (Sticker Mule): Full-stack Software Engineer JD evaluates $150,000 USD compensation, remote workMode, unknown role, and AI-Assisted Engineering', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+You are an exceptional full-stack software engineer.
+Fully remote from 40+ countries.
+Salary: $150,000–$250,000 USD.
+Use AI aggressively to push the limit of what we can do with AI tools.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'compensation')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.equal(ev.criteria.find(c => c.criterion === 'roles')!.status, 'unknown')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('AI-Assisted Engineering'))
+})
+
+
 
 
 

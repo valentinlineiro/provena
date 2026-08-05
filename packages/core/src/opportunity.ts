@@ -53,12 +53,17 @@ function parseAmount(s: string): number {
   return parseFloat(t)
 }
 
-function extractSalaries(text: string): number[] {
-  const out: number[] = []
-  // Matches: €103 000, €103,000, 103 000 €, 103000 €, €103k, etc.
-  const re = /(?:(?:€|eur|euro)\s*([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)|([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)\s*(?:€|eur|euro))\s*(k)?(?:\s*\/(?:mo|month|mes|m|day|d|hour|h|hora))?/gi
+interface ExtractedSalary {
+  readonly amount: number
+  readonly currency: 'EUR' | 'USD'
+}
+
+function extractSalaries(text: string): ExtractedSalary[] {
+  const out: ExtractedSalary[] = []
+  // Matches EUR: €103 000, €103,000, 103 000 €, 103000 EUR, €103k, etc.
+  const eurRe = /(?:(?:€|eur|euro)\s*([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)|([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)\s*(?:€|eur|euro))\s*(k)?(?:\s*\/(?:mo|month|mes|m|day|d|hour|h|hora))?/gi
   let m: RegExpExecArray | null
-  while ((m = re.exec(text)) !== null) {
+  while ((m = eurRe.exec(text)) !== null) {
     const fullMatch = m[0]!
     if (/\/(?:mo|month|mes|m|day|d|hour|h|hora)/i.test(fullMatch)) continue
     const afterMatch = text.slice(m.index + fullMatch.length, m.index + fullMatch.length + 10).toLowerCase()
@@ -68,8 +73,24 @@ function extractSalaries(text: string): number[] {
     if (!digits) continue
     let n = parseAmount(digits)
     if (m[3]) n *= 1000
-    if (!Number.isNaN(n) && n >= 10000) out.push(n)
+    if (!Number.isNaN(n) && n >= 10000) out.push({ amount: n, currency: 'EUR' })
   }
+
+  // Matches USD: $150,000, $150 000, 150,000 USD, 150000 dollars, $150k, etc.
+  const usdRe = /(?:(?:\$|usd|dollars?)\s*([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)|([\d]+(?:\s*[\d]{3})*(?:[.,][\d]+)*)\s*(?:\$|usd|dollars?))\s*(k)?(?:\s*\/(?:mo|month|mes|m|day|d|hour|h|hora))?/gi
+  while ((m = usdRe.exec(text)) !== null) {
+    const fullMatch = m[0]!
+    if (/\/(?:mo|month|mes|m|day|d|hour|h|hora)/i.test(fullMatch)) continue
+    const afterMatch = text.slice(m.index + fullMatch.length, m.index + fullMatch.length + 10).toLowerCase()
+    if (/^\s*\/(?:mo|month|mes|m|day|d|hour|h|hora)/.test(afterMatch)) continue
+
+    const digits = m[1] ?? m[2]
+    if (!digits) continue
+    let n = parseAmount(digits)
+    if (m[3]) n *= 1000
+    if (!Number.isNaN(n) && n >= 10000) out.push({ amount: n, currency: 'USD' })
+  }
+
   return out
 }
 
@@ -78,9 +99,15 @@ function checkCompensation(jd: string, prefs: Preferences | undefined): Criterio
   if (!min) return { criterion: 'compensation', status: 'unknown', detail: 'no minimum compensation in profile' }
   const salaries = extractSalaries(jd)
   if (salaries.length === 0) return { criterion: 'compensation', status: 'unknown', detail: 'JD does not state compensation' }
-  const floor = Math.min(...salaries)
+  
+  // Normalize USD to EUR baseline using conservative ~1.0 USD/EUR parity threshold (1 USD >= 0.9 EUR)
+  const eurSalaries = salaries.map(s => s.currency === 'USD' ? s.amount * 0.9 : s.amount)
+  const floor = Math.min(...eurSalaries)
+  const rawFloor = salaries.find(s => (s.currency === 'USD' ? s.amount * 0.9 : s.amount) === floor)
+  
   const status = floor < min ? 'violated' : 'satisfied'
-  return { criterion: 'compensation', status, detail: 'JD states €' + floor + '; minimum is €' + min }
+  const displayAmount = rawFloor ? (rawFloor.currency === 'USD' ? '$' + rawFloor.amount + ' USD' : '€' + rawFloor.amount) : '€' + floor
+  return { criterion: 'compensation', status, detail: `JD states ${displayAmount}; minimum is €${min}` }
 }
 
 const REMOTE_RE = /remote|work from home|\bwfh\b|remote-?first/i

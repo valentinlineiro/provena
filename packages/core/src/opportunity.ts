@@ -365,6 +365,7 @@ export interface ResolvedRequirement {
   readonly requirementId: string
   readonly requirementConcept: string
   readonly requirementKind: MarketRequirement['kind']
+  readonly requirementQualifiers?: readonly import('./market.js').RequirementQualifier[]
   readonly capabilityId?: string
   readonly capabilityName?: string
   readonly status: 'demonstrated' | 'gap' | 'unresolved'
@@ -400,6 +401,7 @@ export function resolveRequirements(marketModel: MarketModel, profile: Profile):
         requirementId: req.id,
         requirementConcept: req.concept,
         requirementKind: req.kind,
+        requirementQualifiers: req.qualifiers,
         capabilityId: matchedCap.id,
         capabilityName: matchedCap.name,
         status: evidence.length > 0 ? 'demonstrated' : 'gap',
@@ -410,6 +412,7 @@ export function resolveRequirements(marketModel: MarketModel, profile: Profile):
         requirementId: req.id,
         requirementConcept: req.concept,
         requirementKind: req.kind,
+        requirementQualifiers: req.qualifiers,
         status: 'unresolved',
         evidence: [],
       })

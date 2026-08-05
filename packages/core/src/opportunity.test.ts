@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { evaluateOpportunity } from './opportunity.js'
+import { evaluateOpportunity, resolveRequirements } from './opportunity.js'
+import { extractMarketRequirements } from './market.js'
 import type { Profile } from './profile.js'
 
 function makeProfile(overrides: Partial<Profile> = {}): Profile {
@@ -162,6 +163,33 @@ test('K2B Acceptance: Role Family vs Role Level Semantics', async () => {
   // Witness #20 (Univ CEU): Docente Universitario -> Family incompatible (Academia vs Engineering) -> VIOLATED
   const ev20 = evaluateOpportunity('Docente Universitario en Ingeniería Informática. Sistemas distribuidos.', profile)
   assert.equal(ev20.criteria.find(c => c.criterion === 'roles')!.status, 'violated')
+})
+
+test('K3 Acceptance: MarketRequirement Qualifiers & Unresolved Concept Preservation (Pleo Witness)', () => {
+  const jd = 'Staff Applied AI Engineer. Deep proficiency with Python for data and ML engineering. Experience with LLM evaluation strategy at scale.'
+  const marketModel = extractMarketRequirements(jd)
+
+  // 1. Concept Recognition
+  const pythonReq = marketModel.requirements.find(r => r.concept === 'Python')
+  assert.ok(pythonReq)
+
+  const evalsReq = marketModel.requirements.find(r => r.concept === 'LLM Evaluation & Benchmarking')
+  assert.ok(evalsReq)
+
+  // 2. Qualifier Extraction (Proficiency, Context, Scale)
+  assert.ok(pythonReq.qualifiers)
+  assert.ok(pythonReq.qualifiers.some(q => q.kind === 'proficiency' && q.value.includes('deep proficiency')))
+  assert.ok(pythonReq.qualifiers.some(q => q.kind === 'context' && q.value.includes('data')))
+
+  assert.ok(evalsReq.qualifiers)
+  assert.ok(evalsReq.qualifiers.some(q => q.kind === 'scale' && q.value.includes('at scale')))
+
+  // 3. Resolution Preservation: Recognized concept without candidate capability remains unresolved, not dropped or fabricated
+  const profile = makeProfile()
+  const resolved = resolveRequirements(marketModel, profile)
+  const resolvedEvals = resolved.find(r => r.requirementId === evalsReq.id)
+  assert.ok(resolvedEvals)
+  assert.equal(resolvedEvals.status, 'unresolved')
 })
 
 test('CONSIDER: coverage below the apply threshold', () => {

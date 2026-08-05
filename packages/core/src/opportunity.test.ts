@@ -634,6 +634,81 @@ Salary: $160,000 USD.`
   assert.ok(assessment.confidence < 0.5)
 })
 
+test('K11 Acceptance: DeclarativeMarketRecognizer — domain recognition recovery via ADMIN_KNOWLEDGE without changing universal protocol', async () => {
+  const { DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, resolveRequirements, evaluateSufficiency, projectProfessionalFit, assessPreferences, projectPersonalFit, computeRecognitionCoverage, applyPolicy } = await import('./index.js')
+  const { Profile } = await import('./types.js')
+
+  const adminJd = `Responsable de Administración y Recepción (Presencial).
+Gestión completa de atención al cliente y pacientes en recepción.
+Requisitos: Experiencia en gestión administrativa, facturación, y atención al cliente.
+Conocimientos de software de gestión médica y gestión de nóminas.
+Salario: €30.000 bruto/año.`
+
+  const lydiaProfile: import('./types.js').Profile = {
+    identity: {
+      person: { name: 'Lydia Pérez', title: 'Responsable de Administración' },
+      experienceIds: ['e-1'], projectIds: [], educationIds: [], publicationIds: [], certificationIds: [], recommendationIds: [], capabilityIds: ['c-1', 'c-2'], contributionIds: [],
+    },
+    person: { name: 'Lydia Pérez', title: 'Responsable de Administración' },
+    experiences: [{ id: 'e-1', organisation: 'Clínica', title: 'Administrativa', start: '2018-01', capabilityIds: ['c-1', 'c-2'], summary: '5 años supervisando facturación y atención al cliente' }],
+    capabilities: [
+      { id: 'c-1', name: 'Gestión Administrativa y Facturación', signals: ['gestión administrativa', 'facturación'], evidence: ['5 años supervisando facturación'] },
+      { id: 'c-2', name: 'Atención al Cliente y Recepción', signals: ['atención al cliente', 'recepción'], evidence: ['Atención telefónica y presencial'] },
+    ],
+    contributions: [],
+    preferences: { work: { remote: 'optional' }, compensation: { minimum: 25000 } },
+  }
+
+  // 1. Unaugmented software recognizer (K10 baseline behavior)
+  const defaultRecognizer = new DeclarativeMarketRecognizer(DEFAULT_SOFTWARE_KNOWLEDGE)
+  const mmDefault = defaultRecognizer.extractMarketRequirements(adminJd)
+  assert.equal(mmDefault.requirements.length, 0, 'Software recognizer recognizes 0 requirements in Admin JD')
+
+  // 2. Composed recognizer (Software + Admin Knowledge)
+  const composedKnowledge = composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE)
+  const composedRecognizer = new DeclarativeMarketRecognizer(composedKnowledge)
+  const mmComposed = composedRecognizer.extractMarketRequirements(adminJd)
+
+  // Recovery: Composed recognizer recovers domain requirements
+  assert.ok(mmComposed.requirements.length >= 2, `Recognized ${mmComposed.requirements.length} admin requirements`)
+  assert.ok(mmComposed.requirements.some(r => r.concept === 'Gestión Administrativa y Facturación'))
+  assert.ok(mmComposed.requirements.some(r => r.concept === 'Atención al Cliente y Recepción'))
+
+  // 3. Execution of Universal Protocol (K1-K6B) without ANY modifications
+  const resolved = resolveRequirements(mmComposed, lydiaProfile)
+  const suffList = resolved.map(evaluateSufficiency)
+  const profFit = projectProfessionalFit(suffList)
+  const persFit = projectPersonalFit(assessPreferences(adminJd, lydiaProfile.preferences))
+  const recCov = computeRecognitionCoverage(adminJd, mmComposed)
+  const assessment = applyPolicy(profFit, persFit, recCov)
+
+  // System recovers observable fit & confidence via Universal Protocol
+  assert.ok(profFit.score > 7.0, `ProfFit score (${profFit.score}) reflects evidence match`)
+  assert.ok(assessment.confidence > 0.5, `Confidence (${assessment.confidence}) recovered`)
+  assert.equal(assessment.eligibility, 'eligible')
+})
+
+test('K11 Acceptance: Knowledge Composition — adding Admin knowledge leaves Software recognition invariant', async () => {
+  const { DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE } = await import('./index.js')
+
+  const softwareJd = `Staff Software Engineer — Distributed Systems (Remote).
+Deep expertise in Python, Kubernetes, and REST APIs.
+Salary: €100,000.`
+
+  const softOnlyRecognizer = new DeclarativeMarketRecognizer(DEFAULT_SOFTWARE_KNOWLEDGE)
+  const composedRecognizer  = new DeclarativeMarketRecognizer(composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE))
+
+  const mmSoft     = softOnlyRecognizer.extractMarketRequirements(softwareJd)
+  const mmComposed = composedRecognizer.extractMarketRequirements(softwareJd)
+
+  // Composition Invariant: Software requirements recognized are identical
+  assert.equal(mmSoft.requirements.length, mmComposed.requirements.length)
+  assert.deepEqual(
+    mmSoft.requirements.map(r => r.concept),
+    mmComposed.requirements.map(r => r.concept)
+  )
+})
+
 
 test('CONSIDER: coverage below the apply threshold', () => {
   const jd = [

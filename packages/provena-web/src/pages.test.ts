@@ -109,3 +109,54 @@ test('GET /opportunities renders within app-shell with Inbox title and table', a
   assert.ok(html.includes('<h1>Opportunity Inbox</h1>'))
   assert.ok(html.includes('<a class="active" href="/opportunities">Inbox</a>'))
 })
+
+test('POST /api/opportunities/ingest is idempotent across repeated syncs of the same board', async () => {
+  const store = new Map<string, string>()
+  const kvEnv = {
+    PROVENA_KV: {
+      get: async (key: string, type?: string) => {
+        const v = store.get(key)
+        if (v === undefined) return null
+        return type === 'json' ? JSON.parse(v) : v
+      },
+      put: async (key: string, value: string) => { store.set(key, value) },
+    },
+  } as never
+
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({
+      jobs: [
+        {
+          id: 42,
+          internal_job_id: 1,
+          title: 'Senior MLOps Engineer',
+          location: { name: 'Remote' },
+          absolute_url: 'https://boards.greenhouse.io/acme/jobs/42',
+          updated_at: '2026-01-01T00:00:00Z',
+          content: '<p>Requirements: Python, Kubernetes, MLflow.</p>',
+        },
+      ],
+    }), { status: 200, headers: { 'content-type': 'application/json' } })
+  ) as typeof fetch
+
+  try {
+    const ingest = () => worker.fetch(new Request('https://provena.example/api/opportunities/ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ boardToken: 'acme' }),
+    }), kvEnv)
+
+    const first = await (await ingest()).json() as { fetchedCount: number; newlyAddedCount: number; totalMemoryCount: number }
+    assert.equal(first.fetchedCount, 1)
+    assert.equal(first.newlyAddedCount, 1)
+    assert.equal(first.totalMemoryCount, 1)
+
+    const second = await (await ingest()).json() as { fetchedCount: number; newlyAddedCount: number; totalMemoryCount: number }
+    assert.equal(second.fetchedCount, 1)
+    assert.equal(second.newlyAddedCount, 0, 'repeated sync of the same board must not add duplicates')
+    assert.equal(second.totalMemoryCount, 1, 'memory count must stay stable across repeated ingests')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})

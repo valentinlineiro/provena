@@ -18,6 +18,8 @@ import {
   computeRecognitionCoverage,
   applyPolicy,
   UrlOpportunitySource,
+  GreenhousePublicSource,
+  hashOpportunityKey,
 } from '@provena/core'
 import type { CVContext, CVProjection, ProcessedOpportunity, OpportunityUserDecision } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
@@ -1050,9 +1052,13 @@ ${renderAppShell(
   'opportunities',
   '<div class="page-header">' +
   '<h1>Opportunity Inbox</h1>' +
-  '<p class="subtitle">O1.2 Memory & Decision Tracking: Evaluated opportunities ranked by attention priority</p>' +
+  '<p class="subtitle">O1.3 Automatic ATS Ingestion: Synchronize job boards or view stored market memory</p>' +
   '</div>',
   '<div class="readable">' +
+  '<div style="display:flex;gap:0.5rem;margin-bottom:1rem;background:#fff;padding:0.75rem;border-radius:0.5rem;border:1px solid #e5e5e5;align-items:center;">' +
+  '<input id="boardToken" type="text" placeholder="Greenhouse board (e.g. hashicorp, stripe, lever)" value="hashicorp" style="flex:1;padding:0.5rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.25rem;">' +
+  '<button style="width:auto;margin-top:0;padding:0.5rem 1rem;font-size:0.875rem;" onclick="syncBoard()">Sync Board Jobs</button>' +
+  '</div>' +
   '<div id="inbox">Loading opportunities...</div>' +
   '</div>'
 )}
@@ -1084,9 +1090,9 @@ async function loadInbox() {
     html += '<td>' + conf + '</td>'
     html += '<td><span class="badge ' + o.userDecision + '">' + o.userDecision + '</span></td>'
     html += '<td><div class="btn-group">' +
-      '<button class="' + (o.userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\'' + o.id + '\', \'interested\')">⭐</button>' +
-      '<button class="' + (o.userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\'' + o.id + '\', \'applied\')">✓</button>' +
-      '<button class="' + (o.userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\'' + o.id + '\', \'dismissed\')">✗</button>' +
+      '<button class="' + (o.userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\\'' + o.id + '\\', \\'interested\\')">⭐</button>' +
+      '<button class="' + (o.userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\\'' + o.id + '\\', \\'applied\\')">✓</button>' +
+      '<button class="' + (o.userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\\'' + o.id + '\\', \\'dismissed\\')">✗</button>' +
       '</div></td>'
     html += '</tr>'
   }
@@ -1094,6 +1100,18 @@ async function loadInbox() {
   container.innerHTML = html
 }
 
+async function syncBoard() {
+  const container = document.getElementById('inbox')
+  const boardToken = document.getElementById('boardToken').value.trim() || 'hashicorp'
+  container.innerHTML = '<p class="meta">Fetching and evaluating ATS board positions for "' + boardToken + '" via K*...</p>'
+  const res = await fetch('/api/opportunities/ingest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ boardToken }),
+  })
+  if (!res.ok) { container.innerHTML = '<p class="meta">Sync failed: ' + await res.text() + '</p>'; return }
+  loadInbox()
+}
 async function setDecision(id, decision) {
   await fetch('/api/opportunities/decision', {
     method: 'POST',
@@ -1137,6 +1155,73 @@ loadInbox()
         return new Response('ok', { status: 200 })
       } catch (e) {
         return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/opportunities/ingest') {
+      try {
+        const body = (await request.json()) as { boardToken?: string }
+        const boardToken = body.boardToken || 'shakers'
+        const source = new GreenhousePublicSource(boardToken)
+        const fetchedRawJobs = await source.fetchAllBoardJobs()
+
+        const rawMemory = await env.PROVENA_KV.get('opportunities_memory', 'json')
+        const opps = (rawMemory as { opportunities: ProcessedOpportunity[] } | null)?.opportunities ?? []
+
+        const composedK = composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE)
+        const recognizer = new DeclarativeMarketRecognizer(composedK)
+
+        let newlyAddedCount = 0
+        for (const rawOpp of fetchedRawJobs) {
+          const key = hashOpportunityKey(rawOpp)
+          if (opps.some(o => o.id === key)) continue // already ingested & evaluated — idempotent skip
+
+          const marketModel = recognizer.extractMarketRequirements(rawOpp.description)
+          const resolved = resolveRequirements(marketModel, profile)
+          const suffList = resolved.map(evaluateSufficiency)
+          const profFit = projectProfessionalFit(suffList)
+          const prefAssessments = assessPreferences(rawOpp.description, profile.preferences)
+          const persFit = projectPersonalFit(prefAssessments)
+          const recCov = computeRecognitionCoverage(rawOpp.description, marketModel)
+          const assessment = applyPolicy(profFit, persFit, recCov)
+          const legacyEv = evaluateOpportunity(rawOpp.description, profile)
+
+          const evaluation = {
+            ...legacyEv,
+            rawOpportunity: rawOpp,
+            marketModel,
+            professionalFit: profFit,
+            personalFit: persFit,
+            assessment,
+            recognitionCoverage: recCov,
+            knowledgeMode: 'composed',
+            knowledgeName: composedK.name,
+            knowledgePatternsCount: composedK.patterns.length,
+          }
+
+          opps.unshift({
+            id: key,
+            raw: rawOpp,
+            evaluation,
+            userDecision: 'new',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+          newlyAddedCount++
+        }
+
+        await env.PROVENA_KV.put('opportunities_memory', JSON.stringify({ opportunities: opps }))
+
+        return new Response(JSON.stringify({
+          boardToken,
+          fetchedCount: fetchedRawJobs.length,
+          newlyAddedCount,
+          totalMemoryCount: opps.length,
+        }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Ingestion failed', { status: 400 })
       }
     }
 

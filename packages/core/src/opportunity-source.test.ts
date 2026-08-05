@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { validateSafeUrl, extractJobFromHtml, DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, MLOPS_KNOWLEDGE } from './index.js'
+import { validateSafeUrl, extractJobFromHtml, DeclarativeMarketRecognizer, composeKnowledge, DEFAULT_SOFTWARE_KNOWLEDGE, MLOPS_KNOWLEDGE, GreenhousePublicSource, hashOpportunityKey } from './index.js'
 
 test('validateSafeUrl accepts valid public HTTP/HTTPS URLs', () => {
   const url1 = validateSafeUrl('https://boards.greenhouse.io/company/jobs/12345')
@@ -111,4 +111,55 @@ Requirements: Python, Kubernetes, MLOps, MLflow, feature store, and Databricks U
   const conceptsExtracted = mmExtracted.requirements.map(r => r.concept)
 
   assert.deepEqual(conceptsExtracted, conceptsManual, 'MarketModel requirements extracted via URL source must match manual copy')
+})
+
+test('GreenhousePublicSource.fetchAllBoardJobs maps the board jobs list to RawOpportunity[]', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (input: string | URL) => {
+    assert.ok(String(input).includes('boards-api.greenhouse.io/v1/boards/acme/jobs'))
+    return new Response(JSON.stringify({
+      jobs: [
+        {
+          id: 42,
+          internal_job_id: 1,
+          title: 'Senior MLOps Engineer',
+          location: { name: 'Remote' },
+          absolute_url: 'https://boards.greenhouse.io/acme/jobs/42',
+          updated_at: '2026-01-01T00:00:00Z',
+          content: '<p>Requirements: Python, Kubernetes, MLflow.</p>',
+        },
+      ],
+    }), { status: 200, headers: { 'content-type': 'application/json' } })
+  }) as typeof fetch
+
+  try {
+    const source = new GreenhousePublicSource('acme')
+    const raws = await source.fetchAllBoardJobs()
+
+    assert.equal(raws.length, 1)
+    assert.equal(raws[0]!.source, 'greenhouse')
+    assert.equal(raws[0]!.externalId, '42')
+    assert.equal(raws[0]!.title, 'Senior MLOps Engineer')
+    assert.equal(raws[0]!.location, 'Remote')
+    assert.ok(raws[0]!.description.includes('Python'))
+    assert.ok(!raws[0]!.description.includes('<p>'))
+    assert.equal(hashOpportunityKey(raws[0]!), 'opp-acme-42')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('GreenhousePublicSource.fetchAllBoardJobs returns empty array when jobs field is missing', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({}), { status: 200, headers: { 'content-type': 'application/json' } })
+  ) as typeof fetch
+
+  try {
+    const source = new GreenhousePublicSource('empty-board')
+    const raws = await source.fetchAllBoardJobs()
+    assert.deepEqual(raws, [])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })

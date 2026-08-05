@@ -254,3 +254,67 @@ export class UrlOpportunitySource implements OpportunitySource {
     return extractJobFromHtml(finalUrl, html)
   }
 }
+
+// ---- GreenhousePublicSource Concrete Class ---------------------------------
+
+export interface GreenhouseJobItem {
+  id: number
+  internal_job_id: number
+  title: string
+  location?: { name?: string }
+  absolute_url: string
+  updated_at: string
+  content?: string
+}
+
+export class GreenhousePublicSource implements OpportunitySource {
+  private readonly boardToken: string
+  private readonly options: SafeFetchOptions
+
+  constructor(boardToken: string, options: SafeFetchOptions = {}) {
+    this.boardToken = boardToken
+    this.options = options
+  }
+
+  async fetch(input: OpportunitySourceInput): Promise<RawOpportunity> {
+    const url = input.url.includes('boards-api.greenhouse.io')
+      ? input.url
+      : `https://boards-api.greenhouse.io/v1/boards/${this.boardToken}/jobs/${input.url}?content=true`
+
+    const { html } = await fetchSafeContent(url, this.options)
+    const data = JSON.parse(html) as GreenhouseJobItem
+
+    return {
+      externalId: String(data.id),
+      source: 'greenhouse',
+      url: data.absolute_url || url,
+      title: data.title,
+      company: this.boardToken,
+      location: data.location?.name || undefined,
+      publishedAt: data.updated_at || undefined,
+      description: stripHtmlTags(data.content || ''),
+    }
+  }
+
+  async fetchAllBoardJobs(): Promise<RawOpportunity[]> {
+    const listUrl = `https://boards-api.greenhouse.io/v1/boards/${this.boardToken}/jobs?content=true`
+    const { html } = await fetchSafeContent(listUrl, this.options)
+    const data = JSON.parse(html) as { jobs: GreenhouseJobItem[] }
+
+    if (!data.jobs || !Array.isArray(data.jobs)) {
+      return []
+    }
+
+    return data.jobs.map(job => ({
+      externalId: String(job.id),
+      source: 'greenhouse' as const,
+      url: job.absolute_url || `https://boards.greenhouse.io/${this.boardToken}/jobs/${job.id}`,
+      title: job.title,
+      company: this.boardToken,
+      location: job.location?.name || undefined,
+      publishedAt: job.updated_at || undefined,
+      description: stripHtmlTags(job.content || ''),
+    }))
+  }
+}
+

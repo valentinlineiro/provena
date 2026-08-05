@@ -341,6 +341,28 @@ Lead the development of our AI agent ecosystem with LLM-based automations.
   assert.equal(ev.verdict, 'skip')
 })
 
+test('real JD evaluation #10 (SDG): CTO JD evaluates remote workMode, non-skip verdict, and demonstrated distributed stack while preserving AI gap', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+We are looking for a CTO to lead one of our core enterprise products.
+Our international team of digital nomads works remotely from all over the world.
+REMOTE OPPORTUNITY to work full-time.
+High load (distributed architecture, microservices, event driven, syn/async, k8s, CI/CD).
+Strong software development background and artificial intelligence interest.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'satisfied')
+  assert.notEqual(ev.verdict, 'skip')
+  const demonstratedNames = ev.demonstrated.map(d => d.capabilityName)
+  assert.ok(demonstratedNames.includes('Distributed Systems'))
+  assert.ok(demonstratedNames.includes('Kubernetes'))
+  assert.ok(demonstratedNames.includes('Software Development'))
+  const gapNames = ev.gaps.map(g => g.capabilityName)
+  assert.ok(gapNames.includes('Artificial Intelligence (AI)'))
+})
+
+
 
 
 

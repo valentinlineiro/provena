@@ -9,6 +9,26 @@ export interface RawOpportunity {
   readonly description: string
 }
 
+export type OpportunityUserDecision = 'new' | 'seen' | 'interested' | 'applied' | 'dismissed'
+
+export interface ProcessedOpportunity {
+  readonly id: string
+  readonly raw: RawOpportunity
+  readonly evaluation: import('./opportunity.js').OpportunityEvaluation
+  readonly userDecision: OpportunityUserDecision
+  readonly userFeedbackReason?: string
+  readonly createdAt: string
+  readonly updatedAt: string
+}
+
+export function hashOpportunityKey(raw: RawOpportunity): string {
+  if (raw.externalId && raw.company) {
+    return `opp-${raw.company.toLowerCase().replace(/[^a-z0-9]/g, '')}-${raw.externalId}`
+  }
+  const cleanUrl = raw.url.split('?')[0]!.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
+  return `opp-hash-${cleanUrl.replace(/[^a-z0-9]/g, '_')}`
+}
+
 export interface OpportunitySourceInput {
   readonly url: string
 }

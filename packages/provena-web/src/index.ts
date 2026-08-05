@@ -19,7 +19,7 @@ import {
   applyPolicy,
   UrlOpportunitySource,
 } from '@provena/core'
-import type { CVContext, CVProjection } from '@provena/core'
+import type { CVContext, CVProjection, ProcessedOpportunity, OpportunityUserDecision } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import profile, { updatedAt } from './profile.js'
@@ -61,13 +61,14 @@ async function recordEvent(env: Env, name: EventName) {
   await env.PROVENA_KV.put('events', JSON.stringify({ events }))
 }
 
-export function siteNav(section: 'story' | 'prepare' | 'evaluate', navClass = 'site'): string {
+export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportunities', navClass = 'site'): string {
   const link = (label: string, href: string, active: boolean) =>
     '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
   const sections = [
     { label: 'Story', href: '/', id: 'story' as const },
     { label: 'Prepare', href: '/cv', id: 'prepare' as const },
     { label: 'Evaluate', href: '/evaluate', id: 'evaluate' as const },
+    { label: 'Inbox', href: '/opportunities', id: 'opportunities' as const },
   ]
   return (
     '<nav class="' + navClass + '">' +
@@ -78,7 +79,7 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate', navClass = 's
 }
 
 export function renderAppShell(
-  section: 'story' | 'prepare' | 'evaluate',
+  section: 'story' | 'prepare' | 'evaluate' | 'opportunities',
   pageHeaderHtml: string,
   pageContentHtml: string
 ): string {
@@ -1021,6 +1022,125 @@ export default {
       }
     }
 
+const OPPORTUNITIES_PAGE = `<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provena — Opportunity Inbox</title>
+<style>
+${APP_SHELL_CSS}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+h1 { font-size: 1.125rem; font-weight: 700; }
+.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+.opp-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 0.5rem; overflow: hidden; border: 1px solid #e5e5e5; margin-top: 1rem; }
+.opp-table th, .opp-table td { padding: 0.75rem 1rem; text-align: left; font-size: 0.875rem; border-bottom: 1px solid #eee; }
+.opp-table th { background: #fafafa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #777; }
+.badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.badge.new { background: #e3f2fd; color: #1565c0; }
+.badge.interested { background: #e8f5e9; color: #2e7d32; }
+.badge.applied { background: #f3e5f5; color: #6a1b9a; }
+.badge.dismissed { background: #ffebee; color: #c62828; }
+.badge.seen { background: #f5f5f5; color: #616161; }
+.btn-group { display: flex; gap: 0.375rem; }
+.btn-group button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: 28px; width: auto; border: 1px solid #ccc; background: #fff; border-radius: 0.25rem; cursor: pointer; }
+.btn-group button:hover { background: #f0f0f0; }
+.btn-group button.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+</style>
+${renderAppShell(
+  'opportunities',
+  '<div class="page-header">' +
+  '<h1>Opportunity Inbox</h1>' +
+  '<p class="subtitle">O1.2 Memory & Decision Tracking: Evaluated opportunities ranked by attention priority</p>' +
+  '</div>',
+  '<div class="readable">' +
+  '<div id="inbox">Loading opportunities...</div>' +
+  '</div>'
+)}
+<script>
+async function loadInbox() {
+  const container = document.getElementById('inbox')
+  const res = await fetch('/api/opportunities')
+  if (!res.ok) { container.innerHTML = '<p>Error loading opportunities</p>'; return }
+  const data = await res.json()
+  const opps = data.opportunities || []
+  if (opps.length === 0) {
+    container.innerHTML = '<div class="card"><p>No opportunities in memory yet. Use <a href="/evaluate">Evaluate</a> to ingest job URLs or text.</p></div>'
+    return
+  }
+
+  let html = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Personal</th><th>Confidence</th><th>Decision</th><th>Action</th></tr></thead><tbody>'
+  for (const o of opps) {
+    const raw = o.raw || {}
+    const ev = o.evaluation || {}
+    const rec = ev.assessment ? ev.assessment.recommendation : (ev.verdict || 'abstain')
+    const profScore = ev.professionalFit ? ev.professionalFit.score.toFixed(1) : '—'
+    const persScore = ev.personalFit && ev.personalFit.assessedCount > 0 ? ev.personalFit.score.toFixed(1) : '—'
+    const conf = Math.round((ev.assessment ? ev.assessment.confidence : (ev.confidence || 0)) * 100) + '%'
+
+    html += '<tr>'
+    html += '<td><strong>' + (raw.title || 'Job Opportunity') + '</strong>' + (raw.company ? ' <span class="meta">at ' + raw.company + '</span>' : '') + '<br><a class="meta" href="' + raw.url + '" target="_blank">View Source</a></td>'
+    html += '<td>' + profScore + '</td>'
+    html += '<td>' + persScore + '</td>'
+    html += '<td>' + conf + '</td>'
+    html += '<td><span class="badge ' + o.userDecision + '">' + o.userDecision + '</span></td>'
+    html += '<td><div class="btn-group">' +
+      '<button class="' + (o.userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\'' + o.id + '\', \'interested\')">⭐</button>' +
+      '<button class="' + (o.userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\'' + o.id + '\', \'applied\')">✓</button>' +
+      '<button class="' + (o.userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\'' + o.id + '\', \'dismissed\')">✗</button>' +
+      '</div></td>'
+    html += '</tr>'
+  }
+  html += '</tbody></table>'
+  container.innerHTML = html
+}
+
+async function setDecision(id, decision) {
+  await fetch('/api/opportunities/decision', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, decision }),
+  })
+  loadInbox()
+}
+
+loadInbox()
+</script>
+`
+
+    if (request.method === 'GET' && url.pathname === '/opportunities') {
+      return new Response(OPPORTUNITIES_PAGE, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/opportunities') {
+      const raw = await env.PROVENA_KV.get('opportunities_memory', 'json')
+      const opps = (raw as { opportunities: ProcessedOpportunity[] } | null)?.opportunities ?? []
+      return new Response(JSON.stringify({ opportunities: opps }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/opportunities/decision') {
+      try {
+        const body = (await request.json()) as { id?: string; decision?: OpportunityUserDecision }
+        if (!body.id || !body.decision) return new Response('Missing id or decision', { status: 400 })
+
+        const raw = await env.PROVENA_KV.get('opportunities_memory', 'json')
+        const opps = (raw as { opportunities: ProcessedOpportunity[] } | null)?.opportunities ?? []
+        const item = opps.find(o => o.id === body.id)
+        if (item) {
+          (item as any).userDecision = body.decision;
+          (item as any).updatedAt = new Date().toISOString()
+          await env.PROVENA_KV.put('opportunities_memory', JSON.stringify({ opportunities: opps }))
+        }
+        return new Response('ok', { status: 200 })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
     return new Response('Not found', { status: 404 })
   },
 }
+

@@ -327,6 +327,21 @@ Use AI aggressively to push the limit of what we can do with AI tools.
   assert.ok(demonstratedNames.includes('AI-Assisted Engineering'))
 })
 
+test('real JD evaluation #9 (Libeen): Head of Product & Technology JD evaluates workMode as violated and verdict as skip', async () => {
+  const profile = (await import('../../provena-web/src/profile.js')).default
+  const jd = `
+Head of Product & Technology — Libeen | Madrid
+Hybrid model based in Madrid.
+Define and evolve Libeen's product vision.
+Lead the development of our AI agent ecosystem with LLM-based automations.
+  `.trim()
+
+  const ev = evaluateOpportunity(jd, profile)
+  assert.equal(ev.criteria.find(c => c.criterion === 'workMode')!.status, 'violated')
+  assert.equal(ev.verdict, 'skip')
+})
+
+
 
 
 

@@ -17,7 +17,7 @@ Fully remote position.
   const concepts = m1.requirements.map(r => r.concept)
   assert.ok(concepts.includes('Python'))
   assert.ok(concepts.includes('Kubernetes'))
-  assert.ok(concepts.includes('LLM & GenAI Systems'))
+  assert.ok(concepts.includes('RAG & Retrieval'))
   assert.ok(concepts.includes('Distributed Systems'))
   assert.ok(concepts.includes('Remote Work'))
 })

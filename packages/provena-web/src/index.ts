@@ -1057,7 +1057,7 @@ ${renderAppShell(
   '</div>',
   '<div class="readable">' +
   '<div style="display:flex;gap:0.5rem;margin-bottom:1rem;background:#fff;padding:0.75rem;border-radius:0.5rem;border:1px solid #e5e5e5;align-items:center;">' +
-  '<input id="boardToken" type="text" placeholder="Greenhouse board (e.g. hashicorp, stripe, lever)" value="hashicorp" style="flex:1;padding:0.5rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.25rem;">' +
+  '<input id="boardToken" type="text" placeholder="Greenhouse board token (e.g. stripe, gitlab, coinbase)" value="stripe" style="flex:1;padding:0.5rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.25rem;">' +
   '<button style="width:auto;margin-top:0;padding:0.5rem 1rem;font-size:0.875rem;" onclick="syncBoard()">Sync Board Jobs</button>' +
   '</div>' +
   '<div id="inbox">Loading opportunities...</div>' +
@@ -1103,7 +1103,7 @@ async function loadInbox() {
 
 async function syncBoard() {
   const container = document.getElementById('inbox')
-  const boardToken = document.getElementById('boardToken').value.trim() || 'hashicorp'
+  const boardToken = document.getElementById('boardToken').value.trim() || 'stripe'
   container.innerHTML = '<p class="meta">Fetching and evaluating ATS board positions for "' + boardToken + '" via K*...</p>'
   const res = await fetch('/api/opportunities/ingest', {
     method: 'POST',
@@ -1154,8 +1154,11 @@ loadInbox()
     if (request.method === 'POST' && url.pathname === '/api/opportunities/ingest') {
       try {
         const body = (await request.json()) as { boardToken?: string }
-        const boardToken = body.boardToken || 'shakers'
-        const source = new GreenhousePublicSource(boardToken)
+        const boardToken = body.boardToken || 'stripe'
+        // Greenhouse's public board API is a fixed, known-safe domain (unlike arbitrary
+        // user-submitted URLs), so a larger board can legitimately exceed the general
+        // SSRF-guard default cap without it being a resource-exhaustion risk.
+        const source = new GreenhousePublicSource(boardToken, { maxSizeBytes: 10 * 1024 * 1024 })
         const fetchedRawJobs = await source.fetchAllBoardJobs()
 
         const repository = new KvOpportunityRepository(env.PROVENA_KV)
@@ -1209,7 +1212,9 @@ loadInbox()
           headers: { 'Content-Type': 'application/json' },
         })
       } catch (e) {
-        return new Response(e instanceof Error ? e.message : 'Ingestion failed', { status: 400 })
+        const message = e instanceof Error ? e.message : 'Ingestion failed'
+        const hint = message.includes('404') ? ` — no public Greenhouse board found for that token. Check the company's careers page for its board token (often visible in the URL as boards.greenhouse.io/{token}).` : ''
+        return new Response(message + hint, { status: 400 })
       }
     }
 

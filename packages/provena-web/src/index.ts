@@ -1,6 +1,21 @@
 /// <reference types="@cloudflare/workers-types" />
 import { computeCareerCompass, narrateCompass, cvReadiness } from './compass.js'
-import { profileToTimeline, cvProjector, evaluateOpportunity } from '@provena/core'
+import {
+  profileToTimeline,
+  cvProjector,
+  evaluateOpportunity,
+  DeclarativeMarketRecognizer,
+  composeKnowledge,
+  DEFAULT_SOFTWARE_KNOWLEDGE,
+  ADMIN_KNOWLEDGE,
+  resolveRequirements,
+  evaluateSufficiency,
+  projectProfessionalFit,
+  assessPreferences,
+  projectPersonalFit,
+  computeRecognitionCoverage,
+  applyPolicy,
+} from '@provena/core'
 import type { CVContext, CVProjection } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
@@ -640,29 +655,44 @@ h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
 label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
 textarea { width: 100%; min-height: 12rem; font-size: 0.875rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; resize: vertical; font-family: inherit; }
+select { width: 100%; padding: 0.625rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.375rem; background: #fff; }
 button { width: 100%; padding: 0.75rem; min-height: 44px; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
 .action-bar button { margin-top: 0; }
-.card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-top: 1rem; }
-.card .verdict { font-size: 1.125rem; font-weight: 700; }
-.card .verdict.apply { color: #2e7d32; }
-.card .verdict.consider { color: #b26a00; }
-.card .verdict.skip { color: #c62828; }
-.card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 1rem; }
-.card ul { margin: 0.25rem 0 0 1.125rem; }
-.card li { font-size: 0.875rem; color: #333; margin-bottom: 0.375rem; }
-.card .trace { font-size: 0.8125rem; color: #555; margin-top: 0.25rem; }
-.meta { color: #777; font-size: 0.8125rem; margin-top: 0.5rem; }
+.card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
+.card .verdict { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.02em; display: inline-block; padding: 0.25rem 0.625rem; border-radius: 0.25rem; margin-bottom: 0.5rem; }
+.card .verdict.strong-candidate { background: #e8f5e9; color: #1b5e20; }
+.card .verdict.consider { background: #fff3e0; color: #e65100; }
+.card .verdict.abstain { background: #ede7f6; color: #4a148c; }
+.card .verdict.skip { background: #ffebee; color: #b71c1c; }
+.card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-top: 1.25rem; border-bottom: 1px solid #eee; padding-bottom: 0.25rem; }
+.card ul { margin: 0.5rem 0 0 1.25rem; }
+.card li { font-size: 0.875rem; color: #333; margin-bottom: 0.5rem; }
+.card .trace { font-size: 0.8125rem; color: #555; margin-top: 0.25rem; background: #f9f9f9; padding: 0.375rem 0.5rem; border-radius: 0.25rem; border-left: 3px solid #ccc; }
+.meta { color: #666; font-size: 0.8125rem; margin-top: 0.5rem; }
+.pill-grid { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.5rem; }
+.pill { font-size: 0.75rem; background: #f0f0f0; border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+.badge { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.125rem 0.375rem; border-radius: 0.2rem; }
+.badge.direct { background: #e8f5e9; color: #2e7d32; }
+.badge.adjacent { background: #e3f2fd; color: #1565c0; }
+.badge.uncertain { background: #fff8e1; color: #f57f17; }
 </style>
 ${renderAppShell(
   'evaluate',
   '<div class="page-header">' +
   '<h1>Evaluate an opportunity</h1>' +
-  '<p class="subtitle">Paste a job description. Provena looks for signals it can honestly evaluate against your profile.</p>' +
+  '<p class="subtitle">K11-LIVE Experimental Laboratorio: Intervention Test for Market Knowledge Architecture</p>' +
   '</div>',
   '<div class="split-view" style="--split-threshold: 54rem;">' +
   '<div>' +
   '<label for="jd">Job description</label>' +
-  '<textarea id="jd" placeholder="Staff Software Engineer..."></textarea>' +
+  '<textarea id="jd" placeholder="Paste job description here..."></textarea>' +
+  '<label for="knowledgeMode">Market Knowledge (Experimental Intervention)</label>' +
+  '<select id="knowledgeMode" onchange="evaluateJD()">' +
+  '<option value="software">Software Knowledge (Default)</option>' +
+  '<option value="admin">Administration Knowledge (Lydia)</option>' +
+  '<option value="composed">Composed (Software + Administration)</option>' +
+  '<option value="off">Knowledge: OFF (0 patterns - Test Abstention)</option>' +
+  '</select>' +
   '<div class="action-bar">' +
   '<button onclick="evaluateJD()">Evaluate</button>' +
   '</div>' +
@@ -677,42 +707,70 @@ const result = document.getElementById('result')
 let lastEv = null
 async function evaluateJD() {
   const jd = document.getElementById('jd').value.trim()
+  const knowledgeMode = document.getElementById('knowledgeMode').value
   if (!jd) return
-  result.innerHTML = '<p class="meta">Evaluating...</p>'
+  result.innerHTML = '<p class="meta">Running Universal Decision Protocol...</p>'
   const res = await fetch('/api/evaluate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jd }),
+    body: JSON.stringify({ jd, knowledgeMode }),
   })
   if (!res.ok) { result.innerHTML = '<p class="meta">Error: ' + await res.text() + '</p>'; return }
   const ev = await res.json()
   lastEv = ev
   result.innerHTML = renderResult(ev)
 }
-function checkIcon(status) {
-  return status === 'violated' ? '✗' : status === 'satisfied' ? '✓' : '?'
-}
 function renderResult(ev) {
   const parts = []
-  parts.push('<div class="card"><div class="verdict ' + ev.verdict + '">' + ev.verdict.toUpperCase() + '</div>')
-  parts.push('<h3>Criteria</h3><ul>')
-  parts.push(ev.criteria.map(c => '<li>' + checkIcon(c.status) + ' <strong>' + c.criterion + '</strong> — ' + c.detail + '</li>').join(''))
+  const rec = ev.assessment ? ev.assessment.recommendation : ev.verdict
+  const recUpper = rec.toUpperCase().replace('-', ' ')
+
+  parts.push('<div class="card">')
+  parts.push('<div class="verdict ' + rec.toLowerCase() + '">' + recUpper + '</div>')
+  parts.push('<p class="meta">' + (ev.assessment ? ev.assessment.rationale : '') + '</p>')
+
+  parts.push('<h3>Decision System Projections</h3>')
+  parts.push('<ul style="list-style:none;margin-left:0;">')
+  if (ev.professionalFit) {
+    parts.push('<li><strong>Professional Fit:</strong> ' + ev.professionalFit.score.toFixed(1) + ' / 10 <span class="meta">(' + Math.round(ev.professionalFit.assessmentCoverage * 100) + '% coverage)</span></li>')
+  }
+  if (ev.personalFit) {
+    parts.push('<li><strong>Personal Fit:</strong> ' + (ev.personalFit.assessedCount > 0 ? ev.personalFit.score.toFixed(1) + ' / 10' : '—') + ' <span class="meta">(eligible: ' + (ev.personalFit.eligible ? '✓ Yes' : '✗ Violates constraint') + ')</span></li>')
+  }
+  parts.push('<li><strong>Recognition Coverage:</strong> ' + Math.round((ev.recognitionCoverage || 0) * 100) + '%</li>')
+  parts.push('<li><strong>Confidence:</strong> ' + Math.round((ev.assessment ? ev.assessment.confidence : ev.confidence) * 100) + '%</li>')
   parts.push('</ul>')
-  if (ev.demonstrated.length) {
-    parts.push('<h3>Can demonstrate</h3><ul>')
-    parts.push(ev.demonstrated.map(m => '<li>✓ <strong>' + m.capabilityName + '</strong>' +
-      '<div class="trace">JD: "' + m.matchedPhrases.join('", "') + '" → your evidence: ' + m.evidence.join('; ') + '</div></li>').join(''))
+
+  parts.push('<h3>Market Understanding (' + ev.knowledgeName + ')</h3>')
+  if (ev.marketModel && ev.marketModel.requirements.length) {
+    parts.push('<div class="pill-grid">')
+    parts.push(ev.marketModel.requirements.map(r => '<span class="pill">✓ ' + r.concept + '</span>').join(''))
+    parts.push('</div>')
+  } else {
+    parts.push('<p class="meta">0 requirements recognized under active MarketKnowledge. (Confidence suppressed → ABSTAIN)</p>')
+  }
+
+  if (ev.demonstrated && ev.demonstrated.length) {
+    parts.push('<h3>Causal Evidence Chain</h3><ul>')
+    parts.push(ev.demonstrated.map(m =>
+      '<li>✓ <strong>' + m.capabilityName + '</strong>' +
+      '<div class="trace">JD Raw: "' + m.matchedPhrases.join('", "') + '"<br>Evidence: ' + (m.evidence.join('; ') || 'Direct capability evidence') + '</div></li>'
+    ).join(''))
     parts.push('</ul>')
   }
-  if (ev.gaps.length) {
+
+  if (ev.gaps && ev.gaps.length) {
     parts.push('<h3>Gaps</h3><ul>')
-    parts.push(ev.gaps.map(m => '<li>△ <strong>' + m.capabilityName + '</strong> — recognized but no recorded evidence</li>').join(''))
+    parts.push(ev.gaps.map(m => '<li>△ <strong>' + m.capabilityName + '</strong> — recognized requirement without evidence</li>').join(''))
     parts.push('</ul>')
   }
-  parts.push('<h3>Not evaluated</h3>')
-  parts.push('<p class="meta">' + ev.notEvaluated + ' part(s) of the description could not be read against the profile vocabulary.</p>')
-  parts.push('<p class="meta">Coverage ' + Math.round(ev.coverage * 100) + '% · Interpreted ' + Math.round(ev.interpretationCoverage * 100) + '% · Confidence ' + Math.round(ev.confidence * 100) + '%</p>')
-  if (ev.verdict === 'apply') parts.push('<button onclick="prepare()">Prepare application</button>')
+
+  parts.push('<h3>Market Recognition Diagnostics</h3>')
+  parts.push('<p class="meta">' + ev.notEvaluated + ' chunk(s) uninterpreted by current knowledge dictionary (' + ev.knowledgePatternsCount + ' active patterns).</p>')
+
+  if (ev.verdict === 'apply' || rec === 'strong-candidate') {
+    parts.push('<button onclick="prepare()">Prepare application</button>')
+  }
   parts.push('</div>')
   return parts.join('')
 }
@@ -836,11 +894,47 @@ export default {
 
     if (request.method === 'POST' && url.pathname === '/api/evaluate') {
       try {
-        const body = (await request.json()) as { jd?: string }
+        const body = (await request.json()) as { jd?: string; knowledgeMode?: string }
         if (!body.jd || typeof body.jd !== 'string') {
           return new Response('Missing jd', { status: 400 })
         }
-        return new Response(JSON.stringify(evaluateOpportunity(body.jd, profile)), {
+
+        const mode = body.knowledgeMode || 'software'
+        let knowledge
+        if (mode === 'off') {
+          knowledge = { name: 'none', version: '0.0.0', patterns: [] }
+        } else if (mode === 'admin') {
+          knowledge = ADMIN_KNOWLEDGE
+        } else if (mode === 'composed') {
+          knowledge = composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE)
+        } else {
+          knowledge = DEFAULT_SOFTWARE_KNOWLEDGE
+        }
+
+        const recognizer = new DeclarativeMarketRecognizer(knowledge)
+        const marketModel = recognizer.extractMarketRequirements(body.jd)
+        const resolved = resolveRequirements(marketModel, profile)
+        const suffList = resolved.map(evaluateSufficiency)
+        const profFit = projectProfessionalFit(suffList)
+        const prefAssessments = assessPreferences(body.jd, profile.preferences)
+        const persFit = projectPersonalFit(prefAssessments)
+        const recCov = computeRecognitionCoverage(body.jd, marketModel)
+        const assessment = applyPolicy(profFit, persFit, recCov)
+
+        // Legacy compatibility + K11-LIVE full causal trace
+        const legacyEv = evaluateOpportunity(body.jd, profile)
+
+        return new Response(JSON.stringify({
+          ...legacyEv,
+          marketModel,
+          professionalFit: profFit,
+          personalFit: persFit,
+          assessment,
+          recognitionCoverage: recCov,
+          knowledgeMode: mode,
+          knowledgeName: knowledge.name,
+          knowledgePatternsCount: knowledge.patterns.length,
+        }), {
           headers: { 'Content-Type': 'application/json' },
         })
       } catch (e) {

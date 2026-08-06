@@ -106,7 +106,7 @@ test('GET /opportunities renders within app-shell with Inbox title and table', a
   const res = await worker.fetch(new Request('https://provena.example/opportunities'), env)
   const html = await res.text()
   assert.ok(html.includes('<div class="app-shell">'))
-  assert.ok(html.includes('<h1>Opportunity Inbox</h1>'))
+  assert.ok(html.includes('<h1>Attention Inbox</h1>'))
   assert.ok(html.includes('<a class="active" href="/opportunities">Inbox</a>'))
 })
 

@@ -101,6 +101,9 @@ export class DefaultOpportunityRankingPolicy {
       })
   }
 
+  // btoa/atob (not Buffer): Buffer.base64url needs nodejs_compat on some
+  // Workers runtimes; btoa/atob are universal. TextEncoder/TextDecoder for
+  // UTF-8 safety since btoa is latin-1 only.
   encodeCursor(tab: AttentionTab, assessment: UserOpportunityAssessment): string {
     const payload: AttentionCursorPayload = {
       v: 1,
@@ -111,13 +114,19 @@ export class DefaultOpportunityRankingPolicy {
       pub: assessment.evaluatedAt || '',
       id: assessment.opportunityId,
     }
-    const jsonStr = JSON.stringify(payload)
-    return Buffer.from(jsonStr, 'utf-8').toString('base64url')
+    const bytes = new TextEncoder().encode(JSON.stringify(payload))
+    let binary = ''
+    for (const byte of bytes) binary += String.fromCharCode(byte)
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
   }
 
   decodeCursor(cursorStr: string, expectedTab: AttentionTab): AttentionCursorPayload | null {
     try {
-      const jsonStr = Buffer.from(cursorStr, 'base64url').toString('utf-8')
+      let b64 = cursorStr.replace(/-/g, '+').replace(/_/g, '/')
+      while (b64.length % 4 !== 0) b64 += '='
+      const binary = atob(b64)
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0))
+      const jsonStr = new TextDecoder().decode(bytes)
       const parsed = JSON.parse(jsonStr) as AttentionCursorPayload
       if (parsed && parsed.v === 1 && parsed.tab === expectedTab && parsed.id) {
         return parsed

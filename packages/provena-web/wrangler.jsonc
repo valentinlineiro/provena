@@ -10,6 +10,9 @@
       "id": "b744bdf16241405ba38d35918e9b2b54"
     }
   ],
+  "alias": {
+    "node:test": "node_modules/@provena/core/src/compat.ts"
+  },
   "triggers": {
     "crons": ["0 */6 * * *"]
   }

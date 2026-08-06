@@ -1,0 +1,82 @@
+{
+  "k12Unit": "U2",
+  "family": "GTM / Commercial Sales",
+  "protocolId": "K12-GTM-002",
+  "status": "DRAFT",
+  "version": 1,
+  "method": "28 pure GTM over Stripe board (56 U1 GTM = consumed provenance); stratified ~2:1; unique SDR role forced to Discovery",
+  "picks": {
+    "ids": [
+      "7942216",
+      "7525370",
+      "8044391"
+    ],
+    "rationale": "hard-negative non-GTM roles sharing GTM vocabulary in description (transfer != specificity): GTM Recruiter, Engineering Manager Sales Systems, Strategy & Ops Lead Deal Pricing"
+  },
+  "subfamilies": {
+    "AE / Enterprise Sales": {
+      "discovery": 15,
+      "virginHoldout": 7
+    },
+    "Partnerships / Partner Dev": {
+      "discovery": 1,
+      "virginHoldout": 1
+    },
+    "SDR / Sales Development": {
+      "discovery": 1,
+      "virginHoldout": 0
+    },
+    "Sales/GTM Leadership & Ops": {
+      "discovery": 2,
+      "virginHoldout": 1
+    }
+  },
+  "discovery": [
+    "7298935",
+    "7451366",
+    "7461966",
+    "7789539",
+    "7825578",
+    "7866501",
+    "7922618",
+    "7961609",
+    "7993151",
+    "7997146",
+    "8040874",
+    "8041894",
+    "8042978",
+    "8060387",
+    "8070701",
+    "8072764",
+    "8075473",
+    "8077887",
+    "8100129"
+  ],
+  "virginHoldout": [
+    "7458833",
+    "7576967",
+    "7862938",
+    "7893199",
+    "7997555",
+    "8023928",
+    "8024368",
+    "8090126",
+    "8095679"
+  ],
+  "controls": [
+    "7520686",
+    "7525370",
+    "7543679",
+    "7656504",
+    "7863336",
+    "7942216",
+    "7976987",
+    "7993610",
+    "7993682",
+    "7994063",
+    "8044391",
+    "8056309",
+    "8064702",
+    "8089882"
+  ]
+}

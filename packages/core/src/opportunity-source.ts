@@ -11,6 +11,13 @@ export interface RawOpportunity {
 
 export type OpportunityUserDecision = 'new' | 'seen' | 'interested' | 'applied' | 'dismissed'
 
+/**
+ * @deprecated O1 type — conflates OpportunityPosting, MarketModel evaluation, and
+ * UserOpportunityDecision into a single record. Use the O2.2 types from
+ * market-catalog.ts (Opportunity, OpportunityPosting, MarketModelRecord,
+ * UserOpportunityDecision) instead.
+ * Retained for existing web routes and MemoryOpportunityRepository consumers.
+ */
 export interface StoredOpportunity {
   readonly id: string
   readonly raw: RawOpportunity
@@ -332,6 +339,11 @@ export class GreenhousePublicSource implements OpportunitySource {
 // directly — they hand a StoredOpportunity to this contract. Swapping KV for
 // SQLite/D1 later only means writing a new implementation of this interface.
 
+/**
+ * @deprecated O1 repository — operates on the monolithic StoredOpportunity.
+ * Will be replaced by separate repositories for Opportunity, OpportunityPosting,
+ * MarketModelRecord, and UserOpportunityDecision in O2.4+.
+ */
 export interface OpportunityRepository {
   findById(id: string): Promise<StoredOpportunity | null>
   findByDedupeKey(key: string): Promise<StoredOpportunity | null>

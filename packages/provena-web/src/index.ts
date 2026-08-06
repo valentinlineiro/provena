@@ -4,7 +4,6 @@ import {
   profileToTimeline,
   cvProjector,
   evaluateOpportunity,
-  DeclarativeMarketRecognizer,
   composeKnowledge,
   DEFAULT_SOFTWARE_KNOWLEDGE,
   ADMIN_KNOWLEDGE,
@@ -20,7 +19,16 @@ import {
   UrlOpportunitySource,
   GreenhousePublicSource,
   reconcileBoardSync,
+  MarketFeedService,
+  MarketIngestionEngine,
+  DeclarativeMarketRecognizer,
 } from '@provena/core'
+import {
+  PostgresMarketOpportunityRepository,
+  PostgresMarketPostingRepository,
+  PostgresMarketModelStore,
+} from '@provena/market-postgres'
+import postgres from 'postgres'
 import type { CVContext, CVProjection, OpportunityUserDecision } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
@@ -45,6 +53,7 @@ const COMPASS_HTML = (() => {
 
 interface Env {
   PROVENA_KV: KVNamespace
+  DATABASE_URL?: string
 }
 
 interface Capture {
@@ -1218,7 +1227,83 @@ loadInbox()
       }
     }
 
+    if (request.method === 'POST' && url.pathname === '/api/market/sync') {
+      try {
+        if (!env.DATABASE_URL) {
+          return new Response('DATABASE_URL secret is not set in environment', { status: 500 })
+        }
+
+        const sql = postgres(env.DATABASE_URL, { max: 1 })
+        const oppRepo = new PostgresMarketOpportunityRepository(sql)
+        const postRepo = new PostgresMarketPostingRepository(sql)
+        const modelStore = new PostgresMarketModelStore(sql)
+        const recognizer = new DeclarativeMarketRecognizer(DEFAULT_SOFTWARE_KNOWLEDGE)
+
+        const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
+        const feedService = new MarketFeedService(postRepo, engine)
+
+        const source = new GreenhousePublicSource('stripe')
+        const registration = {
+          id: 'stripe-board',
+          sourceType: 'greenhouse' as const,
+          source,
+          sourceBoardId: 'stripe',
+        }
+
+        const syncResult = await feedService.syncSource(registration, {
+          now: new Date().toISOString(),
+          marketKnowledgeVersion: DEFAULT_SOFTWARE_KNOWLEDGE.version,
+          recognitionOrder: 100,
+        })
+
+        await sql.end()
+
+        return new Response(JSON.stringify({ status: 'ok', syncResult }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Sync failed', { status: 500 })
+      }
+    }
+
     return new Response('Not found', { status: 404 })
+  },
+
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    if (!env.DATABASE_URL) {
+      console.error('[Cloudflare Cron] Cannot execute autonomous market sync: DATABASE_URL is not set.')
+      return
+    }
+
+    ctx.waitUntil(
+      (async () => {
+        const sql = postgres(env.DATABASE_URL!, { max: 1 })
+        const oppRepo = new PostgresMarketOpportunityRepository(sql)
+        const postRepo = new PostgresMarketPostingRepository(sql)
+        const modelStore = new PostgresMarketModelStore(sql)
+        const recognizer = new DeclarativeMarketRecognizer(DEFAULT_SOFTWARE_KNOWLEDGE)
+
+        const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
+        const feedService = new MarketFeedService(postRepo, engine)
+
+        const source = new GreenhousePublicSource('stripe')
+        const registration = {
+          id: 'stripe-board',
+          sourceType: 'greenhouse' as const,
+          source,
+          sourceBoardId: 'stripe',
+        }
+
+        const res = await feedService.syncSource(registration, {
+          now: new Date().toISOString(),
+          marketKnowledgeVersion: DEFAULT_SOFTWARE_KNOWLEDGE.version,
+          recognitionOrder: 100,
+        })
+
+        console.log(`[Cloudflare Cron Auto-Sync Result]: ${JSON.stringify(res.ingestResult)}`)
+        await sql.end()
+      })()
+    )
   },
 }
 

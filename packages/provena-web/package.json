@@ -12,8 +12,10 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
     "@provena/core": "*",
+    "@provena/market-postgres": "*",
     "@provena/markdown": "*",
     "@provena/html": "*",
+    "postgres": "^3.4.4",
     "typescript": "^5.7.0",
     "wrangler": "^4.115.0"
   }

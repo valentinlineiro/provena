@@ -1,4 +1,5 @@
 export { YamlWorkspaceLoader } from './yaml-workspace-loader.js'
 export { YamlWorkspaceWriter } from './yaml-workspace-writer.js'
+export { parsePreferenceSet } from './preference-set-parser.js'
 export { applyMigrations, LATEST_VERSION, type Migration, type SchemaVersion } from './migration-runner.js'
 export { merge } from './merge.js'

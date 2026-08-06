@@ -9,5 +9,8 @@
       "binding": "PROVENA_KV",
       "id": "b744bdf16241405ba38d35918e9b2b54"
     }
-  ]
+  ],
+  "triggers": {
+    "crons": ["0 */6 * * *"]
+  }
 }

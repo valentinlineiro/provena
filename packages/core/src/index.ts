@@ -74,3 +74,79 @@ export { DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGEN
 
 export type { RawOpportunity, OpportunitySourceInput, OpportunitySource, SafeFetchOptions, StoredOpportunity, OpportunityUserDecision, GreenhouseJobItem, OpportunityRepository } from './opportunity-source.js'
 export { validateSafeUrl, fetchSafeContent, extractJobFromHtml, UrlOpportunitySource, GreenhousePublicSource, hashOpportunityKey, MemoryOpportunityRepository, reconcileBoardSync } from './opportunity-source.js'
+
+// ── O2.1: PreferenceSet & Retrieval Port ────────────────────────────────────
+export type {
+  RoleFamily,
+  RoleLevel,
+  WorkMode,
+  PreferenceStrength,
+  WorkModeTarget,
+  GeographyTarget,
+  LanguageTarget,
+  CompensationTarget,
+  CompanyRef,
+  LocationConstraint,
+  PreferenceConstraints,
+  PreferenceSet,
+} from './preference-set.js'
+
+export type {
+  RetrievalTreatment,
+  CandidateOpportunity,
+  RetrievalCriteria,
+  OpportunitySearchPort,
+  RetrievalPolicy,
+} from './retrieval.js'
+export { DirectRetrievalPolicy } from './retrieval.js'
+
+// ── O2.2: Market Catalog ─────────────────────────────────────────
+export type {
+  OpportunityId,
+  OpportunityPostingId,
+  SourceType,
+  Opportunity,
+  OpportunityPosting,
+  MarketModelRecord,
+  DecisionStatus,
+  UserOpportunityDecision,
+  UserOpportunityAssessment,
+} from './market-catalog.js'
+export { makeOpportunityId, makeOpportunityPostingId, normalizeOpportunityTitle, makePostingDedupeKey } from './market-catalog.js'
+
+// ── O2.3: Market Catalog Persistence Ports ───────────────────────────
+export type {
+  OpportunityQuery,
+  MarketOpportunityRepository,
+  MarketPostingRepository,
+  MarketModelStore,
+} from './market-catalog-ports.js'
+export {
+  MarketModelVersionConflict,
+  MemoryMarketOpportunityRepository,
+  MemoryMarketPostingRepository,
+  MemoryMarketModelStore,
+  runMarketRepositoryContractTests,
+} from './market-catalog-ports.js'
+
+// ── O2.5A: Market Ingestion Engine ───────────────────────────────────
+export type {
+  MarketRecognizer,
+  IngestionContext,
+  IngestResult,
+} from './market-ingest.js'
+export {
+  computeContentHash,
+  MarketIngestionEngine,
+} from './market-ingest.js'
+
+// ── O2.7: Personalized Assessment & Ranking ─────────────────────────
+export type { AssessmentContext } from './opportunity-assessment-engine.js'
+export { OpportunityAssessmentEngine } from './opportunity-assessment-engine.js'
+
+export type { RankedOpportunity, AttentionInbox } from './opportunity-ranking-policy.js'
+export { DefaultOpportunityRankingPolicy } from './opportunity-ranking-policy.js'
+
+// ── O2.8: Market Feed Service ────────────────────────────────────────
+export type { FeedSourceRegistration, DeltaSyncResult } from './market-feed-service.js'
+export { MarketFeedService } from './market-feed-service.js'

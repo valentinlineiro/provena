@@ -11,8 +11,8 @@
 //
 // ...should pass with zero test changes.
 
+import { runMarketRepositoryContractTests } from './contract-tests.js'
 import {
-  runMarketRepositoryContractTests,
   MemoryMarketOpportunityRepository,
   MemoryMarketPostingRepository,
   MemoryMarketModelStore,

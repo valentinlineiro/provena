@@ -7,10 +7,8 @@ import type {
   MarketOpportunityRepository,
   MarketPostingRepository,
   MarketModelStore,
-  MarketModelRecord,
 } from './market-catalog-ports.js'
-import { MarketModelVersionConflict } from './market-catalog-ports.js'
-import type { Opportunity, OpportunityPosting } from './market-catalog.js'
+import type { Opportunity, OpportunityPosting, MarketModelRecord } from './market-catalog.js'
 import { makeOpportunityId, makeOpportunityPostingId } from './market-catalog.js'
 
 export function runMarketRepositoryContractTests(

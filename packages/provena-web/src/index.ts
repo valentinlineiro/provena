@@ -22,6 +22,7 @@ import {
   MarketFeedService,
   MarketIngestionEngine,
   DeclarativeMarketRecognizer,
+  DefaultOpportunityRankingPolicy,
 } from '@provena/core'
 import {
   PostgresMarketOpportunityRepository,
@@ -29,7 +30,7 @@ import {
   PostgresMarketModelStore,
 } from '@provena/market-postgres'
 import postgres from 'postgres'
-import type { CVContext, CVProjection, OpportunityUserDecision } from '@provena/core'
+import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab, UserOpportunityAssessment } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import profile, { updatedAt } from './profile.js'
@@ -1044,70 +1045,138 @@ ${APP_SHELL_CSS}
 body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
 h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
-.opp-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 0.5rem; overflow: hidden; border: 1px solid #e5e5e5; margin-top: 1rem; }
+.tabs { display: flex; gap: 0.5rem; margin-top: 1rem; border-bottom: 2px solid #e5e5e5; }
+.tab-btn { padding: 0.6rem 1rem; font-size: 0.875rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.tab-btn:hover { color: #1a1a1a; }
+.tab-btn.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+.count-pill { display: inline-block; background: #e0e0e0; color: #333; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 10px; margin-left: 0.3rem; }
+.tab-btn.active .count-pill { background: #1a1a1a; color: #fff; }
+.opp-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 0.5rem; overflow: hidden; border: 1px solid #e5e5e5; margin-top: 0.75rem; }
 .opp-table th, .opp-table td { padding: 0.75rem 1rem; text-align: left; font-size: 0.875rem; border-bottom: 1px solid #eee; }
 .opp-table th { background: #fafafa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #777; }
 .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-.badge.new { background: #e3f2fd; color: #1565c0; }
+.badge.strong-candidate { background: #e8f5e9; color: #2e7d32; }
+.badge.consider { background: #fff3e0; color: #ef6c00; }
+.badge.abstain { background: #f3e5f5; color: #6a1b9a; }
+.badge.skip { background: #ffebee; color: #c62828; }
 .badge.interested { background: #e8f5e9; color: #2e7d32; }
-.badge.applied { background: #f3e5f5; color: #6a1b9a; }
+.badge.applied { background: #e3f2fd; color: #1565c0; }
 .badge.dismissed { background: #ffebee; color: #c62828; }
-.badge.seen { background: #f5f5f5; color: #616161; }
 .btn-group { display: flex; gap: 0.375rem; }
 .btn-group button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: 28px; width: auto; border: 1px solid #ccc; background: #fff; border-radius: 0.25rem; cursor: pointer; }
 .btn-group button:hover { background: #f0f0f0; }
 .btn-group button.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.sentinel { text-align: center; padding: 1.5rem; color: #888; font-size: 0.875rem; }
 </style>
 ${renderAppShell(
   'opportunities',
   '<div class="page-header">' +
-  '<h1>Opportunity Inbox</h1>' +
-  '<p class="subtitle">O1.3 Automatic ATS Ingestion: Synchronize job boards or view stored market memory</p>' +
+  '<h1>Attention Inbox</h1>' +
+  '<p class="subtitle">Server-Side Attention Ordering & Cursor-Paginated Market Exploration</p>' +
   '</div>',
   '<div class="readable">' +
   '<div style="display:flex;gap:0.5rem;margin-bottom:1rem;background:#fff;padding:0.75rem;border-radius:0.5rem;border:1px solid #e5e5e5;align-items:center;">' +
   '<input id="boardToken" type="text" placeholder="Greenhouse board token (e.g. stripe, gitlab, coinbase)" value="stripe" style="flex:1;padding:0.5rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.25rem;">' +
   '<button style="width:auto;margin-top:0;padding:0.5rem 1rem;font-size:0.875rem;" onclick="syncBoard()">Sync Board Jobs</button>' +
   '</div>' +
+  '<div class="tabs">' +
+  '<button class="tab-btn active" id="tab-needs-attention" onclick="switchTab(\'needs-attention\')">Needs Attention <span class="count-pill" id="cnt-needs-attention">0</span></button>' +
+  '<button class="tab-btn" id="tab-worth-considering" onclick="switchTab(\'worth-considering\')">Worth Considering <span class="count-pill" id="cnt-worth-considering">0</span></button>' +
+  '<button class="tab-btn" id="tab-unresolved" onclick="switchTab(\'unresolved\')">Unresolved <span class="count-pill" id="cnt-unresolved">0</span></button>' +
+  '<button class="tab-btn" id="tab-decided" onclick="switchTab(\'decided\')">Decided <span class="count-pill" id="cnt-decided">0</span></button>' +
+  '</div>' +
   '<div id="inbox">Loading opportunities...</div>' +
+  '<div id="sentinel" class="sentinel"></div>' +
   '</div>'
 )}
 <script>
-async function loadInbox() {
+let currentTab = 'needs-attention'
+let currentCursor = null
+let isLoading = false
+let hasMore = false
+let observer = null
+
+function switchTab(tab) {
+  currentTab = tab
+  currentCursor = null
+  hasMore = false
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'))
+  const activeBtn = document.getElementById('tab-' + tab)
+  if (activeBtn) activeBtn.classList.add('active')
   const container = document.getElementById('inbox')
-  const res = await fetch('/api/opportunities')
-  if (!res.ok) { container.innerHTML = '<p>Error loading opportunities</p>'; return }
-  const data = await res.json()
-  const opps = data.opportunities || []
-  if (opps.length === 0) {
-    container.innerHTML = '<div class="card"><p>No opportunities in memory yet. Use <a href="/evaluate">Evaluate</a> to ingest job URLs or text.</p></div>'
-    return
+  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Personal</th><th>Confidence</th><th>Decision</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
+  loadTab(true)
+}
+
+async function loadTab(reset = false) {
+  if (isLoading) return
+  isLoading = true
+  const sentinel = document.getElementById('sentinel')
+  sentinel.textContent = 'Loading...'
+
+  const url = new URL('/api/opportunities', location.origin)
+  url.searchParams.set('tab', currentTab)
+  url.searchParams.set('limit', '30')
+  if (currentCursor && !reset) {
+    url.searchParams.set('cursor', currentCursor)
   }
 
-  let html = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Personal</th><th>Confidence</th><th>Decision</th><th>Action</th></tr></thead><tbody>'
-  for (const o of opps) {
-    const raw = o.raw || {}
-    const ev = o.evaluation || {}
-    const rec = ev.assessment ? ev.assessment.recommendation : (ev.verdict || 'abstain')
-    const profScore = ev.professionalFit ? ev.professionalFit.score.toFixed(1) : '—'
-    const persScore = ev.personalFit && ev.personalFit.assessedCount > 0 ? ev.personalFit.score.toFixed(1) : '—'
-    const conf = Math.round((ev.assessment ? ev.assessment.confidence : (ev.confidence || 0)) * 100) + '%'
+  try {
+    const res = await fetch(url)
+    if (!res.ok) { sentinel.textContent = 'Error loading tab'; isLoading = false; return }
+    const data = await res.json()
 
-    html += '<tr' + (o.active === false ? ' style="opacity:0.55;"' : '') + '>'
-    html += '<td><strong>' + (raw.title || 'Job Opportunity') + '</strong>' + (raw.company ? ' <span class="meta">at ' + raw.company + '</span>' : '') + (o.active === false ? ' <span class="meta">(closed)</span>' : '') + '<br><a class="meta" href="' + raw.url + '" target="_blank">View Source</a></td>'
-    html += '<td>' + profScore + '</td>'
-    html += '<td>' + persScore + '</td>'
-    html += '<td>' + conf + '</td>'
-    html += '<td><span class="badge ' + o.userDecision + '">' + o.userDecision + '</span></td>'
-    html += '<td><div class="btn-group">' +
-      '<button class="' + (o.userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\\'' + o.id + '\\', \\'interested\\')">⭐</button>' +
-      '<button class="' + (o.userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\\'' + o.id + '\\', \\'applied\\')">✓</button>' +
-      '<button class="' + (o.userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\\'' + o.id + '\\', \\'dismissed\\')">✗</button>' +
-      '</div></td>'
-    html += '</tr>'
+    // Update tab counters
+    if (data.counts) {
+      for (const k of Object.keys(data.counts)) {
+        const el = document.getElementById('cnt-' + k)
+        if (el) el.textContent = data.counts[k]
+      }
+    }
+
+    const rows = document.getElementById('opp-rows')
+    if (reset && data.items.length === 0) {
+      document.getElementById('inbox').innerHTML = '<div class="card" style="margin-top:1rem;"><p>No opportunities in this view.</p></div>'
+      sentinel.textContent = ''
+      isLoading = false
+      return
+    }
+
+    for (const item of data.items) {
+      const o = item.assessment || item
+      const raw = item.raw || o.raw || {}
+      const title = item.title || raw.title || o.title || 'Opportunity'
+      const company = item.companyName || raw.company || o.companyName || ''
+      const itemUrl = item.url || raw.url || o.url || '#'
+      const profScore = typeof o.professionalFitScore === 'number' ? o.professionalFitScore.toFixed(1) : '—'
+      const persScore = typeof o.personalFitScore === 'number' ? o.personalFitScore.toFixed(1) : '—'
+      const conf = typeof o.confidence === 'number' ? Math.round(o.confidence * 100) + '%' : '—'
+      const rec = o.recommendation || item.tier || 'abstain'
+      const userDecision = item.userDecision || 'new'
+
+      const tr = document.createElement('tr')
+      tr.innerHTML =
+        '<td><strong>' + title + '</strong>' + (company ? ' <span class="meta">at ' + company + '</span>' : '') + '<br><a class="meta" href="' + itemUrl + '" target="_blank">View Source</a></td>' +
+        '<td>' + profScore + '</td>' +
+        '<td>' + persScore + '</td>' +
+        '<td>' + conf + '</td>' +
+        '<td><span class="badge ' + rec + '">' + rec + '</span></td>' +
+        '<td><div class="btn-group">' +
+        '<button class="' + (userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\\'' + (item.id || o.opportunityId) + '\\', \\'interested\\')">⭐</button>' +
+        '<button class="' + (userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\\'' + (item.id || o.opportunityId) + '\\', \\'applied\\')">✓</button>' +
+        '<button class="' + (userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\\'' + (item.id || o.opportunityId) + '\\', \\'dismissed\\')">✗</button>' +
+        '</div></td>'
+      rows.appendChild(tr)
+    }
+
+    currentCursor = data.nextCursor
+    hasMore = !!data.nextCursor
+    sentinel.textContent = hasMore ? 'Scroll for more...' : 'End of list'
+  } catch (e) {
+    sentinel.textContent = 'Failed to load'
+  } finally {
+    isLoading = false
   }
-  html += '</tbody></table>'
-  container.innerHTML = html
 }
 
 async function syncBoard() {
@@ -1120,18 +1189,29 @@ async function syncBoard() {
     body: JSON.stringify({ boardToken }),
   })
   if (!res.ok) { container.innerHTML = '<p class="meta">Sync failed: ' + await res.text() + '</p>'; return }
-  loadInbox()
+  switchTab(currentTab)
 }
+
 async function setDecision(id, decision) {
   await fetch('/api/opportunities/decision', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, decision }),
   })
-  loadInbox()
+  switchTab(currentTab)
 }
 
-loadInbox()
+// IntersectionObserver for Cursor Infinite Scroll
+window.addEventListener('DOMContentLoaded', () => {
+  const sentinel = document.getElementById('sentinel')
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMore && !isLoading) {
+      loadTab(false)
+    }
+  }, { threshold: 0.1 })
+  observer.observe(sentinel)
+  switchTab('needs-attention')
+})
 </script>
 `
 
@@ -1142,8 +1222,74 @@ loadInbox()
     }
 
     if (request.method === 'GET' && url.pathname === '/api/opportunities') {
+      const tab = (url.searchParams.get('tab') || 'needs-attention') as AttentionTab
+      const cursor = url.searchParams.get('cursor')
+      const limit = parseInt(url.searchParams.get('limit') || '30', 10)
+
       const opps = await new KvOpportunityRepository(env.PROVENA_KV).list()
-      return new Response(JSON.stringify({ opportunities: opps }), {
+
+      // Evaluate and rank opportunities
+      const policy = new DefaultOpportunityRankingPolicy()
+      const ranked = opps.map(o => {
+        const ev = o.evaluation || {}
+        const evAny = ev as any
+        const assessment: UserOpportunityAssessment = evAny.assessment || {
+          opportunityId: o.id,
+          userId: 'valentin',
+          marketKnowledgeVersion: '1.0.0',
+          protocolVersion: '1.0.0',
+          profileVersion: '1.0.0',
+          preferenceVersion: '1.0.0',
+          assessmentJson: {} as any,
+          professionalFitScore: evAny.professionalFit?.score ?? 0,
+          personalFitScore: evAny.personalFit?.score ?? 0,
+          confidence: ev.confidence ?? 0.5,
+          recommendation: ev.verdict === 'apply' ? 'strong-candidate' : ev.verdict === 'consider' ? 'consider' : 'abstain',
+          evaluatedAt: o.lastSeenAt,
+        }
+
+        return {
+          assessment,
+          rankScore: assessment.professionalFitScore * assessment.confidence,
+          tier: assessment.recommendation,
+          raw: o.raw,
+          userDecision: o.userDecision,
+          title: o.raw?.title || 'Opportunity',
+          companyName: o.raw?.company || '',
+          url: o.raw?.url || '#',
+          id: o.id,
+        }
+      })
+
+      // Count items per tab
+      const counts = {
+        'needs-attention': ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate').length,
+        'worth-considering': ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider').length,
+        'unresolved': ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip')).length,
+        'decided': ranked.filter(r => r.userDecision && r.userDecision !== 'new').length,
+      }
+
+      // Filter to current tab
+      let tabItems = ranked
+      if (tab === 'needs-attention') {
+        tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate')
+      } else if (tab === 'worth-considering') {
+        tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider')
+      } else if (tab === 'unresolved') {
+        tabItems = ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip'))
+      } else if (tab === 'decided') {
+        tabItems = ranked.filter(r => r.userDecision && r.userDecision !== 'new')
+      }
+
+      const paginatedView = policy.paginateTab(tabItems, tab, cursor, limit)
+
+      return new Response(JSON.stringify({
+        tab,
+        counts,
+        items: paginatedView.items,
+        nextCursor: paginatedView.nextCursor,
+        totalInTab: paginatedView.totalInTab,
+      }), {
         headers: { 'Content-Type': 'application/json' },
       })
     }

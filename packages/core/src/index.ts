@@ -143,7 +143,7 @@ export {
 export type { AssessmentContext } from './opportunity-assessment-engine.js'
 export { OpportunityAssessmentEngine } from './opportunity-assessment-engine.js'
 
-export type { RankedOpportunity, AttentionInbox } from './opportunity-ranking-policy.js'
+export type { RankedOpportunity, AttentionInbox, AttentionTab, AttentionCursorPayload, PaginatedAttentionView } from './opportunity-ranking-policy.js'
 export { DefaultOpportunityRankingPolicy } from './opportunity-ranking-policy.js'
 
 // ── O2.8: Market Feed Service ────────────────────────────────────────

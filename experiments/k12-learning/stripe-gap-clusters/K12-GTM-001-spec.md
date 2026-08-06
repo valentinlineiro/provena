@@ -56,10 +56,25 @@ The commit that introduces `split.json` + `validate-split.mjs` + this spec IS th
 experimental freeze. Its SHA is the freeze identity; it is recorded here in a
 subsequent administrative commit (a commit cannot reference its own SHA).
 
-- Freeze commit SHA: recorded in the next administrative commit
-- Status: FROZEN
+- Split freeze commit SHA: `f4bbeb2`
+- ΔK freeze commit SHA: `8d1a47d` (delta-gtm.json, 14 MarketPatternDefinitions)
+- Status: FROZEN — U1 REJECTED (see `validation-u1.json`)
 - Discovery inspection permitted: only after the freeze commit lands
 - Sealed until ΔK is authored: VirginHoldout (19), Controls (14)
+
+## U1 result (recorded after measurement)
+
+Preregistered gates on the frozen ΔK:
+
+| Gate | Criterion | Result |
+| :--- | :---: | :---: |
+| RecoveryGain (Discovery, n=37) | > 0 | PASS (+0.099; 0.002 → 0.101, 6 → 131 reqs) |
+| HoldoutTransfer (VirginHoldout, n=19) | > 0 | PASS (+0.093; 0.005 → 0.097, 9 → 74 reqs) |
+| ControlContamination (Controls, n=14) | = 0 | **FAIL (3 / 14)** |
+
+Leaked controls: 8076108 (mentor), 8055659 (trusted advisor),
+6348471 (product adoption, go-to-market strategy). No matcher revision was
+performed after observing controls; U1 is closed as a negative result.
 
 ## Operational rule during induction
 

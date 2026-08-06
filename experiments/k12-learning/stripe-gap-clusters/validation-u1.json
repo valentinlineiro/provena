@@ -1,0 +1,26 @@
+{
+  "k12Unit": "U1",
+  "protocolId": "K12-GTM-001",
+  "family": "GTM / Commercial Sales",
+  "splitFreeze": "f4bbeb2",
+  "deltaFreeze": "8d1a47d",
+  "deltaPatternCount": 14,
+  "measurement": {
+    "recoveryGainDiscovery": { "k0CovMean": 0.002, "k1CovMean": 0.101, "gain": 0.099, "reqs0": 6, "reqs1": 131, "n": 37 },
+    "holdoutTransfer": { "k0CovMean": 0.005, "k1CovMean": 0.097, "gain": 0.093, "reqs0": 9, "reqs1": 74, "n": 19 },
+    "controlContamination": { "matched": 3, "of": 14 }
+  },
+  "promotionCriteria": {
+    "recoveryGain > 0": "PASS (0.099)",
+    "holdoutTransfer > 0": "PASS (0.093)",
+    "controlContamination = 0": "FAIL (3/14)"
+  },
+  "leakedControls": [
+    { "id": "8076108", "title": "Head of Strategic Risk Programs, New Markets", "patterns": ["gtm-sales-team-leadership"] },
+    { "id": "8055659", "title": "Strategy & Operations Program Manager", "patterns": ["gtm-trusted-advisory"] },
+    { "id": "6348471", "title": "Product Marketing Manager", "patterns": ["gtm-customer-success-lifecycle", "gtm-sales-process-building"] }
+  ],
+  "verdict": "REJECTED",
+  "reason": "ControlContamination = 3/14 violates the preregistered promotion gate. Frozen ΔK not promoted. No matcher revision performed after observing controls (strict protocol).",
+  "status": "FROZEN - REJECTED"
+}

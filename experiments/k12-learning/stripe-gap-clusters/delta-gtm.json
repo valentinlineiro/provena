@@ -1,0 +1,206 @@
+{
+  "k12Unit": "U1",
+  "experiment": "K12-GTM-001",
+  "family": "GTM / Commercial Sales",
+  "knowledgeBaseVersion": "DEFAULT_SOFTWARE_KNOWLEDGE (K0)",
+  "inducedFrom": "Discovery (37) raw descriptions — frozen split f4bbeb2",
+  "patterns": [
+    {
+      "id": "gtm-full-sales-cycle",
+      "concept": "Full Sales Cycle Ownership",
+      "kind": "capability",
+      "matchers": [
+        "full sales cycle",
+        "own the full sales cycle",
+        "sales cycle from start to finish",
+        "end-to-end sales cycle",
+        "lead to close",
+        "sales cycle from lead to close"
+      ],
+      "tags": ["gtm", "sales", "cycle"]
+    },
+    {
+      "id": "gtm-prospecting-outbound",
+      "concept": "Prospecting & Outbound Acquisition",
+      "kind": "practice",
+      "matchers": [
+        "prospecting",
+        "outbound strategies",
+        "outbound prospecting",
+        "cold calling",
+        "cold-call",
+        "generate your own leads",
+        "high-potential prospective users"
+      ],
+      "tags": ["gtm", "sales", "prospecting"]
+    },
+    {
+      "id": "gtm-pipeline-management",
+      "concept": "Sales Pipeline Management",
+      "kind": "practice",
+      "matchers": [
+        "sales pipeline",
+        "pipeline quality",
+        "predictable pipeline",
+        "top-of-the-funnel",
+        "build pipeline",
+        "new business pipeline"
+      ],
+      "tags": ["gtm", "pipeline"]
+    },
+    {
+      "id": "gtm-named-account-planning",
+      "concept": "Named Account Management & Planning",
+      "kind": "capability",
+      "matchers": [
+        "named account list",
+        "account plans",
+        "account mapping",
+        "develop account plans",
+        "own a named account list",
+        "manage a named account list"
+      ],
+      "tags": ["gtm", "account", "planning"]
+    },
+    {
+      "id": "gtm-executive-selling",
+      "concept": "Executive Stakeholder Selling",
+      "kind": "practice",
+      "matchers": [
+        "executive stakeholders",
+        "c-level executives",
+        "c-level",
+        "buyer journey",
+        "multi-party sale",
+        "business-level and technical conversations"
+      ],
+      "tags": ["gtm", "executive", "selling"]
+    },
+    {
+      "id": "gtm-competitive-deal-making",
+      "concept": "Competitive Deal Making & Negotiation",
+      "kind": "capability",
+      "matchers": [
+        "competitive situations",
+        "lead commercial negotiations",
+        "commercial negotiations",
+        "close deals",
+        "deal negotiation",
+        "build value in competitive situations"
+      ],
+      "tags": ["gtm", "negotiation", "closing"]
+    },
+    {
+      "id": "gtm-customer-success-lifecycle",
+      "concept": "Customer Success Post-Sales Lifecycle",
+      "kind": "practice",
+      "matchers": [
+        "post-sales lifecycle",
+        "post-sale lifecycle",
+        "retention and expansion",
+        "account health",
+        "product adoption",
+        "usage velocity",
+        "business reviews",
+        "retention and renewal"
+      ],
+      "tags": ["gtm", "csm", "lifecycle"]
+    },
+    {
+      "id": "gtm-expansion-upsell",
+      "concept": "Account Expansion & Upsell/Cross-sell",
+      "kind": "capability",
+      "matchers": [
+        "upsell/cross-sell",
+        "upsell and cross-sell",
+        "cross-sell",
+        "upsell",
+        "expansion revenue",
+        "renewal outcomes"
+      ],
+      "tags": ["gtm", "expansion", "renewal"]
+    },
+    {
+      "id": "gtm-trusted-advisory",
+      "concept": "Trusted Advisor & Business Reviews",
+      "kind": "practice",
+      "matchers": [
+        "trusted advisor",
+        "trusted payments and product advisor",
+        "strategic advisor",
+        "business reviews to align",
+        "thought leadership"
+      ],
+      "tags": ["gtm", "advisory"]
+    },
+    {
+      "id": "gtm-partnership-development",
+      "concept": "Partnership Development & Management",
+      "kind": "capability",
+      "matchers": [
+        "develop and manage relationships with partners",
+        "partnership strategy",
+        "joint initiatives",
+        "deal negotiation and execution",
+        "partner relationships",
+        "develop and execute the strategic vision"
+      ],
+      "tags": ["gtm", "partnerships"]
+    },
+    {
+      "id": "gtm-sales-process-building",
+      "concept": "Sales Process & Go-To-Market Building",
+      "kind": "practice",
+      "matchers": [
+        "go-to-market strategy",
+        "scaled sales strategies",
+        "sales process",
+        "value proposition",
+        "sales culture",
+        "repeatable processes"
+      ],
+      "tags": ["gtm", "process", "gtm"]
+    },
+    {
+      "id": "gtm-sdr-development",
+      "concept": "Sales Development & Lead Qualification",
+      "kind": "practice",
+      "matchers": [
+        "qualify leads",
+        "qualify needs",
+        "book meetings",
+        "early sales funnel",
+        "sales development",
+        "outreach"
+      ],
+      "tags": ["gtm", "sdr"]
+    },
+    {
+      "id": "gtm-sales-team-leadership",
+      "concept": "Sales Team Leadership & Coaching",
+      "kind": "practice",
+      "matchers": [
+        "coach and develop",
+        "recruit, develop and lead",
+        "recruit, develop",
+        "mentor",
+        "forecast of the region",
+        "deliver on ambitious targets",
+        "own the coaching"
+      ],
+      "tags": ["gtm", "leadership"]
+    },
+    {
+      "id": "gtm-sales-compensation",
+      "concept": "Sales Compensation & Incentives",
+      "kind": "domain",
+      "matchers": [
+        "sales compensation",
+        "variable compensation",
+        "incentive compensation",
+        "compensation strategy"
+      ],
+      "tags": ["gtm", "compensation", "ops"]
+    }
+  ]
+}

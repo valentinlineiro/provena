@@ -126,7 +126,6 @@ export {
   MemoryMarketOpportunityRepository,
   MemoryMarketPostingRepository,
   MemoryMarketModelStore,
-  runMarketRepositoryContractTests,
 } from './market-catalog-ports.js'
 
 // ── O2.5A: Market Ingestion Engine ───────────────────────────────────

@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import postgres from 'postgres'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { runMarketRepositoryContractTests } from '@provena/core'
+import { runMarketRepositoryContractTests } from '@provena/core/contract-tests'
 import {
   PostgresMarketOpportunityRepository,
   PostgresMarketPostingRepository,

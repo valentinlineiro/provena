@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./contract-tests": "./src/contract-tests.ts",
     "./landing/*.js": "./src/landing/*.ts",
     "./landing/*": "./src/landing/*.ts",
     "./test-utils/*.js": "./src/test-utils/*.ts",

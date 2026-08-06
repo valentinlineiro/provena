@@ -82,7 +82,7 @@ this spec IS the experimental freeze. Its SHA is the freeze identity; it is
 recorded here in a subsequent administrative commit (a commit cannot reference
 its own SHA).
 
-- Split freeze commit SHA: (pending)
+- Split freeze commit SHA: `f6eded1`
 - ΔK freeze commit SHA: (pending) — delta-gtm2.json
 - Status: DRAFT — not frozen
 - Discovery inspection permitted: only after the freeze commit lands

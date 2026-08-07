@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { renderAppShell, APP_SHELL_CSS } from './shell.js'
+import { renderAppShell, APP_SHELL_CSS, THEME_INIT_SCRIPT } from './shell.js'
 import { computeCareerCompass, narrateCompass, cvReadiness } from './compass.js'
 import {
   profileToTimeline,
@@ -83,67 +83,68 @@ async function recordEvent(env: Env, name: EventName) {
 const PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+${THEME_INIT_SCRIPT}
 <title>Provena — Professional Journey</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--c-page-bg); color: var(--c-text); }
 .hero { padding: 0.5rem 0 1rem; }
 h1 { font-size: 1.125rem; font-weight: 700; }
-.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+.subtitle { color: var(--c-text-muted); font-size: 0.875rem; margin-top: 0.125rem; }
 section { margin-top: 1.5rem; }
 section:first-child { margin-top: 0; }
-h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 0.5rem; }
-.chapter { background: #1a1a1a; color: #fff; border-radius: 0.75rem; padding: 1.25rem; }
-.chapter .kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #aaa; }
+h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-faint); margin-bottom: 0.5rem; }
+.chapter { background: var(--c-accent-bg); color: var(--c-white); border-radius: 0.75rem; padding: 1.25rem; }
+.chapter .kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.7); }
 .chapter .role { font-size: 1.25rem; font-weight: 700; margin-top: 0.25rem; }
-.chapter .org { color: #ccc; font-size: 0.875rem; }
-.chapter .meta { color: #aaa; font-size: 0.875rem; margin-top: 0.5rem; }
-.chapter .continue { margin-top: 1rem; width: 100%; padding: 0.75rem; min-height: 44px; font-size: 0.875rem; font-weight: 600; background: #fff; color: #1a1a1a; border: none; border-radius: 0.5rem; cursor: pointer; }
-.compass { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
+.chapter .org { color: rgba(255,255,255,0.85); font-size: 0.875rem; }
+.chapter .meta { color: rgba(255,255,255,0.7); font-size: 0.875rem; margin-top: 0.5rem; }
+.chapter .continue { margin-top: 1rem; width: 100%; padding: 0.75rem; min-height: 44px; font-size: 0.875rem; font-weight: 600; background: var(--c-surface); color: var(--c-text); border: none; border-radius: 0.5rem; cursor: pointer; }
+.compass { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 0.875rem; }
 .compass .status { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.375rem; }
 .compass .status::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2e7d32; flex: 0 0 auto; }
 .compass .status.warn::before { background: #b26a00; }
-.compass .status.neutral::before { background: #999; }
-.compass .headline { font-size: 0.9rem; line-height: 1.6; color: #333; margin-top: 0.375rem; }
+.compass .status.neutral::before { background: var(--c-text-faint); }
+.compass .headline { font-size: 0.9rem; line-height: 1.6; color: var(--c-text-muted); margin-top: 0.375rem; }
 .compass .fact { margin-top: 0.75rem; }
-.compass .label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; }
+.compass .label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-faint); }
 .compass ul { margin: 0.25rem 0 0 1.125rem; }
-.compass li { font-size: 0.875rem; color: #333; }
-.compass .fact p { font-size: 0.875rem; color: #333; margin-top: 0.25rem; }
+.compass li { font-size: 0.875rem; color: var(--c-text-muted); }
+.compass .fact p { font-size: 0.875rem; color: var(--c-text-muted); margin-top: 0.25rem; }
 .compass details { margin-top: 0.75rem; }
-.compass details summary { font-size: 0.8125rem; color: #666; }
+.compass details summary { font-size: 0.8125rem; color: var(--c-text-muted); }
 .compass details ul { margin: 0.5rem 0 0 1.125rem; }
-.market-banner { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
-.market-banner .header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #666; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+.market-banner { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 0.875rem; }
+.market-banner .header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-muted); display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
 .market-banner .pulse { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2e7d32; box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); animation: pulse-ring 2s infinite; display: inline-block; }
 @keyframes pulse-ring { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 125, 50, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); } }
 .market-banner .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
-.market-banner .stat-box { background: #f9f9f9; border: 1px solid #efefef; border-radius: 0.375rem; padding: 0.5rem; }
-.market-banner .stat-val { font-size: 1.125rem; font-weight: 700; color: #1a1a1a; }
-.market-banner .stat-lbl { font-size: 0.6875rem; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
-.market-banner .action { margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem; border-top: 1px solid #efefef; padding-top: 0.5rem; }
-.market-banner .action a { color: #1a1a1a; font-weight: 600; text-decoration: none; }
+.market-banner .stat-box { background: var(--c-surface-hover); border: 1px solid var(--c-surface-hover); border-radius: 0.375rem; padding: 0.5rem; }
+.market-banner .stat-val { font-size: 1.125rem; font-weight: 700; color: var(--c-text); }
+.market-banner .stat-lbl { font-size: 0.6875rem; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.market-banner .action { margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem; border-top: 1px solid var(--c-surface-hover); padding-top: 0.5rem; }
+.market-banner .action a { color: var(--c-text); font-weight: 600; text-decoration: none; }
 .market-banner .action a:hover { text-decoration: underline; }
-.experience { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-bottom: 0.5rem; }
+.experience { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 0.875rem; margin-bottom: 0.5rem; }
 .experience .role { font-weight: 600; font-size: 1rem; }
-.experience .org { color: #555; font-size: 0.875rem; }
-.experience .dates { color: #999; font-size: 0.75rem; }
-.experience .hitos { color: #777; font-size: 0.75rem; margin-top: 0.25rem; }
+.experience .org { color: var(--c-text-muted); font-size: 0.875rem; }
+.experience .dates { color: var(--c-text-faint); font-size: 0.75rem; }
+.experience .hitos { color: var(--c-text-faint); font-size: 0.75rem; margin-top: 0.25rem; }
 .experience .caps { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.tag { background: #efefef; color: #333; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 999px; }
+.tag { background: var(--c-surface-hover); color: var(--c-text-muted); font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 999px; }
 .ok { color: #2e7d32; font-size: 0.875rem; }
-details summary { cursor: pointer; font-size: 0.8125rem; color: #666; padding: 0.25rem 0; }
-.capture { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; }
+details summary { cursor: pointer; font-size: 0.8125rem; color: var(--c-text-muted); padding: 0.25rem 0; }
+.capture { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; }
 .capture p { font-size: 0.875rem; }
-.capture time { color: #999; font-size: 0.75rem; }
-button { width: 100%; padding: 0.75rem; min-height: 44px; font-size: 1rem; font-weight: 500; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 0.75rem; }
+.capture time { color: var(--c-text-faint); font-size: 0.75rem; }
+button { width: 100%; padding: 0.75rem; min-height: 44px; font-size: 1rem; font-weight: 500; background: var(--c-accent-bg); color: var(--c-white); border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 0.75rem; }
 button:active { opacity: 0.8; }
 .action-bar button { margin-top: 0; }
-textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; resize: vertical; font-family: inherit; }
+textarea { width: 100%; min-height: 5rem; font-size: 1rem; padding: 0.75rem; border: 1px solid var(--c-border-strong); border-radius: 0.5rem; resize: vertical; font-family: inherit; }
 .quick { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.quick button { width: auto; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.875rem; background: #fff; color: #1a1a1a; border: 1px solid #ccc; margin: 0; }
-#status { margin-top: 0.75rem; font-size: 0.875rem; color: #666; }
+.quick button { width: auto; min-height: 44px; padding: 0.5rem 0.75rem; font-size: 0.875rem; background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border-strong); margin: 0; }
+#status { margin-top: 0.75rem; font-size: 0.875rem; color: var(--c-text-muted); }
 .hidden { display: none; }
 </style>
 ${renderAppShell(
@@ -326,21 +327,22 @@ const SUGGESTIONS = {
 const CV_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+${THEME_INIT_SCRIPT}
 <title>Provena — Identity</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--c-page-bg); color: var(--c-text); }
 .cv-workspace { display: flex; gap: 1.5rem; width: 100%; }
-.cv-workspace-sidebar { width: 340px; flex-shrink: 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; overflow-y: auto; }
+.cv-workspace-sidebar { width: 340px; flex-shrink: 0; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 1.5rem; overflow-y: auto; }
 .cv-canvas { flex: 1; min-width: 0; padding: 1rem; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
-.cv-sheet { background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); max-width: 100%; }
-.canonical-banner { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #1a1a1a; border-radius: 0.375rem; padding: 0.75rem 1rem; margin-top: 0.75rem; }
-.canonical-badge { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #1a1a1a; display: inline-block; margin-bottom: 0.25rem; }
-.canonical-banner p { font-size: 0.8125rem; color: #4a5568; line-height: 1.4; }
-.identity-health { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1.25rem; }
-.identity-health .health-title { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; font-weight: 700; margin-bottom: 0.375rem; }
-.identity-health .health-item { font-size: 0.8125rem; color: #334155; margin-top: 0.25rem; }
+.cv-sheet { background: var(--c-surface); box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); max-width: 100%; }
+.canonical-banner { background: var(--c-surface); border: 1px solid var(--c-border); border-left: 4px solid var(--c-accent-bg); border-radius: 0.375rem; padding: 0.75rem 1rem; margin-top: 0.75rem; }
+.canonical-badge { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--c-text); display: inline-block; margin-bottom: 0.25rem; }
+.canonical-banner p { font-size: 0.8125rem; color: var(--c-text-muted); line-height: 1.4; }
+.identity-health { background: var(--c-surface-hover); border: 1px solid var(--c-border); border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1.25rem; }
+.identity-health .health-title { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-muted); font-weight: 700; margin-bottom: 0.375rem; }
+.identity-health .health-item { font-size: 0.8125rem; color: var(--c-text-muted); margin-top: 0.25rem; }
 
 @container page (max-width: 63.9375rem) {
   .cv-workspace-sidebar { display: none; }
@@ -362,19 +364,19 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; c
 ${htmlRenderer.renderStyles()}
 
 h1 { font-size: 1.125rem; font-weight: 700; }
-.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
-label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
-input, select { width: 100%; padding: 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.375rem; font-family: inherit; }
+.subtitle { color: var(--c-text-muted); font-size: 0.875rem; margin-top: 0.125rem; }
+label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-faint); margin: 1rem 0 0.25rem; }
+input, select { width: 100%; padding: 0.5rem; font-size: 0.875rem; border: 1px solid var(--c-border-strong); border-radius: 0.375rem; font-family: inherit; }
 .check { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.check label { display: flex; align-items: center; gap: 0.25rem; text-transform: none; letter-spacing: 0; color: #333; font-size: 0.8125rem; background: #efefef; border-radius: 999px; padding: 0.25rem 0.625rem; margin: 0; }
+.check label { display: flex; align-items: center; gap: 0.25rem; text-transform: none; letter-spacing: 0; color: var(--c-text-muted); font-size: 0.8125rem; background: var(--c-surface-hover); border-radius: 999px; padding: 0.25rem 0.625rem; margin: 0; }
 .check input { width: auto; }
-button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+button { width: 100%; padding: 0.625rem; font-size: 0.875rem; font-weight: 600; background: var(--c-accent-bg); color: var(--c-white); border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
 .action-bar button { margin-top: 0; }
-pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; font-size: 0.8125rem; white-space: pre-wrap; margin-top: 0.75rem; max-height: 24rem; overflow: auto; }
+pre { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 0.875rem; font-size: 0.8125rem; white-space: pre-wrap; margin-top: 0.75rem; max-height: 24rem; overflow: auto; }
 .meta { background: #fffbe6; border: 1px solid #e6d98a; border-radius: 0.5rem; padding: 0.625rem; font-size: 0.8125rem; color: #6b5b00; margin-top: 1rem; display: none; }
 .row { display: flex; gap: 0.5rem; }
 .row button { flex: 1; }
-.your-cv { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
+.your-cv { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-faint); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--c-border); }
 </style>
 ${renderAppShell(
   'prepare',
@@ -427,7 +429,7 @@ ${renderAppShell(
   '<div class="your-cv">Export</div>' +
   '<div class="row">' +
   '<button onclick="exportPdf()">Download PDF</button>' +
-  '<button onclick="exportJsonResume()" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;">JSON Resume</button>' +
+  '<button onclick="exportJsonResume()" style="background:var(--c-surface-hover); color:var(--c-text); border:1px solid var(--c-border-strong);">JSON Resume</button>' +
   '</div>' +
   '</aside>' +
   '<main class="cv-canvas">' +
@@ -436,7 +438,7 @@ ${renderAppShell(
   '</div>' +
   '<div class="action-bar cv-action-bar">' +
   '<div class="row">' +
-  '<button type="button" onclick="openCustomize()" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;">Projection Settings</button>' +
+  '<button type="button" onclick="openCustomize()" style="background:var(--c-surface-hover); color:var(--c-text); border:1px solid var(--c-border-strong);">Projection Settings</button>' +
   '<button type="button" onclick="exportPdf()">Download PDF</button>' +
   '</div>' +
   '</div>' +
@@ -444,7 +446,7 @@ ${renderAppShell(
   '<div class="bottom-sheet">' +
   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
   '<h2 style="font-size:1rem;font-weight:700;">Projection Settings</h2>' +
-  '<button type="button" onclick="closeCustomize()" style="width:auto;margin-top:0;padding:0.375rem 0.75rem;background:#e5e5e5;color:#1a1a1a;">Done</button>' +
+  '<button type="button" onclick="closeCustomize()" style="width:auto;margin-top:0;padding:0.375rem 0.75rem;background:var(--c-border);color: var(--c-text);">Done</button>' +
   '</div>' +
   '<section>' +
   '<label for="role">Target role</label>' +
@@ -638,31 +640,32 @@ preview()
 const EVALUATE_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+${THEME_INIT_SCRIPT}
 <title>Provena — Evaluate</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--c-page-bg); color: var(--c-text); }
 h1 { font-size: 1.125rem; font-weight: 700; }
-.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
-label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 1rem 0 0.25rem; }
-textarea { width: 100%; min-height: 12rem; font-size: 0.875rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; resize: vertical; font-family: inherit; }
-select { width: 100%; padding: 0.625rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.375rem; background: #fff; }
-button { width: 100%; padding: 0.75rem; min-height: 44px; font-size: 0.875rem; font-weight: 600; background: #1a1a1a; color: #fff; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+.subtitle { color: var(--c-text-muted); font-size: 0.875rem; margin-top: 0.125rem; }
+label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-faint); margin: 1rem 0 0.25rem; }
+textarea { width: 100%; min-height: 12rem; font-size: 0.875rem; padding: 0.75rem; border: 1px solid var(--c-border-strong); border-radius: 0.5rem; resize: vertical; font-family: inherit; }
+select { width: 100%; padding: 0.625rem; font-size: 0.875rem; border: 1px solid var(--c-border-strong); border-radius: 0.375rem; background: var(--c-surface); }
+button { width: 100%; padding: 0.75rem; min-height: 44px; font-size: 0.875rem; font-weight: 600; background: var(--c-accent-bg); color: var(--c-white); border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
 .action-bar button { margin-top: 0; }
-.card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
+.card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
 .card .verdict { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.02em; display: inline-block; padding: 0.25rem 0.625rem; border-radius: 0.25rem; margin-bottom: 0.5rem; }
 .card .verdict.strong-candidate { background: #e8f5e9; color: #1b5e20; }
 .card .verdict.consider { background: #fff3e0; color: #e65100; }
 .card .verdict.abstain { background: #ede7f6; color: #4a148c; }
 .card .verdict.skip { background: #ffebee; color: #b71c1c; }
-.card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-top: 1.25rem; border-bottom: 1px solid #eee; padding-bottom: 0.25rem; }
+.card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text-faint); margin-top: 1.25rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.25rem; }
 .card ul { margin: 0.5rem 0 0 1.25rem; }
-.card li { font-size: 0.875rem; color: #333; margin-bottom: 0.5rem; }
-.card .trace { font-size: 0.8125rem; color: #555; margin-top: 0.25rem; background: #f9f9f9; padding: 0.375rem 0.5rem; border-radius: 0.25rem; border-left: 3px solid #ccc; }
-.meta { color: #666; font-size: 0.8125rem; margin-top: 0.5rem; }
+.card li { font-size: 0.875rem; color: var(--c-text-muted); margin-bottom: 0.5rem; }
+.card .trace { font-size: 0.8125rem; color: var(--c-text-muted); margin-top: 0.25rem; background: var(--c-surface-hover); padding: 0.375rem 0.5rem; border-radius: 0.25rem; border-left: 3px solid var(--c-border-strong); }
+.meta { color: var(--c-text-muted); font-size: 0.8125rem; margin-top: 0.5rem; }
 .pill-grid { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.5rem; }
-.pill { font-size: 0.75rem; background: #f0f0f0; border: 1px solid #ddd; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+.pill { font-size: 0.75rem; background: var(--c-surface-hover); border: 1px solid var(--c-border); padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
 .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.125rem 0.375rem; border-radius: 0.2rem; }
 .badge.direct { background: #e8f5e9; color: #2e7d32; }
 .badge.adjacent { background: #e3f2fd; color: #1565c0; }
@@ -678,7 +681,7 @@ ${renderAppShell(
   '<div>' +
   '<label for="jobUrl">Job Posting URL (O1.1 Ingestion)</label>' +
   '<div style="display:flex;gap:0.5rem;margin-top:0.25rem;">' +
-  '<input id="jobUrl" type="url" placeholder="https://boards.greenhouse.io/..." style="flex:1;padding:0.625rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.375rem;">' +
+  '<input id="jobUrl" type="url" placeholder="https://boards.greenhouse.io/..." style="flex:1;padding:0.625rem;font-size:0.875rem;border:1px solid var(--c-border-strong);border-radius:0.375rem;">' +
   '<button style="width:auto;margin-top:0;padding:0.625rem 1rem;" onclick="evaluateUrl()">Fetch & Evaluate</button>' +
   '</div>' +
   '<label for="jd">Or Paste Job Description</label>' +
@@ -1117,26 +1120,27 @@ async function registerObservedSource(env: Env, token: string, count: number): P
 const SOURCES_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+${THEME_INIT_SCRIPT}
 <title>Provena — Observation Sources</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--c-page-bg); color: var(--c-text); }
 h1 { font-size: 1.125rem; font-weight: 700; }
-.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+.subtitle { color: var(--c-text-muted); font-size: 0.875rem; margin-top: 0.125rem; }
 .sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
-.source-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; }
+.source-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; }
 .source-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
 .source-name { font-weight: 700; font-size: 1rem; }
-.source-provider { font-size: 0.75rem; background: #f0f0f0; color: #555; padding: 0.15rem 0.4rem; border-radius: 0.25rem; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
-.source-meta { font-size: 0.8125rem; color: #666; margin-top: 0.5rem; line-height: 1.5; }
+.source-provider { font-size: 0.75rem; background: var(--c-surface-hover); color: var(--c-text-muted); padding: 0.15rem 0.4rem; border-radius: 0.25rem; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+.source-meta { font-size: 0.8125rem; color: var(--c-text-muted); margin-top: 0.5rem; line-height: 1.5; }
 .source-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
 .source-actions button { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.8125rem; border-radius: 0.25rem; min-height: 36px; cursor: pointer; }
-.btn-primary { background: #1a1a1a; color: #fff; border: none; }
-.btn-secondary { background: #fff; color: #333; border: 1px solid #ccc; }
-.btn-secondary:hover { background: #f5f5f5; }
-.sync-bar { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center; }
-.sync-bar input { flex: 1; padding: 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.25rem; }
+.btn-primary { background: var(--c-accent-bg); color: var(--c-white); border: none; }
+.btn-secondary { background: var(--c-surface); color: var(--c-text-muted); border: 1px solid var(--c-border-strong); }
+.btn-secondary:hover { background: var(--c-page-bg); }
+.sync-bar { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center; }
+.sync-bar input { flex: 1; padding: 0.5rem; font-size: 0.875rem; border: 1px solid var(--c-border-strong); border-radius: 0.25rem; }
 .status-pill { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600; color: #2e7d32; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #2e7d32; }
 </style>
@@ -1151,7 +1155,7 @@ ${renderAppShell(
   '<input id="newBoardToken" type="text" placeholder="Career page URL (e.g. https://boards.greenhouse.io/openai or company name)" value="https://boards.greenhouse.io/stripe">' +
   '<button class="btn-primary" style="width:auto;margin:0;" onclick="addAndSyncSource()">+ Connect Source</button>' +
   '</div>' +
-  '<div id="sources-status" style="margin-bottom:1rem;font-size:0.875rem;color:#666;"></div>' +
+  '<div id="sources-status" style="margin-bottom:1rem;font-size:0.875rem;color:var(--c-text-muted);"></div>' +
   '<div class="sources-grid" id="sources-list">' +
   'Loading observed market sources...' +
   '</div>' +
@@ -1171,7 +1175,7 @@ async function loadSources() {
       '<span class="source-provider">' + s.provider + '</span>' +
       '</div>' +
       '<div class="source-meta">' +
-      '<div style="word-break:break-all;"><a href="' + (s.url || '#') + '" target="_blank" style="color:#666;text-decoration:none;">' + (s.url || s.token) + '</a></div>' +
+      '<div style="word-break:break-all;"><a href="' + (s.url || '#') + '" target="_blank" style="color:var(--c-text-muted);text-decoration:none;">' + (s.url || s.token) + '</a></div>' +
       '<div style="margin-top:0.25rem;">Status: <span class="status-pill"><span class="status-dot"></span>' + (s.status || 'Watching') + '</span></div>' +
       '<div>Observed Jobs: ' + s.jobsObserved + '</div>' +
       '</div>' +
@@ -1220,22 +1224,23 @@ loadSources()
 const OPPORTUNITIES_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+${THEME_INIT_SCRIPT}
 <title>Provena — Opportunity Inbox</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--c-page-bg); color: var(--c-text); }
 h1 { font-size: 1.125rem; font-weight: 700; }
-.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
-.tabs { display: flex; gap: 0.5rem; margin-top: 1rem; border-bottom: 2px solid #e5e5e5; }
-.tab-btn { padding: 0.6rem 1rem; font-size: 0.875rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-.tab-btn:hover { color: #1a1a1a; }
-.tab-btn.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
-.count-pill { display: inline-block; background: #e0e0e0; color: #333; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 10px; margin-left: 0.3rem; }
-.tab-btn.active .count-pill { background: #1a1a1a; color: #fff; }
-.opp-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 0.5rem; overflow: hidden; border: 1px solid #e5e5e5; margin-top: 0.75rem; }
-.opp-table th, .opp-table td { padding: 0.75rem 1rem; text-align: left; font-size: 0.875rem; border-bottom: 1px solid #eee; }
-.opp-table th { background: #fafafa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #777; }
+.subtitle { color: var(--c-text-muted); font-size: 0.875rem; margin-top: 0.125rem; }
+.tabs { display: flex; gap: 0.5rem; margin-top: 1rem; border-bottom: 2px solid var(--c-border); }
+.tab-btn { padding: 0.6rem 1rem; font-size: 0.875rem; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--c-text-muted); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.tab-btn:hover { color: var(--c-text); }
+.tab-btn.active { color: var(--c-text); border-bottom-color: var(--c-text); }
+.count-pill { display: inline-block; background: var(--c-border); color: var(--c-text-muted); font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 10px; margin-left: 0.3rem; }
+.tab-btn.active .count-pill { background: var(--c-accent-bg); color: var(--c-white); }
+.opp-table { width: 100%; border-collapse: collapse; background: var(--c-surface); border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--c-border); margin-top: 0.75rem; }
+.opp-table th, .opp-table td { padding: 0.75rem 1rem; text-align: left; font-size: 0.875rem; border-bottom: 1px solid var(--c-border); }
+.opp-table th { background: var(--c-surface-hover); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-text-faint); }
 .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
 .badge.strong-candidate { background: #e8f5e9; color: #2e7d32; }
 .badge.consider { background: #fff3e0; color: #ef6c00; }
@@ -1245,10 +1250,10 @@ h1 { font-size: 1.125rem; font-weight: 700; }
 .badge.applied { background: #e3f2fd; color: #1565c0; }
 .badge.dismissed { background: #ffebee; color: #c62828; }
 .btn-group { display: flex; gap: 0.375rem; }
-.btn-group button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: 28px; width: auto; border: 1px solid #ccc; background: #fff; border-radius: 0.25rem; cursor: pointer; }
-.btn-group button:hover { background: #f0f0f0; }
-.btn-group button.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-.sentinel { text-align: center; padding: 1.5rem; color: #888; font-size: 0.875rem; }
+.btn-group button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: 28px; width: auto; border: 1px solid var(--c-border-strong); background: var(--c-surface); border-radius: 0.25rem; cursor: pointer; }
+.btn-group button:hover { background: var(--c-surface-hover); }
+.btn-group button.active { background: var(--c-accent-bg); color: var(--c-white); border-color: var(--c-text); }
+.sentinel { text-align: center; padding: 1.5rem; color: var(--c-text-faint); font-size: 0.875rem; }
 </style>
 ${renderAppShell(
   'opportunities',
@@ -1257,15 +1262,15 @@ ${renderAppShell(
   '<p class="subtitle">Provena continuously evaluates observed opportunities and surfaces only what deserves your attention.</p>' +
   '</div>',
   '<div class="readable">' +
-  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;background:#fff;padding:0.875rem 1.125rem;border-radius:0.5rem;border:1px solid #e5e5e5;box-shadow:0 1px 2px rgba(0,0,0,0.03);">' +
-  '<div style="display:flex;gap:1.25rem;align-items:center;font-size:0.875rem;color:#444;">' +
-  '<div>Watching <strong style="color:#1a1a1a;">4 observation sources</strong></div>' +
-  '<div style="color:#ccc;">·</div>' +
-  '<div><strong style="color:#1a1a1a;" id="inbox-total-eval">1,284</strong> opportunities evaluated</div>' +
-  '<div style="color:#ccc;">·</div>' +
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;background: var(--c-surface);padding:0.875rem 1.125rem;border-radius:0.5rem;border:1px solid var(--c-border);box-shadow:0 1px 2px rgba(0,0,0,0.03);">' +
+  '<div style="display:flex;gap:1.25rem;align-items:center;font-size:0.875rem;color:var(--c-text-muted);">' +
+  '<div>Watching <strong style="color: var(--c-text);">4 observation sources</strong></div>' +
+  '<div style="color:var(--c-border-strong);">·</div>' +
+  '<div><strong style="color: var(--c-text);" id="inbox-total-eval">1,284</strong> opportunities evaluated</div>' +
+  '<div style="color:var(--c-border-strong);">·</div>' +
   '<div><strong style="color:#2e7d32;" id="inbox-attention-count">0</strong> require attention</div>' +
   '</div>' +
-  '<a href="/sources" style="font-size:0.875rem;color:#1a1a1a;font-weight:600;text-decoration:none;">Manage Observation Sources →</a>' +
+  '<a href="/sources" style="font-size:0.875rem;color: var(--c-text);font-weight:600;text-decoration:none;">Manage Observation Sources →</a>' +
   '</div>' +
   '<div class="tabs">' +
   '<button class="tab-btn active" id="tab-needs-attention" onclick="switchTab(\'needs-attention\')">Needs Attention <span class="count-pill" id="cnt-needs-attention">0</span></button>' +
@@ -1333,7 +1338,7 @@ async function loadTab(reset = false) {
     if (!rows) { isLoading = false; return }
 
     if (reset && data.items.length === 0) {
-      rows.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2.5rem 1rem;color:#666;line-height:1.5;"><strong style="display:block;color:#1a1a1a;margin-bottom:0.25rem;">Nothing requires your attention right now.</strong>Provena is continuously watching your observation sources in the background.</td></tr>'
+      rows.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2.5rem 1rem;color:var(--c-text-muted);line-height:1.5;"><strong style="display:block;color: var(--c-text);margin-bottom:0.25rem;">Nothing requires your attention right now.</strong>Provena is continuously watching your observation sources in the background.</td></tr>'
       if (sentinel) sentinel.textContent = ''
       isLoading = false
       return

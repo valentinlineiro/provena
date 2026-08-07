@@ -11,7 +11,7 @@ test('Home renders the site nav with Story active and no Prepare CV button', asy
   assert.equal((html.match(/<nav class="site-nav">/g) || []).length, 1)
   assert.ok(html.includes('<a class="brand" href="/">Provena</a>'))
   assert.ok(html.includes('<a class="active" href="/">Story</a>'))
-  assert.ok(html.includes('<a href="/cv">Prepare</a>'))
+  assert.ok(html.includes('<a href="/cv">Identity</a>'))
   assert.ok(!html.includes('Prepare CV'))
 })
 
@@ -22,6 +22,7 @@ test('Home renders within AppShell and SplitView with Story content and Career C
   assert.ok(html.includes('<div class="split-view" style="--split-threshold: 56rem;">'), 'Missing split-view with 56rem threshold')
   assert.ok(html.includes('Current chapter'), 'Missing Current chapter')
   assert.ok(html.includes('Career Compass'), 'Missing Career Compass')
+  assert.ok(html.includes('Market Activity'), 'Missing Market Activity')
   assert.ok(html.includes('Recent evidence'), 'Missing Recent evidence')
 })
 
@@ -32,7 +33,7 @@ test('Prepare page renders the site nav with Prepare active and no back link', a
   assert.ok(html.includes('<a class="brand" href="/">Provena</a>'))
   assert.equal((html.match(/<nav class="site-nav">/g) || []).length, 1)
   assert.ok(html.includes('<a href="/">Story</a>'))
-  assert.ok(html.includes('<a class="active" href="/cv">Prepare</a>'))
+  assert.ok(html.includes('<a class="active" href="/cv">Identity</a>'))
   assert.ok(html.includes('<h1>Prepare</h1>'))
   assert.ok(html.includes('Target a role, review suggestions, export.'))
   assert.ok(!html.includes('← Home'))

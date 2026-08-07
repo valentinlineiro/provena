@@ -6,13 +6,13 @@ test('siteNav renders the brand and both section links', () => {
   const html = siteNav('story')
   assert.ok(html.includes('<a class="brand" href="/">Provena</a>'))
   assert.ok(html.includes('<a class="active" href="/">Story</a>'))
-  assert.ok(html.includes('<a href="/cv">Prepare</a>'))
+  assert.ok(html.includes('<a href="/cv">Identity</a>'))
 })
 
 test('siteNav marks the current section active and the other inactive', () => {
   assert.ok(siteNav('story').includes('<a class="active" href="/">Story</a>'))
   assert.ok(!siteNav('story').includes('class="active" href="/cv"'))
-  assert.ok(siteNav('prepare').includes('<a class="active" href="/cv">Prepare</a>'))
+  assert.ok(siteNav('prepare').includes('<a class="active" href="/cv">Identity</a>'))
   assert.ok(!siteNav('prepare').includes('class="active" href="/"'))
 })
 
@@ -46,7 +46,7 @@ test('renderAppShell outputs structural wrapper with app-shell, app-header, site
 test('renderAppShell outputs correct active section links for prepare and evaluate', () => {
   const prepareHtml = renderAppShell('prepare', '', '')
   assert.ok(prepareHtml.includes('<nav class="site-nav">'))
-  assert.ok(prepareHtml.includes('<a class="active" href="/cv">Prepare</a>'))
+  assert.ok(prepareHtml.includes('<a class="active" href="/cv">Identity</a>'))
   assert.ok(!prepareHtml.includes('class="active" href="/"'))
 
   const evaluateHtml = renderAppShell('evaluate', '', '')

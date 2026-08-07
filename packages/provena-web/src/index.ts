@@ -84,7 +84,7 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportuniti
     '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
   const sections = [
     { label: 'Story', href: '/', id: 'story' as const },
-    { label: 'Prepare', href: '/cv', id: 'prepare' as const },
+    { label: 'Identity', href: '/cv', id: 'prepare' as const },
     { label: 'Evaluate', href: '/evaluate', id: 'evaluate' as const },
     { label: 'Sources', href: '/sources', id: 'sources' as const },
     { label: 'Inbox', href: '/opportunities', id: 'opportunities' as const },
@@ -193,6 +193,17 @@ h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; colo
 .compass details { margin-top: 0.75rem; }
 .compass details summary { font-size: 0.8125rem; color: #666; }
 .compass details ul { margin: 0.5rem 0 0 1.125rem; }
+.market-banner { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; }
+.market-banner .header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #666; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+.market-banner .pulse { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2e7d32; box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); animation: pulse-ring 2s infinite; display: inline-block; }
+@keyframes pulse-ring { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 125, 50, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); } }
+.market-banner .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
+.market-banner .stat-box { background: #f9f9f9; border: 1px solid #efefef; border-radius: 0.375rem; padding: 0.5rem; }
+.market-banner .stat-val { font-size: 1.125rem; font-weight: 700; color: #1a1a1a; }
+.market-banner .stat-lbl { font-size: 0.6875rem; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
+.market-banner .action { margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem; border-top: 1px solid #efefef; padding-top: 0.5rem; }
+.market-banner .action a { color: #1a1a1a; font-weight: 600; text-decoration: none; }
+.market-banner .action a:hover { text-decoration: underline; }
 .experience { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 0.875rem; margin-bottom: 0.5rem; }
 .experience .role { font-weight: 600; font-size: 1rem; }
 .experience .org { color: #555; font-size: 0.875rem; }
@@ -252,7 +263,21 @@ ${renderAppShell(
   '</details>' +
   '</section>' +
   '</div>' +
-  '<div style="flex: 1;">' +
+  '<div style="flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">' +
+  '<section>' +
+  '<h2>Market Activity</h2>' +
+  '<div class="market-banner">' +
+  '<div class="header"><span class="pulse"></span><span>Continuous Observation</span></div>' +
+  '<div class="stats">' +
+  '<div class="stat-box"><div class="stat-val">4 Feeds</div><div class="stat-lbl">Active Sources</div></div>' +
+  '<div class="stat-box"><div class="stat-val">1,284</div><div class="stat-lbl">Observed Roles</div></div>' +
+  '</div>' +
+  '<div class="action">' +
+  '<span style="color:#2e7d32; font-weight:600; font-size:0.75rem;">3 require attention</span>' +
+  '<a href="/opportunities">Open Inbox →</a>' +
+  '</div>' +
+  '</div>' +
+  '</section>' +
   '<section>' +
   '<h2>Career Compass</h2>' +
   '<div class="compass" id="compass"></div>' +

@@ -405,7 +405,7 @@ const SUGGESTIONS = {
 const CV_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Provena — Prepare</title>
+<title>Provena — Identity</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -414,6 +414,12 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; c
 .cv-workspace-sidebar { width: 340px; flex-shrink: 0; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; overflow-y: auto; }
 .cv-canvas { flex: 1; min-width: 0; padding: 1rem; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
 .cv-sheet { background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); max-width: 100%; }
+.canonical-banner { background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #1a1a1a; border-radius: 0.375rem; padding: 0.75rem 1rem; margin-top: 0.75rem; }
+.canonical-badge { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #1a1a1a; display: inline-block; margin-bottom: 0.25rem; }
+.canonical-banner p { font-size: 0.8125rem; color: #4a5568; line-height: 1.4; }
+.identity-health { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1.25rem; }
+.identity-health .health-title { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; font-weight: 700; margin-bottom: 0.375rem; }
+.identity-health .health-item { font-size: 0.8125rem; color: #334155; margin-top: 0.25rem; }
 
 @container page (max-width: 63.9375rem) {
   .cv-workspace-sidebar { display: none; }
@@ -452,13 +458,23 @@ pre { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; paddin
 ${renderAppShell(
   'prepare',
   '<div class="page-header">' +
-  '<h1>Prepare</h1>' +
-  '<p class="subtitle">Target a role, review suggestions, export.</p>' +
+  '<h1>Identity</h1>' +
+  '<p class="subtitle">Your canonical professional identity model. Maintain it once, derive everywhere.</p>' +
+  '<div class="canonical-banner">' +
+  '<span class="canonical-badge">Canonical Source of Truth</span>' +
+  '<p>This model is the authoritative source used by Career Compass, Protocol v1 market evaluations, and every exported projection.</p>' +
+  '</div>' +
   '</div>',
   '<div class="cv-workspace split-view" style="--split-threshold: 64rem;">' +
   '<aside class="cv-workspace-sidebar">' +
+  '<div class="identity-health">' +
+  '<div class="health-title">Identity Health</div>' +
+  '<div class="health-item ok">✓ 100% evidence-backed capabilities</div>' +
+  '<div class="health-item ok">✓ 4 active market feeds connected</div>' +
+  '<div class="health-item ok">✓ 1,284 opportunities evaluated</div>' +
+  '</div>' +
   '<section>' +
-  '<label for="role">Target role</label>' +
+  '<label for="role">Projection Target Role</label>' +
   '<input id="role" list="roles" placeholder="Staff Software Engineer">' +
   '<datalist id="roles">' +
   '<option value="Senior Software Engineer">' +
@@ -487,7 +503,7 @@ ${renderAppShell(
   '</section>' +
   '<div class="meta" id="meta"></div>' +
   '<div class="meta" id="readiness"></div>' +
-  '<div class="your-cv">Your CV</div>' +
+  '<div class="your-cv">Export Projections</div>' +
   '<div class="row">' +
   '<button onclick="exportMd()">Download .md</button>' +
   '<button onclick="exportHtml()">Open HTML / Print PDF</button>' +
@@ -499,7 +515,7 @@ ${renderAppShell(
   '</div>' +
   '<div class="action-bar cv-action-bar">' +
   '<div class="row">' +
-  '<button type="button" onclick="openCustomize()">Customize</button>' +
+  '<button type="button" onclick="openCustomize()">Projection Settings</button>' +
   '<button type="button" onclick="exportHtml()">Open HTML / Print PDF</button>' +
   '<button type="button" onclick="exportMd()">Download .md</button>' +
   '</div>' +

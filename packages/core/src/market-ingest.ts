@@ -276,9 +276,10 @@ export class MarketIngestionEngine {
       const oppPostings = await this.postings.listByOpportunity(opp.id)
       for (const p of oppPostings) {
         if (p.sourceType === context.sourceType && !seenPostingIdsInCurrentSync.has(p.id)) {
+          const wasActive = p.status === 'ACTIVE'
           const updated = reconcilePostingStatus(p, false, context.now)
           await this.postings.save(updated)
-          if (p.active && !updated.active) {
+          if (wasActive && updated.status !== 'ACTIVE') {
             deactivatedPostings++
           }
         }

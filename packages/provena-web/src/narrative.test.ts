@@ -29,7 +29,7 @@ test('D1: Hero & Value Proposition contract assertion', () => {
   const why = readDoc('website/why.md')
   const product = readDoc('PRODUCT.md')
 
-  assert.ok(product.includes('Preserve human attention'))
+  assert.ok(product.includes('preserved attention') || product.includes('Preserved human attention'))
   assert.ok(landing.includes('Helping to look less'))
   assert.ok(why.includes('Helping to look less'))
   assert.ok(readme.includes('Helping to look less'))

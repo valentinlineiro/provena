@@ -1,87 +1,134 @@
-# Try it in 5 minutes
+# Getting Started
 
-Clone, install, create a workspace, and render it. No previous setup needed.
+## Try Provena in 5 Minutes
 
-## 1. Use the CLI directly
+You don't need to search job boards manually.
 
-```bash
-npx @provena/cli render profiles/valentin
+Define your professional identity once, connect the market sources you care about, and let Provena continuously evaluate every opportunity against your profile.
+
+In less than five minutes, you will have your own **Attention Inbox**.
+
+---
+
+## 1. Build your professional identity
+
+Start by creating (or importing) your canonical professional identity.
+
+Your identity becomes the single source of truth used for every evaluation.
+
+```text
+Professional Identity  ──►  Canonical Model
 ```
 
-Or install globally:
+Unlike a résumé or a LinkedIn profile, your identity is not a document. It is structured knowledge about your professional experience, capabilities, and evidence.
 
-```bash
-npm install -g @provena/cli
-provena render profiles/valentin
+---
+
+## 2. Connect market sources
+
+Choose the job boards and market streams you want Provena to observe:
+
+- Stripe (`stripe` on Greenhouse)
+- OpenAI (`openai` on Greenhouse)
+- Anthropic (`anthropic` on Ashby)
+- Linear (`linear` on Lever)
+
+Once connected, Provena continuously synchronizes new opportunities.
+
+```text
+Sources  ──►  Market Catalog
 ```
 
-## 2. Create a workspace
+No manual searching required.
 
-```bash
-mkdir my-profile
+---
 
-cat > my-profile/person.yaml << 'EOF'
-name: "Your Name"
-email: "you@example.com"
-title: "Software Engineer"
-summary: "A short professional summary."
-urls:
-  github: "https://github.com/you"
-EOF
+## 3. Review your Attention Inbox
 
-cat > my-profile/provena.yaml << 'EOF'
-version: "1.0"
-EOF
+Every observed opportunity is evaluated deterministically against your identity.
+
+The Inbox only surfaces opportunities that deserve your attention into semantic tabs:
+
+```text
+Needs Attention      (High confidence & high professional/personal fit)
+
+Worth Considering    (Moderate fit worth reviewing)
+
+Unresolved          (Newly ingested postings awaiting evaluation)
+
+Decided             (Items marked Interested, Applied, or Dismissed)
 ```
 
-## 3. Render it
+Everything else stays in the market catalog.
 
-Render as Markdown:
+---
 
-```bash
-npx @provena/cli render my-profile
-cat my-profile/resume.md
+## 4. Understand why
+
+Every recommendation is explainable and falsifiable. For every opportunity, you can inspect:
+
+- **Professional Fit**: Coverage of technical capabilities and evidence requirements.
+- **Personal Fit**: Alignment with work preferences and constraints.
+- **Confidence**: Data sufficiency score.
+- **Supporting Evidence**: Direct links back to canonical profile facts.
+
+No opaque AI ranking. No black-box scoring.
+
+---
+
+## What Just Happened?
+
+```text
+Professional Identity
+        │
+        ▼
+Market Sources
+        │
+        ▼
+Continuous Observation
+        │
+        ▼
+Deterministic Assessment
+        │
+        ▼
+Attention Inbox
+        │
+        ▼
+Helping to look less
 ```
 
-Render as JSON Resume:
+Instead of searching repeatedly, Provena continuously watches the market and only interrupts you when something deserves your attention.
 
-```bash
-npx @provena/cli render my-profile --format jsonresume
-cat my-profile/resume.json
-```
+---
 
-## 4. Validate it
+## Optional: Use the CLI
 
-```bash
-npx @provena/cli validate my-profile
-```
+The CLI is available for developers who prefer local, file-based workflows.
 
-## Total time
+Typical uses include:
 
-Under five minutes.
+- **Validating a workspace**:
+  ```bash
+  provena validate .
+  ```
 
-## What just happened?
+- **Rendering identity projections**:
+  ```bash
+  provena render . --format markdown
+  ```
 
-```
-my-profile/
-  person.yaml          ──┐
-  provena.yaml          ──┤
-                         ▼
-                    Identity (canonical model)
-                         │
-                    ┌────┴────┐
-                    │         │
-                    ▼         ▼
-                resume.md   resume.json
-```
+- **Exporting JSON Resume**:
+  ```bash
+  provena render . --format jsonresume
+  ```
 
-The YAML workspace became a canonical identity model. Two different
-representations — Markdown and JSON Resume — were derived from the same
-source, without any manual copying.
+The CLI manages your canonical identity workspace. The web application manages continuous market observation and your Attention Inbox.
 
-## Next steps
+---
 
-- See the [concept](/concept) behind the model
-- Browse the [example workspace](https://github.com/valentinlineiro/provena/tree/main/profiles/valentin)
-- Read the [architecture](/architecture)
-- View the [source](https://github.com/valentinlineiro/provena) on GitHub
+## Next Steps
+
+- Learn [Why Provena](/why) exists.
+- Explore the [Architecture](/architecture).
+- View the [Problem](/problem) and [Concept](/concept).
+- Check the research [Roadmap](/roadmap).

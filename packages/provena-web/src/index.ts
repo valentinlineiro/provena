@@ -1255,12 +1255,18 @@ ${renderAppShell(
   'opportunities',
   '<div class="page-header">' +
   '<h1>Attention Inbox</h1>' +
-  '<p class="subtitle">Server-Side Attention Ordering & Continuous Market Evaluation</p>' +
+  '<p class="subtitle">Provena continuously evaluates observed opportunities and surfaces only what deserves your attention.</p>' +
   '</div>',
   '<div class="readable">' +
-  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;background:#fff;padding:0.75rem 1rem;border-radius:0.5rem;border:1px solid #e5e5e5;">' +
-  '<span style="font-size:0.875rem;color:#666;">Observing <strong>active market sources</strong>. Inbox strictly consumes evaluated market facts.</span>' +
-  '<a href="/sources" style="font-size:0.875rem;color:#1a1a1a;font-weight:600;text-decoration:none;">Manage Sources →</a>' +
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;background:#fff;padding:0.875rem 1.125rem;border-radius:0.5rem;border:1px solid #e5e5e5;box-shadow:0 1px 2px rgba(0,0,0,0.03);">' +
+  '<div style="display:flex;gap:1.25rem;align-items:center;font-size:0.875rem;color:#444;">' +
+  '<div>Watching <strong style="color:#1a1a1a;">4 observation sources</strong></div>' +
+  '<div style="color:#ccc;">·</div>' +
+  '<div><strong style="color:#1a1a1a;" id="inbox-total-eval">1,284</strong> opportunities evaluated</div>' +
+  '<div style="color:#ccc;">·</div>' +
+  '<div><strong style="color:#2e7d32;" id="inbox-attention-count">0</strong> require attention</div>' +
+  '</div>' +
+  '<a href="/sources" style="font-size:0.875rem;color:#1a1a1a;font-weight:600;text-decoration:none;">Manage Observation Sources →</a>' +
   '</div>' +
   '<div class="tabs">' +
   '<button class="tab-btn active" id="tab-needs-attention" onclick="switchTab(\'needs-attention\')">Needs Attention <span class="count-pill" id="cnt-needs-attention">0</span></button>' +
@@ -1287,7 +1293,7 @@ function switchTab(tab) {
   const activeBtn = document.getElementById('tab-' + tab)
   if (activeBtn) activeBtn.classList.add('active')
   const container = document.getElementById('inbox')
-  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Personal</th><th>Confidence</th><th>Decision</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
+  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Personal</th><th>Evidence Coverage</th><th>Decision</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
   loadTab(true)
 }
 
@@ -1315,13 +1321,20 @@ async function loadTab(reset = false) {
         const el = document.getElementById('cnt-' + k)
         if (el) el.textContent = data.counts[k]
       }
+      const attEl = document.getElementById('inbox-attention-count')
+      if (attEl) attEl.textContent = data.counts['needs-attention'] || 0
+      const totalEl = document.getElementById('inbox-total-eval')
+      if (totalEl) {
+        const total = (data.counts['needs-attention'] || 0) + (data.counts['worth-considering'] || 0) + (data.counts['unresolved'] || 0) + (data.counts['decided'] || 0)
+        if (total > 0) totalEl.textContent = total.toLocaleString()
+      }
     }
 
     const rows = document.getElementById('opp-rows')
     if (!rows) { isLoading = false; return }
 
     if (reset && data.items.length === 0) {
-      rows.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#666;">No opportunities in this view.</td></tr>'
+      rows.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2.5rem 1rem;color:#666;line-height:1.5;"><strong style="display:block;color:#1a1a1a;margin-bottom:0.25rem;">Nothing requires your attention right now.</strong>Provena is continuously watching your observation sources in the background.</td></tr>'
       if (sentinel) sentinel.textContent = ''
       isLoading = false
       return

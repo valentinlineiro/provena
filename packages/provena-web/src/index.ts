@@ -1596,13 +1596,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const tabItems = classified.filter(r => r.tab === tab)
           .sort((a, b) => b._pf - a._pf || b._conf - a._conf)
-        const pageItems = tabItems.slice(0, limit)
+        const offset = bookmarkParam ? parseInt(bookmarkParam, 10) || 0 : 0
+        const pageItems = tabItems.slice(offset, offset + limit)
+        const nextOffset = offset + pageItems.length
 
         return new Response(JSON.stringify({
           tab,
           counts,
           items: pageItems,
-          nextBookmark: null,
+          nextBookmark: nextOffset < tabItems.length ? String(nextOffset) : null,
           totalInTab: tabItems.length,
           totalEvaluatedCount: classified.length,
         }), {

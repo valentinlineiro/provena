@@ -122,7 +122,7 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
 
     const whereConditions = []
 
-    whereConditions.push(this.sql`p.status = 'ACTIVE'`)
+    whereConditions.push(this.sql`p.active = true`)
 
     if (tab === 'needs-attention') {
       whereConditions.push(this.sql`a.decision_tier = 4 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
@@ -181,11 +181,11 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
         a.confidence,
         a.evaluated_at,
         d.user_decision
-      FROM opportunities o
-      JOIN opportunity_postings p ON p.opportunity_id = o.id
-      JOIN current_opportunity_assessments a ON a.opportunity_id = o.id AND a.profile_id = ${profileId}
-      LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = o.id AND d.user_id = ${userId}
-      WHERE ${whereSql}
+      FROM current_opportunity_assessments a
+      JOIN opportunities o ON o.id = a.opportunity_id
+      JOIN opportunity_postings p ON p.opportunity_id = a.opportunity_id AND p.active = true
+      LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = a.opportunity_id AND d.user_id = ${userId}
+      WHERE a.profile_id = ${profileId} AND ${whereSql}
       ORDER BY a.decision_tier DESC, a.professional_fit DESC, a.confidence DESC, a.evaluated_at DESC, o.id ASC
       LIMIT ${limit}
     `

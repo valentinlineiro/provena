@@ -1507,7 +1507,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 END as tab_name,
                 COUNT(*)::text as count
               FROM current_opportunity_assessments a
-              JOIN opportunity_postings p ON p.opportunity_id = a.opportunity_id AND p.status = 'ACTIVE'
+              JOIN opportunity_postings p ON p.opportunity_id = a.opportunity_id AND p.active = true
               LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = a.opportunity_id AND d.user_id = 'valentin'
               WHERE a.profile_id = 'valentin'
               GROUP BY tab_name

@@ -23,7 +23,6 @@ import {
   MarketFeedService,
   MarketIngestionEngine,
   DeclarativeMarketRecognizer,
-  DefaultOpportunityRankingPolicy,
   encodeBookmark,
   decodeBookmark,
 } from '@provena/core'
@@ -37,7 +36,7 @@ import {
   PostgresObservationSourceRepository,
 } from '@provena/market-postgres'
 import postgres from 'postgres'
-import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab, UserOpportunityAssessment } from '@provena/core'
+import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import profile, { updatedAt } from './profile.js'
@@ -1345,28 +1344,17 @@ async function loadTab(reset = false) {
     }
 
     for (const item of data.items) {
-      const o = item.assessment || item
-      const raw = item.raw || o.raw || {}
-      const title = item.title || raw.title || o.title || 'Opportunity'
-      const company = item.companyName || raw.company || o.companyName || ''
-      const itemUrl = item.url || raw.url || o.url || '#'
-      const profScore = typeof o.professionalFitScore === 'number' ? o.professionalFitScore.toFixed(1) : '—'
-      const persScore = typeof o.personalFitScore === 'number' ? o.personalFitScore.toFixed(1) : '—'
-      const conf = typeof o.confidence === 'number' ? Math.round(o.confidence * 100) + '%' : '—'
-      const rec = o.recommendation || item.tier || 'abstain'
-      const userDecision = item.userDecision || 'new'
-
       const tr = document.createElement('tr')
       tr.innerHTML =
-        '<td><strong>' + title + '</strong>' + (company ? ' <span class="meta">at ' + company + '</span>' : '') + '<br><a class="meta" href="' + itemUrl + '" target="_blank">View Source</a></td>' +
-        '<td>' + profScore + '</td>' +
-        '<td>' + persScore + '</td>' +
-        '<td>' + conf + '</td>' +
-        '<td><span class="badge ' + rec + '">' + rec + '</span></td>' +
+        '<td><strong>' + item.title + '</strong>' + (item.companyName ? ' <span class="meta">at ' + item.companyName + '</span>' : '') + '<br><a class="meta" href="' + item.url + '" target="_blank">View Source</a></td>' +
+        '<td>' + item.profFit + '</td>' +
+        '<td>' + item.personalFit + '</td>' +
+        '<td>' + item.evidenceCoverage + '</td>' +
+        '<td><span class="badge ' + item.verdict + '">' + item.verdict + '</span></td>' +
         '<td><div class="btn-group">' +
-        '<button class="' + (userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\\'' + (item.id || o.opportunityId) + '\\', \\'interested\\')">⭐</button>' +
-        '<button class="' + (userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\\'' + (item.id || o.opportunityId) + '\\', \\'applied\\')">✓</button>' +
-        '<button class="' + (userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\\'' + (item.id || o.opportunityId) + '\\', \\'dismissed\\')">✗</button>' +
+        '<button class="' + (item.userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\\'' + item.id + '\\', \\'interested\\')">⭐</button>' +
+        '<button class="' + (item.userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\\'' + item.id + '\\', \\'applied\\')">✓</button>' +
+        '<button class="' + (item.userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\\'' + item.id + '\\', \\'dismissed\\')">✗</button>' +
         '</div></td>'
       rows.appendChild(tr)
     }
@@ -1464,30 +1452,29 @@ window.addEventListener('DOMContentLoaded', () => {
             const hasMore = results.length > limit
             const pageItems = hasMore ? results.slice(0, limit) : results
 
+            const toVerdict = (rec: string | null | undefined): string => {
+              const r = (rec || '').toLowerCase()
+              if (r === 'strong-candidate' || r === 'strong_fit' || r === 'apply') return 'strong-candidate'
+              if (r === 'consider') return 'consider'
+              return 'unresolved'
+            }
+            const tierToTab = (tier: number | null | undefined, userDec: string): AttentionTab => {
+              if (userDec && userDec !== 'new') return 'decided'
+              if (tier === 4) return 'needs-attention'
+              if (tier === 3) return 'worth-considering'
+              return 'unresolved'
+            }
             const items = pageItems.map(r => ({
               id: r.id,
-              externalId: r.externalId,
               title: r.title,
               companyName: r.companyName,
-              rawDescription: r.rawDescription,
               url: r.url,
+              tab: tierToTab(r.decisionTier ?? null, r.userDecision || 'new'),
+              verdict: toVerdict(r.recommendation),
+              profFit: typeof r.professionalFit === 'number' ? r.professionalFit.toFixed(1) : '—',
+              personalFit: typeof r.personalFit === 'number' ? r.personalFit.toFixed(1) : '—',
+              evidenceCoverage: typeof r.confidence === 'number' ? Math.round(r.confidence * 100) + '%' : '—',
               userDecision: r.userDecision || 'new',
-              assessment: {
-                opportunityId: r.id,
-                userId: 'valentin',
-                marketKnowledgeVersion: '1.0.0',
-                protocolVersion: '1.0.0',
-                profileVersion: '1.0.0',
-                preferenceVersion: '1.0.0',
-                assessmentJson: {} as any,
-                professionalFitScore: r.professionalFit ?? 0,
-                personalFitScore: r.personalFit ?? 0,
-                confidence: r.confidence ?? 0.5,
-                recommendation: r.recommendation ?? 'abstain',
-                evaluatedAt: r.evaluatedAt || new Date().toISOString(),
-              },
-              rankScore: (r.professionalFit ?? 0) * (r.confidence ?? 0.5),
-              tier: r.recommendation || 'abstain',
             }))
 
             const lastItem = pageItems[pageItems.length - 1]
@@ -1555,75 +1542,62 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const opps = env.PROVENA_KV ? await new KvOpportunityRepository(env.PROVENA_KV).list() : []
 
-        // Evaluate and rank opportunities
-        const policy = new DefaultOpportunityRankingPolicy()
-        const ranked = (opps || []).map(o => {
+        // Domain classification happens here in the backend, not in the UI
+        const toKvVerdict = (v: string): string => {
+          if (v === 'apply') return 'strong-candidate'
+          if (v === 'consider') return 'consider'
+          return 'unresolved'
+        }
+        const toKvTab = (tier: string, userDecision: string): AttentionTab => {
+          if (userDecision && userDecision !== 'new') return 'decided'
+          if (tier === 'strong-candidate') return 'needs-attention'
+          if (tier === 'consider') return 'worth-considering'
+          return 'unresolved'
+        }
+
+        const classified = (opps || []).map(o => {
           if (!o) return null
           const ev = o.evaluation || {}
           const evAny = ev as any
-          const assessment: UserOpportunityAssessment = evAny.assessment || {
-            opportunityId: o.id || '',
-            userId: 'valentin',
-            marketKnowledgeVersion: '1.0.0',
-            protocolVersion: '1.0.0',
-            profileVersion: '1.0.0',
-            preferenceVersion: '1.0.0',
-            assessmentJson: {} as any,
-            professionalFitScore: evAny.professionalFit?.score ?? 0,
-            personalFitScore: evAny.personalFit?.score ?? 0,
-            confidence: ev?.confidence ?? 0.5,
-            recommendation: ev?.verdict === 'apply' ? 'strong-candidate' : ev?.verdict === 'consider' ? 'consider' : 'abstain',
-            evaluatedAt: o.lastSeenAt || new Date().toISOString(),
-          }
-
+          const pf: number = evAny.professionalFit?.score ?? evAny.professionalFitScore ?? 0
+          const pers: number = evAny.personalFit?.score ?? evAny.personalFitScore ?? 0
+          const conf: number = ev?.confidence ?? 0.5
+          const verdict = toKvVerdict(ev?.verdict || 'abstain')
+          const userDecision = o.userDecision || 'new'
           return {
-            assessment,
-            rankScore: assessment.professionalFitScore * assessment.confidence,
-            tier: assessment.recommendation,
-            raw: o.raw,
-            userDecision: o.userDecision || 'new',
+            id: o.id || '',
             title: o.raw?.title || 'Opportunity',
             companyName: o.raw?.company || '',
             url: o.raw?.url || '#',
-            id: o.id || '',
+            tab: toKvTab(verdict, userDecision),
+            verdict,
+            profFit: pf.toFixed(1),
+            personalFit: pers.toFixed(1),
+            evidenceCoverage: Math.round(conf * 100) + '%',
+            userDecision,
+            _pf: pf,
+            _conf: conf,
           }
         }).filter((item): item is NonNullable<typeof item> => item !== null)
 
-        const isNew = (r: typeof ranked[0]) => !r.userDecision || r.userDecision === 'new'
-        const isNeedsAtt = (r: typeof ranked[0]) => isNew(r) && (String(r.tier) === 'strong-candidate' || String(r.tier) === 'apply' || String(r.tier) === 'STRONG_FIT' || (r.assessment && (r.assessment as any).decisionTier === 4))
-        const isWorthCons = (r: typeof ranked[0]) => isNew(r) && (String(r.tier) === 'consider' || String(r.tier) === 'CONSIDER' || (r.assessment && (r.assessment as any).decisionTier === 3))
-        const isDecided = (r: typeof ranked[0]) => !!r.userDecision && r.userDecision !== 'new'
-        const isUnresolved = (r: typeof ranked[0]) => !isDecided(r) && !isNeedsAtt(r) && !isWorthCons(r)
-
-        // Count items per tab
         const counts = {
-          'needs-attention': ranked.filter(isNeedsAtt).length,
-          'worth-considering': ranked.filter(isWorthCons).length,
-          'unresolved': ranked.filter(isUnresolved).length,
-          'decided': ranked.filter(isDecided).length,
+          'needs-attention': classified.filter(r => r.tab === 'needs-attention').length,
+          'worth-considering': classified.filter(r => r.tab === 'worth-considering').length,
+          'unresolved': classified.filter(r => r.tab === 'unresolved').length,
+          'decided': classified.filter(r => r.tab === 'decided').length,
         }
 
-        // Filter to current tab
-        let tabItems = ranked
-        if (tab === 'needs-attention') {
-          tabItems = ranked.filter(isNeedsAtt)
-        } else if (tab === 'worth-considering') {
-          tabItems = ranked.filter(isWorthCons)
-        } else if (tab === 'unresolved') {
-          tabItems = ranked.filter(isUnresolved)
-        } else if (tab === 'decided') {
-          tabItems = ranked.filter(isDecided)
-        }
-
-        const paginatedView = policy.paginateTab(tabItems, tab, bookmarkParam, limit)
+        const tabItems = classified.filter(r => r.tab === tab)
+          .sort((a, b) => b._pf - a._pf || b._conf - a._conf)
+        const pageItems = tabItems.slice(0, limit)
 
         return new Response(JSON.stringify({
           tab,
           counts,
-          items: paginatedView.items,
-          nextBookmark: paginatedView.nextBookmark,
-          totalInTab: paginatedView.totalInTab,
-          totalEvaluatedCount: ranked.length,
+          items: pageItems,
+          nextBookmark: null,
+          totalInTab: tabItems.length,
+          totalEvaluatedCount: classified.length,
         }), {
           headers: { 'Content-Type': 'application/json' },
         })

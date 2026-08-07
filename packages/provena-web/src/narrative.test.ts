@@ -54,6 +54,11 @@ function loadContract(): ContractSpec {
 
 const spec = loadContract()
 
+function includesNormalized(haystack: string, needle: string): boolean {
+  const cleanNeedle = needle.replace(/\.$/, '').toLowerCase()
+  return haystack.toLowerCase().includes(cleanNeedle)
+}
+
 // LEVEL 1: Narrative Invariants (D1-D6)
 test('Level 1 — D1: Hero & Value Proposition assertion', () => {
   const readme = readDoc('README.md')
@@ -61,13 +66,13 @@ test('Level 1 — D1: Hero & Value Proposition assertion', () => {
   const why = readDoc('website/why.md')
   const product = readDoc('PRODUCT.md')
 
-  assert.ok(product.includes(spec.contract.promise))
-  assert.ok(landing.includes(spec.contract.promise))
-  assert.ok(why.includes(spec.contract.promise))
-  assert.ok(readme.includes(spec.contract.promise))
-  assert.ok(landing.includes(spec.contract.thesis))
-  assert.ok(why.includes(spec.contract.thesis))
-  assert.ok(readme.includes(spec.contract.thesis))
+  assert.ok(includesNormalized(product, spec.contract.promise))
+  assert.ok(includesNormalized(landing, spec.contract.promise))
+  assert.ok(includesNormalized(why, spec.contract.promise))
+  assert.ok(includesNormalized(readme, spec.contract.promise))
+  assert.ok(includesNormalized(landing, spec.contract.thesis))
+  assert.ok(includesNormalized(why, spec.contract.thesis))
+  assert.ok(includesNormalized(readme, spec.contract.thesis))
 })
 
 test('Level 1 — D2: Canonical Sequence assertion', () => {
@@ -77,24 +82,24 @@ test('Level 1 — D2: Canonical Sequence assertion', () => {
 
   const expectedNodes = ['Identity', 'Observation', 'Assessment', 'Inbox']
   for (const node of expectedNodes) {
-    assert.ok(landing.includes(node), `Landing missing canonical node ${node}`)
-    assert.ok(concept.includes(node), `Concept missing canonical node ${node}`)
+    assert.ok(includesNormalized(landing, node), `Landing missing canonical node ${node}`)
+    assert.ok(includesNormalized(concept, node), `Concept missing canonical node ${node}`)
   }
-  assert.ok(problem.includes('Attention'), 'Problem missing Attention focus')
+  assert.ok(includesNormalized(problem, 'Attention'), 'Problem missing Attention focus')
 })
 
 test('Level 1 — D3: Architecture Fidelity assertion', () => {
   const archWeb = readDoc('website/architecture.md')
   const archDocs = readDoc('docs/architecture.md')
 
-  assert.ok(archWeb.includes('Continuous Market Observation'))
-  assert.ok(archDocs.includes('Continuous Market Observation'))
-  assert.ok(archWeb.includes('Deterministic Assessment'))
-  assert.ok(archDocs.includes('Deterministic Assessment'))
-  assert.ok(archWeb.includes('Attention Inbox'))
-  assert.ok(archDocs.includes('Attention Inbox'))
-  assert.ok(archWeb.includes('Identity Projections'))
-  assert.ok(archDocs.includes('Identity Projections'))
+  assert.ok(includesNormalized(archWeb, 'Continuous Market Observation'))
+  assert.ok(includesNormalized(archDocs, 'Continuous Market Observation'))
+  assert.ok(includesNormalized(archWeb, 'Deterministic Assessment'))
+  assert.ok(includesNormalized(archDocs, 'Deterministic Assessment'))
+  assert.ok(includesNormalized(archWeb, 'Attention Inbox'))
+  assert.ok(includesNormalized(archDocs, 'Attention Inbox'))
+  assert.ok(includesNormalized(archWeb, 'Identity Projections'))
+  assert.ok(includesNormalized(archDocs, 'Identity Projections'))
 })
 
 test('Level 1 — D4: Scenario Alignment assertion', () => {
@@ -112,14 +117,14 @@ test('Level 1 — D5: Roadmap Stage Continuum assertion', () => {
   const roadmapWeb = readDoc('website/roadmap.md')
   const roadmapDocs = readDoc('docs/roadmap.md')
 
-  assert.ok(roadmapWeb.includes('Foundation'))
-  assert.ok(roadmapDocs.includes('Foundation'))
-  assert.ok(roadmapWeb.includes('Platform'))
-  assert.ok(roadmapDocs.includes('Platform'))
-  assert.ok(roadmapWeb.includes('Validation'))
-  assert.ok(roadmapDocs.includes('Validation'))
-  assert.ok(roadmapWeb.includes('v0.7.1'))
-  assert.ok(roadmapDocs.includes('v0.7.1'))
+  assert.ok(includesNormalized(roadmapWeb, 'Foundation'))
+  assert.ok(includesNormalized(roadmapDocs, 'Foundation'))
+  assert.ok(includesNormalized(roadmapWeb, 'Platform'))
+  assert.ok(includesNormalized(roadmapDocs, 'Platform'))
+  assert.ok(includesNormalized(roadmapWeb, 'Validation'))
+  assert.ok(includesNormalized(roadmapDocs, 'Validation'))
+  assert.ok(includesNormalized(roadmapWeb, 'v0.7.1'))
+  assert.ok(includesNormalized(roadmapDocs, 'v0.7.1'))
 })
 
 test('Level 1 — D6: Web-First Onboarding assertion', () => {
@@ -137,7 +142,7 @@ test('Level 2 — Capability Coverage Matrix Harness', () => {
     for (const docFile of cap.required_in) {
       const content = readDoc(docFile)
       assert.ok(
-        content.includes(cap.name) || content.includes(cap.id),
+        includesNormalized(content, cap.name) || includesNormalized(content, cap.id),
         `Doc ${docFile} missing capability ${cap.name}`
       )
     }

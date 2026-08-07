@@ -1,55 +1,98 @@
 # Use Cases
 
-Provena serves professionals who want to stop manually searching job boards and instead let an autonomous system continuously observe and evaluate the market.
+Provena provides a continuous attention platform built around four core capabilities.
 
 ---
 
-## 1. Passive Market Observation
+## 1. Continuous Market Observation
 
-**The Problem**: Searching multiple job boards (Greenhouse, Ashby, Lever) every week consumes hours of manual attention and creates constant fear of missing out.
-
-**Provena Solution**: You connect your market sources once (`/sources`). Provena continuously observes market streams in the background and delivers evaluated opportunities straight to your **Attention Inbox** (`/opportunities`).
+Connect your market sources once (`/sources`). Provena continuously watches new opportunities in the background across Greenhouse, Ashby, Lever, and public job boards.
 
 ```text
-Sources (Greenhouse, Ashby, Lever)  ──►  Continuous Sync  ──►  Attention Inbox
+Identity  ──►  Market Sources  ──►  Continuous Observation  ──►  Shared Market Catalog
 ```
 
----
-
-## 2. Deterministic Opportunity Evaluation
-
-**The Problem**: Evaluating whether a job posting truly fits your background requires reading long descriptions, matching requirements against your memory, and guessing.
-
-**Provena Solution**: Paste any job description into `/evaluate`. Provena deterministically measures:
-- **Professional Fit**: Capability match and evidence coverage.
-- **Personal Fit**: Preference alignment.
-- **Recognition Coverage**: Vocabulary sufficiency.
-
-You receive an immediate, auditable verdict (`APPLY`, `CONSIDER`, `SKIP`) with explicit reasoning traced to your profile.
+- **No more repeated searching**: Stop checking job boards daily.
+- **Deduplicated market memory**: Postings are assigned cryptographic deduplication keys so you never evaluate the same role twice.
+- **Background sync**: Automated Cloudflare Worker cron jobs observe market streams continuously without human intervention.
 
 ---
 
-## 3. Career Timeline & Compass Tracking
+## 2. Attention Inbox & Deterministic Assessment
 
-**The Problem**: Professional history and evidence get forgotten over time. When you evaluate new opportunities, you struggle to recall specific metrics or achievements.
-
-**Provena Solution**: Provena tracks your story in a canonical timeline (`/`). Capture achievements and evidence as they happen. The **Career Compass** continuously checks your market readiness and highlights gap areas before you apply.
-
----
-
-## 4. Single Source of Truth for Identity Projections
-
-**The Problem**: Maintaining separate copies of your résumé, LinkedIn profile, conference bio, and JSON Resume causes facts to drift.
-
-**Provena Solution**: Define your experience, skills, and evidence once in a canonical YAML workspace. Derive Markdown, HTML, JSON Resume, or recruiter briefs without manual copying or formatting drift.
+Every observed opportunity is evaluated deterministically against your canonical identity before reaching you.
 
 ```text
-Canonical Identity (YAML)
+Professional Fit
+Personal Fit
+Recognition Coverage
         │
+        ▼
+Needs Attention  ·  Worth Considering  ·  Unresolved  ·  Decided
+```
+
+- **Review only what matters**: Your Attention Inbox (`/opportunities`) filters out market noise automatically into semantic tabs.
+- **Falsifiable evaluations**: Inspect exact capability matches, evidence coverage, and confidence scores for every recommendation.
+- **Decision recording**: Mark positions as `Interested`, `Applied`, or `Dismissed` to update your attention state immutably.
+
+---
+
+## 3. Career Knowledge & Timeline
+
+Your professional identity evolves as structured knowledge, serving every market evaluation and career decision.
+
+```text
+Facts & Evidence  ──►  Canonical Profile  ──►  Career Compass & Market Readiness
+```
+
+- **Capture once**: Log achievements, milestones, and evidence as they happen (`/`).
+- **Referential integrity**: Capabilities explicitly reference real work evidence — claims are backed by proof, never unverified buzzwords.
+- **Career Compass**: Continuously check your positioning and identify evidence gaps before targeting new roles.
+
+---
+
+## 4. Identity Projections
+
+Generate consistent professional documents from the same canonical identity source.
+
+```text
+Canonical Identity Model
+        │
+        ├──► Web & PDF CV (`/cv` or `resume.html`)
         ├──► Markdown Resume (`resume.md`)
-        ├──► HTML / PDF CV (`resume.html`)
         ├──► JSON Resume (`resume.json`)
-        └──► LinkedIn Profile (`resume.markdown`)
+        └──► LinkedIn Profile Brief (`resume.markdown`)
+```
+
+- **Single source of truth**: Update an achievement once. Every projection reflects it instantly without formatting drift.
+- **Web & CLI support**: Render projections directly in the web application or locally via `provena render`.
+
+---
+
+## Scenario Summary
+
+```text
+Continuous Market Observation
+─────────────────────────────
+Connect once. Provena observes market feeds, deduplicates postings, and maintains your catalog.
+
+        ↓
+
+Attention Inbox & Assessment
+────────────────────────────
+Every posting is evaluated deterministically. Only postings that deserve attention interrupt you.
+
+        ↓
+
+Career Knowledge
+────────────────
+Your professional identity evolves as a single canonical model, supporting every evaluation.
+
+        ↓
+
+Identity Projections
+────────────────────
+Generate résumés, LinkedIn briefs, or JSON Resume exports from the same canonical facts.
 ```
 
 ---

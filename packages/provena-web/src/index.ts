@@ -1362,14 +1362,12 @@ async function loadTab(reset = false) {
     hasMore = !!data.nextBookmark
     sentinel.textContent = hasMore ? 'Scroll for more...' : ''
 
-    // IntersectionObserver only fires on state changes. If the first page
-    // doesn't push the sentinel below the fold, it stays visible but the
-    // observer won't fire again. Trigger the next page automatically.
-    if (hasMore) {
-      const rect = sentinel.getBoundingClientRect()
-      if (rect.top < window.innerHeight) {
-        setTimeout(() => loadTab(false), 80)
-      }
+    // Re-observe the sentinel after each page load so the IntersectionObserver
+    // re-evaluates intersection state. Without this it only fires on *changes*,
+    // meaning it never triggers again if the sentinel stays visible after load.
+    if (observer) {
+      observer.unobserve(sentinel)
+      observer.observe(sentinel)
     }
   } catch (e) {
     sentinel.textContent = 'Failed to load'

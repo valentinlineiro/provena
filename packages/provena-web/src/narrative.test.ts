@@ -48,8 +48,9 @@ interface ContractSpec {
 function loadContract(): ContractSpec {
   const raw = readDoc('PRODUCT.md')
   const match = raw.match(/^---\n([\s\S]+?)\n---/)
-  if (!match) throw new Error('PRODUCT.md missing YAML frontmatter')
-  return yaml.load(match[1]) as ContractSpec
+  const yamlContent = match?.[1]
+  if (!yamlContent) throw new Error('PRODUCT.md missing YAML frontmatter content')
+  return yaml.load(yamlContent) as ContractSpec
 }
 
 const spec = loadContract()

@@ -136,7 +136,7 @@ test('MarketIngestionEngine: content description edit generates updated Posting 
   assert.equal(currentModel?.marketKnowledgeVersion, '1.1.0')
 })
 
-test('MarketIngestionEngine: missing posting in sync is marked inactive without deletion', async () => {
+test('MarketIngestionEngine: missing posting in sync transitions NOT_SEEN then inactive without deletion', async () => {
   const oppRepo = new MemoryMarketOpportunityRepository()
   const postRepo = new MemoryMarketPostingRepository()
   const modelStore = new MemoryMarketModelStore()
@@ -144,17 +144,21 @@ test('MarketIngestionEngine: missing posting in sync is marked inactive without 
   const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, dummyRecognizer)
   await engine.ingest([rawPosting1, rawPosting2], makeContext({ now: '2026-08-06T10:00:00.000Z' }))
 
-  // Sync 2 only contains rawPosting1 (rawPosting2 closed/removed)
+  // Sync 2 only contains rawPosting1 (rawPosting2 missing once -> NOT_SEEN)
   const result2 = await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T12:00:00.000Z' }))
+  assert.equal(result2.deactivatedPostings, 0)
 
-  assert.equal(result2.deactivatedPostings, 1)
+  // Sync 3 only contains rawPosting1 (rawPosting2 missing twice -> INACTIVE)
+  const result3 = await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T13:00:00.000Z' }))
+  assert.equal(result3.deactivatedPostings, 1)
 
   const opps = await oppRepo.list()
   const opp2 = opps.find(o => o.title === 'Staff Software Engineer')!
   const p2 = (await postRepo.listByOpportunity(opp2.id))[0]!
 
   assert.equal(p2.active, false)
-  assert.equal(p2.lastSeenAt, '2026-08-06T12:00:00.000Z')
+  assert.equal(p2.status, 'INACTIVE')
+  assert.equal(p2.lastSeenAt, '2026-08-06T13:00:00.000Z')
 })
 
 test('MarketIngestionEngine isolation: zero coupling to candidate Profile, PreferenceSet, or User identity', () => {
@@ -169,3 +173,37 @@ test('MarketIngestionEngine isolation: zero coupling to candidate Profile, Prefe
   assert.equal('profile' in engine, false)
   assert.equal('user' in engine, false)
 })
+
+test('reconcileBoardSync increments consecutive_absent_runs and transitions ACTIVE to NOT_SEEN then INACTIVE to ARCHIVED without deleting', async () => {
+  const oppRepo = new MemoryMarketOpportunityRepository()
+  const postRepo = new MemoryMarketPostingRepository()
+  const modelStore = new MemoryMarketModelStore()
+
+  const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, dummyRecognizer)
+  await engine.ingest([rawPosting1, rawPosting2], makeContext({ now: '2026-08-06T10:00:00.000Z' }))
+
+  // Run 2: Missing rawPosting2 -> NOT_SEEN (absent 1)
+  await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T11:00:00.000Z' }))
+  const opps = await oppRepo.list()
+  const opp2 = opps.find(o => o.title === 'Staff Software Engineer')!
+  let p2 = (await postRepo.listByOpportunity(opp2.id))[0]!
+
+  assert.equal(p2.status, 'NOT_SEEN')
+  assert.equal(p2.consecutiveAbsentRuns, 1)
+
+  // Run 3: Missing rawPosting2 -> INACTIVE (absent 2)
+  await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T12:00:00.000Z' }))
+  p2 = (await postRepo.listByOpportunity(opp2.id))[0]!
+  assert.equal(p2.status, 'INACTIVE')
+  assert.equal(p2.consecutiveAbsentRuns, 2)
+  assert.equal(p2.active, false)
+
+  // Run 4, 5, 6: Absent until >= 5 -> ARCHIVED
+  await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T13:00:00.000Z' }))
+  await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T14:00:00.000Z' }))
+  await engine.ingest([rawPosting1], makeContext({ now: '2026-08-06T15:00:00.000Z' }))
+  p2 = (await postRepo.listByOpportunity(opp2.id))[0]!
+  assert.equal(p2.status, 'ARCHIVED')
+  assert.equal(p2.consecutiveAbsentRuns, 5)
+})
+

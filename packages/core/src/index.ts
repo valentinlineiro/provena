@@ -105,6 +105,7 @@ export type {
   OpportunityId,
   OpportunityPostingId,
   SourceType,
+  PostingStatus,
   Opportunity,
   OpportunityPosting,
   MarketModelRecord,
@@ -133,9 +134,12 @@ export type {
   MarketRecognizer,
   IngestionContext,
   IngestResult,
+  IngestionRunRecord,
 } from './market-ingest.js'
 export {
   computeContentHash,
+  reconcilePostingStatus,
+  reconcileBoardSync as reconcileCatalogBoardSync,
   MarketIngestionEngine,
 } from './market-ingest.js'
 

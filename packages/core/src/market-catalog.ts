@@ -105,6 +105,8 @@ export interface Opportunity {
 //   not on the Opportunity, because different sources may have different
 //   descriptions for the same canonical role.
 
+export type PostingStatus = 'ACTIVE' | 'NOT_SEEN' | 'INACTIVE' | 'ARCHIVED'
+
 export interface OpportunityPosting {
   readonly id: OpportunityPostingId
 
@@ -128,6 +130,14 @@ export interface OpportunityPosting {
    * Once inactive, only lastSeenAt and active change — content is immutable.
    */
   readonly active: boolean
+
+  /**
+   * Non-destructive status lifecycle: ACTIVE -> NOT_SEEN -> INACTIVE -> ARCHIVED
+   */
+  readonly status?: PostingStatus
+
+  /** Consecutive sync executions where this posting was absent from the source feed */
+  readonly consecutiveAbsentRuns?: number
 
   readonly rawDescription: string
 }

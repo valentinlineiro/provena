@@ -86,8 +86,16 @@ test('MarketFeedService: Sync #1 (initial), Sync #2 (idempotent), Sync #3 (contr
 
   assert.equal(res3.ingestResult.newlyAddedPostings, 1)   // jobE
   assert.equal(res3.ingestResult.updatedPostings, 1)      // jobAUpdated
-  assert.equal(res3.ingestResult.deactivatedPostings, 1)  // jobD deactivated
+  assert.equal(res3.ingestResult.deactivatedPostings, 0)  // jobD missing 1st time -> NOT_SEEN (active)
   assert.equal(res3.ingestResult.newMarketModelsGenerated, 2) // jobE + jobAUpdated
+
+  // SYNC #4: Second absent run for jobD -> INACTIVE (deactivated)
+  const res4 = await service.syncSource(registration, {
+    now: '2026-08-06T13:00:00.000Z',
+    marketKnowledgeVersion: '1.0.1',
+    recognitionOrder: 103,
+  })
+  assert.equal(res4.ingestResult.deactivatedPostings, 1)  // jobD missing 2nd time -> INACTIVE (deactivated)
 
   // Verify Work_{t+1} ∝ ΔMarket invariant holds
   assert.equal(res3.affectedOpportunityIds.length, 4)

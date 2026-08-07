@@ -1515,9 +1515,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 CASE 
                   WHEN a.decision_tier = 4 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'needs-attention'
                   WHEN a.decision_tier = 3 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'worth-considering'
-                  WHEN a.decision_tier IN (1, 2) AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'unresolved'
                   WHEN d.user_decision IS NOT NULL AND d.user_decision != 'new' THEN 'decided'
-                  ELSE 'other'
+                  ELSE 'unresolved'
                 END as tab_name,
                 COUNT(*)::text as count
               FROM current_opportunity_assessments a
@@ -1537,6 +1536,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 counts[row.tab_name as AttentionTab] = parseInt(row.count, 10)
               }
             }
+            const totalEvaluatedCount = counts['needs-attention'] + counts['worth-considering'] + counts['unresolved'] + counts['decided']
 
             return new Response(JSON.stringify({
               tab,
@@ -1544,6 +1544,7 @@ window.addEventListener('DOMContentLoaded', () => {
               items,
               nextBookmark,
               totalInTab: counts[tab] ?? items.length,
+              totalEvaluatedCount,
             }), {
               headers: { 'Content-Type': 'application/json' },
             })
@@ -1616,6 +1617,7 @@ window.addEventListener('DOMContentLoaded', () => {
           items: paginatedView.items,
           nextBookmark: paginatedView.nextBookmark,
           totalInTab: paginatedView.totalInTab,
+          totalEvaluatedCount: ranked.length,
         }), {
           headers: { 'Content-Type': 'application/json' },
         })

@@ -195,3 +195,12 @@ test('GET /api/sources returns list of active market feeds', async () => {
   assert.ok(json.sources.length >= 4)
   assert.equal(json.sources[0].name, 'Stripe Careers')
 })
+
+test('Inbox Materialization Invariant: sum of tab counts equals totalEvaluatedCount', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/api/opportunities?tab=needs-attention'), env)
+  const data = await res.json() as any
+  if (data.counts) {
+    const sum = (data.counts['needs-attention'] || 0) + (data.counts['worth-considering'] || 0) + (data.counts['unresolved'] || 0) + (data.counts['decided'] || 0)
+    assert.equal(data.totalEvaluatedCount ?? sum, sum, 'Total evaluated count must equal the sum of the 4 tabs')
+  }
+})

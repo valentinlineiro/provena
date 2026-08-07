@@ -34,6 +34,7 @@ import {
   PostgresMarketAssessmentRepository,
   PostgresUserDecisionRepository,
   PostgresOpportunitySearchAdapter,
+  PostgresObservationSourceRepository,
 } from '@provena/market-postgres'
 import postgres from 'postgres'
 import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab, UserOpportunityAssessment } from '@provena/core'
@@ -1029,6 +1030,28 @@ const DEFAULT_OBSERVATION_SOURCES: ObservationSourceItem[] = [
 const memoryCustomSources: ObservationSourceItem[] = []
 
 async function getMergedSources(env: Env): Promise<ObservationSourceItem[]> {
+  if (env.DATABASE_URL) {
+    try {
+      const sql = postgres(env.DATABASE_URL, { max: 1 })
+      try {
+        const repo = new PostgresObservationSourceRepository(sql)
+        const dbSources = await repo.list('valentin')
+        if (dbSources.length > 0) {
+          return dbSources.map(r => ({
+            name: r.name,
+            provider: r.provider,
+            token: r.id,
+            url: r.url,
+            status: r.status,
+            jobsObserved: r.jobsObserved > 0 ? r.jobsObserved.toLocaleString() : 'Watching',
+          }))
+        }
+      } finally {
+        await sql.end()
+      }
+    } catch {}
+  }
+
   let customList: ObservationSourceItem[] = memoryCustomSources
   if (env.PROVENA_KV) {
     try {
@@ -1045,11 +1068,33 @@ async function getMergedSources(env: Env): Promise<ObservationSourceItem[]> {
 async function registerObservedSource(env: Env, token: string, count: number): Promise<void> {
   const tokenClean = token.toLowerCase().trim()
   const name = tokenClean.charAt(0).toUpperCase() + tokenClean.slice(1) + ' Careers'
+  const url = `https://boards.greenhouse.io/${tokenClean}`
+
+  if (env.DATABASE_URL) {
+    try {
+      const sql = postgres(env.DATABASE_URL, { max: 1 })
+      try {
+        const repo = new PostgresObservationSourceRepository(sql)
+        await repo.upsert({
+          id: tokenClean,
+          profileId: 'valentin',
+          name,
+          provider: 'Greenhouse',
+          url,
+          status: 'Watching',
+          jobsObserved: count,
+        })
+      } finally {
+        await sql.end()
+      }
+    } catch {}
+  }
+
   const newSource: ObservationSourceItem = {
     name,
     provider: 'Greenhouse',
     token: tokenClean,
-    url: `https://boards.greenhouse.io/${tokenClean}`,
+    url,
     status: 'Watching',
     jobsObserved: count > 0 ? `${count} postings` : 'Watching',
   }

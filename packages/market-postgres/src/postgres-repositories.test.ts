@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import {
   PostgresMarketAssessmentRepository,
   PostgresUserDecisionRepository,
+  PostgresObservationSourceRepository,
 } from './index.js'
 
 const DATABASE_URL = process.env.DATABASE_URL || 'postgres://provena:provena@localhost:5432/provena_test'
@@ -20,6 +21,13 @@ test('PostgresUserDecisionRepository module exports class with expected methods'
   assert.equal(typeof PostgresUserDecisionRepository, 'function')
   assert.equal(typeof PostgresUserDecisionRepository.prototype.setDecision, 'function')
   assert.equal(typeof PostgresUserDecisionRepository.prototype.getDecision, 'function')
+})
+
+test('PostgresObservationSourceRepository module exports class with expected methods', () => {
+  assert.equal(typeof PostgresObservationSourceRepository, 'function')
+  assert.equal(typeof PostgresObservationSourceRepository.prototype.list, 'function')
+  assert.equal(typeof PostgresObservationSourceRepository.prototype.upsert, 'function')
+  assert.equal(typeof PostgresObservationSourceRepository.prototype.delete, 'function')
 })
 
 test('PostgresMarketAssessmentRepository and PostgresUserDecisionRepository database operations', async () => {

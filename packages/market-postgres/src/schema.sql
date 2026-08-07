@@ -126,3 +126,18 @@ CREATE TABLE IF NOT EXISTS market_models (
 CREATE INDEX IF NOT EXISTS idx_market_models_current ON market_models(opportunity_id, recognition_order DESC);
 CREATE INDEX IF NOT EXISTS idx_assessments_keyset ON opportunity_assessments(decision_tier DESC, professional_fit DESC, confidence DESC, evaluated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_user_decisions_tab ON user_opportunity_decisions(user_id, user_decision);
+
+CREATE TABLE IF NOT EXISTS observation_sources (
+    id TEXT PRIMARY KEY,
+    profile_id TEXT NOT NULL DEFAULT 'valentin',
+    name TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    url TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Watching',
+    jobs_observed INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_synced_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_observation_sources_profile ON observation_sources(profile_id);

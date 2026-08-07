@@ -16,3 +16,7 @@ export {
   PostgresUserDecisionRepository,
   type UserDecisionRecord,
 } from './postgres-user-decision-repository.js'
+export {
+  PostgresObservationSourceRepository,
+  type ObservationSourceRecord,
+} from './postgres-observation-source-repository.js'

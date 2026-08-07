@@ -1497,8 +1497,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 orderingVersion: 1,
                 tab,
                 tier: tierNum,
-                pf: Math.round((lastItem.professionalFit ?? 0) * 100) / 100,
-                conf: Math.round((lastItem.confidence ?? 0) * 100) / 100,
+                pf: lastItem.professionalFit ?? 0,
+                conf: lastItem.confidence ?? 0,
                 seen: lastItem.evaluatedAt || new Date().toISOString(),
                 id: lastItem.id,
               })

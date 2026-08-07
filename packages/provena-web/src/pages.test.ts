@@ -160,3 +160,12 @@ test('POST /api/opportunities/ingest is idempotent across repeated syncs of the 
     globalThis.fetch = originalFetch
   }
 })
+
+test('GET /api/opportunities gracefully returns empty response when PROVENA_KV is missing', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/api/opportunities?tab=unresolved&limit=30'), env)
+  assert.equal(res.status, 200)
+  const json = await res.json() as any
+  assert.equal(json.tab, 'unresolved')
+  assert.deepEqual(json.items, [])
+  assert.equal(json.totalInTab, 0)
+})

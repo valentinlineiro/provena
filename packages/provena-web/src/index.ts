@@ -1226,72 +1226,87 @@ window.addEventListener('DOMContentLoaded', () => {
       const cursor = url.searchParams.get('cursor')
       const limit = parseInt(url.searchParams.get('limit') || '30', 10)
 
-      const opps = await new KvOpportunityRepository(env.PROVENA_KV).list()
+      try {
+        const opps = env.PROVENA_KV ? await new KvOpportunityRepository(env.PROVENA_KV).list() : []
 
-      // Evaluate and rank opportunities
-      const policy = new DefaultOpportunityRankingPolicy()
-      const ranked = opps.map(o => {
-        const ev = o.evaluation || {}
-        const evAny = ev as any
-        const assessment: UserOpportunityAssessment = evAny.assessment || {
-          opportunityId: o.id,
-          userId: 'valentin',
-          marketKnowledgeVersion: '1.0.0',
-          protocolVersion: '1.0.0',
-          profileVersion: '1.0.0',
-          preferenceVersion: '1.0.0',
-          assessmentJson: {} as any,
-          professionalFitScore: evAny.professionalFit?.score ?? 0,
-          personalFitScore: evAny.personalFit?.score ?? 0,
-          confidence: ev.confidence ?? 0.5,
-          recommendation: ev.verdict === 'apply' ? 'strong-candidate' : ev.verdict === 'consider' ? 'consider' : 'abstain',
-          evaluatedAt: o.lastSeenAt,
+        // Evaluate and rank opportunities
+        const policy = new DefaultOpportunityRankingPolicy()
+        const ranked = (opps || []).map(o => {
+          if (!o) return null
+          const ev = o.evaluation || {}
+          const evAny = ev as any
+          const assessment: UserOpportunityAssessment = evAny.assessment || {
+            opportunityId: o.id || '',
+            userId: 'valentin',
+            marketKnowledgeVersion: '1.0.0',
+            protocolVersion: '1.0.0',
+            profileVersion: '1.0.0',
+            preferenceVersion: '1.0.0',
+            assessmentJson: {} as any,
+            professionalFitScore: evAny.professionalFit?.score ?? 0,
+            personalFitScore: evAny.personalFit?.score ?? 0,
+            confidence: ev?.confidence ?? 0.5,
+            recommendation: ev?.verdict === 'apply' ? 'strong-candidate' : ev?.verdict === 'consider' ? 'consider' : 'abstain',
+            evaluatedAt: o.lastSeenAt || new Date().toISOString(),
+          }
+
+          return {
+            assessment,
+            rankScore: assessment.professionalFitScore * assessment.confidence,
+            tier: assessment.recommendation,
+            raw: o.raw,
+            userDecision: o.userDecision || 'new',
+            title: o.raw?.title || 'Opportunity',
+            companyName: o.raw?.company || '',
+            url: o.raw?.url || '#',
+            id: o.id || '',
+          }
+        }).filter((item): item is NonNullable<typeof item> => item !== null)
+
+        // Count items per tab
+        const counts = {
+          'needs-attention': ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate').length,
+          'worth-considering': ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider').length,
+          'unresolved': ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip')).length,
+          'decided': ranked.filter(r => r.userDecision && r.userDecision !== 'new').length,
         }
 
-        return {
-          assessment,
-          rankScore: assessment.professionalFitScore * assessment.confidence,
-          tier: assessment.recommendation,
-          raw: o.raw,
-          userDecision: o.userDecision,
-          title: o.raw?.title || 'Opportunity',
-          companyName: o.raw?.company || '',
-          url: o.raw?.url || '#',
-          id: o.id,
+        // Filter to current tab
+        let tabItems = ranked
+        if (tab === 'needs-attention') {
+          tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate')
+        } else if (tab === 'worth-considering') {
+          tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider')
+        } else if (tab === 'unresolved') {
+          tabItems = ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip'))
+        } else if (tab === 'decided') {
+          tabItems = ranked.filter(r => r.userDecision && r.userDecision !== 'new')
         }
-      })
 
-      // Count items per tab
-      const counts = {
-        'needs-attention': ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate').length,
-        'worth-considering': ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider').length,
-        'unresolved': ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip')).length,
-        'decided': ranked.filter(r => r.userDecision && r.userDecision !== 'new').length,
+        const paginatedView = policy.paginateTab(tabItems, tab, cursor, limit)
+
+        return new Response(JSON.stringify({
+          tab,
+          counts,
+          items: paginatedView.items,
+          nextCursor: paginatedView.nextCursor,
+          totalInTab: paginatedView.totalInTab,
+        }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(JSON.stringify({
+          tab,
+          counts: { 'needs-attention': 0, 'worth-considering': 0, 'unresolved': 0, 'decided': 0 },
+          items: [],
+          nextCursor: null,
+          totalInTab: 0,
+          error: e instanceof Error ? e.message : 'Failed to fetch opportunities',
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
       }
-
-      // Filter to current tab
-      let tabItems = ranked
-      if (tab === 'needs-attention') {
-        tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate')
-      } else if (tab === 'worth-considering') {
-        tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider')
-      } else if (tab === 'unresolved') {
-        tabItems = ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip'))
-      } else if (tab === 'decided') {
-        tabItems = ranked.filter(r => r.userDecision && r.userDecision !== 'new')
-      }
-
-      const paginatedView = policy.paginateTab(tabItems, tab, cursor, limit)
-
-      return new Response(JSON.stringify({
-        tab,
-        counts,
-        items: paginatedView.items,
-        nextCursor: paginatedView.nextCursor,
-        totalInTab: paginatedView.totalInTab,
-      }), {
-        headers: { 'Content-Type': 'application/json' },
-      })
     }
 
     if (request.method === 'POST' && url.pathname === '/api/opportunities/decision') {
@@ -1299,7 +1314,9 @@ window.addEventListener('DOMContentLoaded', () => {
         const body = (await request.json()) as { id?: string; decision?: OpportunityUserDecision }
         if (!body.id || !body.decision) return new Response('Missing id or decision', { status: 400 })
 
-        await new KvOpportunityRepository(env.PROVENA_KV).updateDecision(body.id, body.decision)
+        if (env.PROVENA_KV) {
+          await new KvOpportunityRepository(env.PROVENA_KV).updateDecision(body.id, body.decision)
+        }
         return new Response('ok', { status: 200 })
       } catch (e) {
         return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
@@ -1310,6 +1327,15 @@ window.addEventListener('DOMContentLoaded', () => {
       try {
         const body = (await request.json()) as { boardToken?: string }
         const boardToken = body.boardToken || 'stripe'
+        if (!env.PROVENA_KV) {
+          return new Response(JSON.stringify({
+            boardToken,
+            fetchedCount: 0,
+            newlyAddedCount: 0,
+            totalMemoryCount: 0,
+            message: 'PROVENA_KV is not configured in this environment.'
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+        }
         // Greenhouse's public board API is a fixed, known-safe domain (unlike arbitrary
         // user-submitted URLs), so a larger board can legitimately exceed the general
         // SSRF-guard default cap without it being a resource-exhaustion risk.

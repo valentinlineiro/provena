@@ -29,28 +29,25 @@ Every phase and epic exists because of a real friction event. Each phase reduces
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## Strategic Phase Continuum
+## Release Sequence & Version Roadmap
 
 ```text
-Phase 1: Canonical Professional Identity
-        ✓ Completed
+v0.7.1 — Stabilization & Product Alignment (Current)
+        - Zero known bugs, hardening edge cases & Neon fallbacks
+        - UI aligned with continuous observation: Sources (/sources) vs Inbox (/opportunities)
+        - Refreshed landing page ("Helping to look less") & documentation reconciliation
 
-Phase 2: Decision-aware Projection
-        ✓ Completed
+v0.8.0 — K12 (Knowledge Promotion)
+        - Re-engage U2 dataset & discriminative pattern extraction
+        - First operational knowledge version promotion
 
-Phase 3: Shared Market Architecture (O2) & Neon Canonical Store
-        ✓ Completed
+v0.9.0 — Attention Validation & Product Telemetry
+        - Measure Attention Precision & Missed Opportunity Rate
+        - Empirical validation of the "Helping to look less" hypothesis
 
-Phase 4: Market Knowledge Acquisition (K12)
-        🧪 Experimental
-
-Phase 5: Attention Validation & Product Science
-        📋 Planned
-
-Phase 6: Helping to look less (Symbolic Milestone: Operational Knowledge Version 1)
-        🔭 Vision
+v1.0.0 — Verified Continuous Attention Platform
+        - Operational Knowledge Version = 1
+        - Proven, continuous market observation platform backed by experimental proof
 ```
 
 ---

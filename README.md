@@ -1,6 +1,8 @@
 # Provena
 
-Your professional identity as a canonical source of truth and continuous market observer.
+Connect your career to the market once. Provena continuously observes thousands of opportunities, evaluates them against your professional identity, and only interrupts you when something deserves your attention.
+
+> **"Helping to look less."** — Preserve human attention for decisions that matter.
 
 ```bash
 git clone https://github.com/valentinlineiro/provena.git
@@ -15,13 +17,13 @@ npm run dev
 
 > **Professional identity is an immutable history of evidence. Communication is a projection optimized for a decision.**
 
-Provena decouples professional identity from static CV formats and integrates continuous market observation to minimize job search friction.
+Provena decouples professional identity from static CV formats and integrates continuous market observation to minimize human attention in job search.
 
-- **Capture once**: Never reconstruct professional history from memory.
-- **One source of truth**: Plain, referentially verified YAML workspaces (`Profile`).
-- **Decision-aware projections**: Deterministic evaluation (`evaluateOpportunity(jd, profile)`) producing traceable APPLY / CONSIDER / SKIP verdicts.
-- **Continuous market observer (O2)**: Autonomous board ingestion, deduplication, Neon PostgreSQL market memory, and background Cloudflare Worker sync.
-- **Attention Inbox**: Context-filtered market opportunities organized by relevance.
+- **Capture once**: Plain, referentially verified YAML workspaces (`Profile`).
+- **Continuous market observer**: Autonomous board ingestion (Greenhouse, Ashby, Lever), deduplication, Neon PostgreSQL market memory, and Cloudflare Worker cron sync.
+- **Deterministic evaluation**: Traceable APPLY / CONSIDER / SKIP verdicts against your canonical identity.
+- **Attention Inbox**: Context-filtered market opportunities organized by semantic tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`).
+- **Sources management**: Explicit feed configuration — Inbox strictly consumes evaluated market facts.
 
 ---
 
@@ -69,15 +71,16 @@ npm run --prefix packages/provena-web dev
 
 ---
 
-## Subsystem Status (`v0.7.0`)
+## Subsystem Status (`v0.7.1`)
 
 | Subsystem | Status | Description |
 |-----------|--------|-------------|
 | **Identity Domain** | ✅ **Stable** | Profile aggregate, referential integrity, YAML workspace loader/writer |
-| **Decision Protocol** | ✅ **Stable** | Protocol v1 deterministic evaluation, traceable evidence |
-| **Shared Market (O2)** | ✅ **Stable** | Greenhouse board sync, posting deduplication, Neon PostgreSQL + Cloudflare Cron |
-| **Attention Inbox** | ✅ **Stable** | Semantic tabs (`Needs Attention`, `Worth Considering`), cursor pagination |
+| **Decision Protocol** | ✅ **Stable** | Protocol v1 deterministic evaluation, OE-1/2/3 policies, traceable evidence |
+| **Shared Market (O2)** | ✅ **Stable** | Greenhouse/Ashby/Lever board sync, posting deduplication, Neon PostgreSQL + Cloudflare Cron |
+| **Sources Management** | ✅ **Stable** | Continuous observation adapters, feed configuration (`/sources`) |
+| **Attention Inbox** | ✅ **Stable** | Semantic tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`), cursor pagination |
 | **K12 Knowledge Acquisition** | 🧪 **Experimental** | Market requirement pattern extraction (`MarketPatternDefinitions`) |
-| **Attention Validation** | 📋 **Planned** | Empirical measurement of observation time reduction |
+| **Attention Validation** | 📋 **Planned** | Empirical measurement of observation time reduction (*Helping to look less*) |
 
 For full details, see [Live Project Status](docs/project-status.md), [ADR-001 Governance](docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), and [Architecture Freeze Record](docs/architecture/freeze-v0.7.0.md).

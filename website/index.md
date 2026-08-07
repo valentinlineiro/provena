@@ -3,89 +3,88 @@ layout: home
 
 hero:
   name: Provena
-  text: Define your identity once. Export everywhere.
+  text: Stop searching.
   tagline: |
-    A canonical model for your professional identity.
-    One YAML workspace. CV, JSON Resume, HTML, and more — all generated from the same source.
+    Provena continuously observes the market and surfaces only opportunities that deserve your attention.
+    Connect your professional identity once. Let an autonomous system watch continuous market feeds.
   actions:
     - theme: brand
       text: Quick start in 5 minutes
       link: /quickstart
     - theme: alt
-      text: See the model
-      link: /concept
-    - theme: alt
-      text: View example output
-      link: /examples
+      text: Explore Architecture
+      link: /architecture
     - theme: alt
       text: GitHub
       link: https://github.com/valentinlineiro/provena
 
 features:
-  - title: One source of truth
-    details: Your career facts live in YAML files. Every output is derived — never copied, never out of sync.
-  - title: Multiple projections
-    details: Resume, LinkedIn profile, conference bio, JSON Resume — different views of the same identity.
-  - title: Verified by validation
-    details: Referential integrity checks catch broken links between skills, experience, and evidence before you render.
-  - title: CLI-first
-    details: No build step, no platform lock-in. `provena render` from any directory. Works with your editor, not instead of it.
-  - title: Future-proof
-    details: New output format? New projection? The model stays the same. Add a renderer, don't reshape your data.
-  - title: Open source
-    details: MIT license. Your identity is not a SaaS subscription. Own your data, own your toolchain.
+  - title: 1. Professional Identity
+    details: Build a canonical, referentially sound representation of your career facts, evidence, and capabilities in plain YAML.
+  - title: 2. Continuous Market Watch
+    details: Automated observation engines continuously poll ATS boards (Greenhouse, Ashby, Lever) and ingest raw postings.
+  - title: 3. Deterministic Evaluation
+    details: Every market posting is evaluated deterministically against your identity. No LLM hallucinations or opaque matching.
+  - title: 4. Attention Inbox
+    details: Filter out noise automatically. Only review high-confidence opportunities sorted by semantic attention tabs.
 ---
 
-## YAML → Profile → Outputs
+## How It Works
 
 ```
-┌─────────────────────┐
-│  person.yaml        │
-│  experience.yaml    │
-│  capabilities.yaml  │  Canonical identity model
-│  projects.yaml      │
-│  provena.yaml       │
-└─────────┬───────────┘
-          │
-          ▼
-   ┌──────────────┐
-   │   Profile    │  (validated, referentially sound)
-   └──────┬───────┘
-          │
-     ┌────┴────┐
-     │         │
-     ▼         ▼         ▼
-  resume.md  resume.json  resume.html
-  (Markdown) (JSON Resume) (HTML)
+Identity  ──►  Decision Engine  ──►  Continuous Observation  ──►  Attention Inbox  ──►  Helping to look less
 ```
 
-## Who is it for?
+### 1. Build your professional identity
+Define your experience, evidence, and capabilities once in a canonical YAML workspace. Every output is derived — never copied, never out of sync.
 
-**Developers** who want their CV to reflect their actual work, not a hand-edited copy from last year.
+### 2. Provena continuously watches the market
+Adapters automatically monitor job boards across Greenhouse, Ashby, and Lever, maintaining a real-time canonical market catalog.
 
-**Freelancers** who manage multiple bios for different clients and platforms, and want one source of truth.
+### 3. Every opportunity is evaluated deterministically
+Evaluations measure professional fit, personal fit, and recognition coverage with explicit, auditable reasoning traced back to your profile.
 
-**Job seekers** who need polished, consistent outputs across every application channel.
+### 4. You only review what matters
+Your Attention Inbox groups postings into `Needs Attention`, `Worth Considering`, `Unresolved`, and `Decided`.
 
-**Consultants** who maintain capability statements, case studies, and speaker profiles — all from one model.
+---
 
-Try it:
+## Real-Time Pipeline
 
-```bash
-npx @provena/cli render profiles/valentin
-cat profiles/valentin/resume.md
+```
+Greenhouse / Ashby / Lever (Sources)
+              │
+              ▼
+  Neon PostgreSQL / KV (Market)
+              │
+              ▼
+     Protocol v1 (Decision)
+              │
+              ▼
+  Attention Policy (Evaluation)
+              │
+              ▼
+    Attention Inbox (Product)
 ```
 
-## See it in action
+---
 
-| Input YAML | Output Markdown |
-|---|---|
-| `person.yaml` defines name, title, summary | Header shows name and about section |
-| `experience.yaml` lists roles with achievements | Each role is a section with org, title, dates |
-| `capabilities.yaml` defines skills with evidence | Skills are listed with optional descriptions |
-| Identity links experiences to capabilities | No duplication — references, not copies |
+## System Status
 
-The [examples page](/examples) shows this workspace's real YAML side by side with its actual `resume.md`, `resume.json`, and `resume.linkedin.md` — not mockups, the real CLI output.
+| Tier | Component | Status |
+| --- | --- | --- |
+| **Production-ready** | **Canonical Identity** | Deterministic profile model, invariants I1-I5, multi-format rendering |
+| **Production-ready** | **Decision Protocol** | OE-1/2/3 evaluation policy, coverage & confidence scoring |
+| **Production-ready** | **Shared Market** | Global market schema, Greenhouse board ingestion, deduplication |
+| **Production-ready** | **Continuous Sync** | Autonomous cron sync & PostgreSQL/KV repository persistence |
+| **Production-ready** | **Attention Inbox** | Keyset pagination, attention tab ordering, decision recording |
+| *Experimental* | *Market Knowledge Learning* | K12 operational pattern extraction and clustering |
+| *Experimental* | *Attention Validation* | Attention Precision & Missed Opportunity Rate telemetry |
 
-[See the real input and output](/examples) →
-[Start your own in 5 minutes](/quickstart) →
+---
+
+## Philosophy
+
+> **Helping to look less.**
+> 
+> *Preserve human attention for decisions that matter.*

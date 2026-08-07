@@ -79,13 +79,14 @@ async function recordEvent(env: Env, name: EventName) {
   await env.PROVENA_KV.put('events', JSON.stringify({ events }))
 }
 
-export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportunities', navClass = 'site'): string {
+export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportunities' | 'sources', navClass = 'site'): string {
   const link = (label: string, href: string, active: boolean) =>
     '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
   const sections = [
     { label: 'Story', href: '/', id: 'story' as const },
     { label: 'Prepare', href: '/cv', id: 'prepare' as const },
     { label: 'Evaluate', href: '/evaluate', id: 'evaluate' as const },
+    { label: 'Sources', href: '/sources', id: 'sources' as const },
     { label: 'Inbox', href: '/opportunities', id: 'opportunities' as const },
   ]
   return (
@@ -97,7 +98,7 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportuniti
 }
 
 export function renderAppShell(
-  section: 'story' | 'prepare' | 'evaluate' | 'opportunities',
+  section: 'story' | 'prepare' | 'evaluate' | 'opportunities' | 'sources',
   pageHeaderHtml: string,
   pageContentHtml: string
 ): string {
@@ -1040,6 +1041,104 @@ export default {
       }
     }
 
+const SOURCES_PAGE = `<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provena — Sources</title>
+<style>
+${APP_SHELL_CSS}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+h1 { font-size: 1.125rem; font-weight: 700; }
+.subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
+.sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.source-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; }
+.source-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.source-name { font-weight: 700; font-size: 1rem; }
+.source-provider { font-size: 0.75rem; background: #f0f0f0; color: #555; padding: 0.15rem 0.4rem; border-radius: 0.25rem; text-transform: uppercase; font-weight: 600; }
+.source-meta { font-size: 0.8125rem; color: #666; margin-top: 0.5rem; line-height: 1.5; }
+.source-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
+.source-actions button { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.8125rem; border-radius: 0.25rem; min-height: 36px; cursor: pointer; }
+.btn-primary { background: #1a1a1a; color: #fff; border: none; }
+.btn-secondary { background: #fff; color: #333; border: 1px solid #ccc; }
+.btn-secondary:hover { background: #f5f5f5; }
+.sync-bar { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: center; }
+.sync-bar input { flex: 1; padding: 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.25rem; }
+.status-pill { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600; color: #2e7d32; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: #2e7d32; }
+</style>
+${renderAppShell(
+  'sources',
+  '<div class="page-header">' +
+  '<h1>Market Feeds & Observation Sources</h1>' +
+  '<p class="subtitle">Continuous observation adapters for ATS boards (Greenhouse, Ashby, Lever). The Inbox strictly consumes market from here.</p>' +
+  '</div>',
+  '<div class="readable">' +
+  '<div class="sync-bar">' +
+  '<input id="newBoardToken" type="text" placeholder="Greenhouse board token (e.g. stripe, gitlab, openai)" value="stripe">' +
+  '<button class="btn-primary" style="width:auto;margin:0;" onclick="addAndSyncSource()">Connect & Sync Source</button>' +
+  '</div>' +
+  '<div id="sources-status" style="margin-bottom:1rem;font-size:0.875rem;color:#666;"></div>' +
+  '<div class="sources-grid" id="sources-list">' +
+  'Loading observed market sources...' +
+  '</div>' +
+  '</div>'
+)}
+<script>
+async function loadSources() {
+  const container = document.getElementById('sources-list')
+  try {
+    const res = await fetch('/api/sources')
+    const data = await res.json()
+    container.innerHTML = data.sources.map(s =>
+      '<div class="source-card">' +
+      '<div>' +
+      '<div class="source-header">' +
+      '<span class="source-name">' + s.name + '</span>' +
+      '<span class="source-provider">' + s.provider + '</span>' +
+      '</div>' +
+      '<div class="source-meta">' +
+      '<div>Token: <code>' + s.token + '</code></div>' +
+      '<div>Status: <span class="status-pill"><span class="status-dot"></span>' + s.status + '</span></div>' +
+      '<div>Observed Jobs: ' + s.jobsObserved + '</div>' +
+      '</div>' +
+      '</div>' +
+      '<div class="source-actions">' +
+      '<button class="btn-primary" onclick="syncSource(\\'' + s.token + '\\')">Sync Now</button>' +
+      '</div>' +
+      '</div>'
+    ).join('')
+  } catch (e) {
+    container.innerHTML = '<p>Failed to load sources.</p>'
+  }
+}
+
+async function syncSource(token) {
+  const statusEl = document.getElementById('sources-status')
+  statusEl.textContent = 'Syncing board "' + token + '"...'
+  const res = await fetch('/api/opportunities/ingest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ boardToken: token }),
+  })
+  if (res.ok) {
+    const data = await res.json()
+    statusEl.textContent = '✓ Sync complete for ' + token + ': ' + data.fetchedCount + ' fetched, ' + data.newlyAddedCount + ' new.'
+    loadSources()
+  } else {
+    statusEl.textContent = 'Sync failed: ' + (await res.text())
+  }
+}
+
+async function addAndSyncSource() {
+  const token = document.getElementById('newBoardToken').value.trim()
+  if (!token) return
+  await syncSource(token)
+}
+
+loadSources()
+</script>`
+
 const OPPORTUNITIES_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1077,12 +1176,12 @@ ${renderAppShell(
   'opportunities',
   '<div class="page-header">' +
   '<h1>Attention Inbox</h1>' +
-  '<p class="subtitle">Server-Side Attention Ordering & Cursor-Paginated Market Exploration</p>' +
+  '<p class="subtitle">Server-Side Attention Ordering & Continuous Market Evaluation</p>' +
   '</div>',
   '<div class="readable">' +
-  '<div style="display:flex;gap:0.5rem;margin-bottom:1rem;background:#fff;padding:0.75rem;border-radius:0.5rem;border:1px solid #e5e5e5;align-items:center;">' +
-  '<input id="boardToken" type="text" placeholder="Greenhouse board token (e.g. stripe, gitlab, coinbase)" value="stripe" style="flex:1;padding:0.5rem;font-size:0.875rem;border:1px solid #ccc;border-radius:0.25rem;">' +
-  '<button style="width:auto;margin-top:0;padding:0.5rem 1rem;font-size:0.875rem;" onclick="syncBoard()">Sync Board Jobs</button>' +
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;background:#fff;padding:0.75rem 1rem;border-radius:0.5rem;border:1px solid #e5e5e5;">' +
+  '<span style="font-size:0.875rem;color:#666;">Observing <strong>active market sources</strong>. Inbox strictly consumes evaluated market facts.</span>' +
+  '<a href="/sources" style="font-size:0.875rem;color:#1a1a1a;font-weight:600;text-decoration:none;">Manage Sources →</a>' +
   '</div>' +
   '<div class="tabs">' +
   '<button class="tab-btn active" id="tab-needs-attention" onclick="switchTab(\'needs-attention\')">Needs Attention <span class="count-pill" id="cnt-needs-attention">0</span></button>' +
@@ -1225,6 +1324,24 @@ window.addEventListener('DOMContentLoaded', () => {
 })
 </script>
 `
+
+    if (request.method === 'GET' && url.pathname === '/sources') {
+      return new Response(SOURCES_PAGE, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/sources') {
+      const defaultSources = [
+        { name: 'Stripe', provider: 'Greenhouse', token: 'stripe', status: 'active', jobsObserved: '3,482' },
+        { name: 'OpenAI', provider: 'Greenhouse', token: 'openai', status: 'active', jobsObserved: '412' },
+        { name: 'Anthropic', provider: 'Ashby', token: 'anthropic', status: 'active', jobsObserved: '189' },
+        { name: 'Linear', provider: 'Lever', token: 'linear', status: 'active', jobsObserved: '64' },
+      ]
+      return new Response(JSON.stringify({ sources: defaultSources }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
 
     if (request.method === 'GET' && url.pathname === '/opportunities') {
       return new Response(OPPORTUNITIES_PAGE, {

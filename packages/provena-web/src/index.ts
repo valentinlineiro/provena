@@ -1292,7 +1292,7 @@ function switchTab(tab) {
   const activeBtn = document.getElementById('tab-' + tab)
   if (activeBtn) activeBtn.classList.add('active')
   const container = document.getElementById('inbox')
-  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Evidence</th><th>Verdict</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
+  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Verdict</th><th>Prof Fit</th><th>Personal Fit</th><th>Evidence</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
   loadTab(true)
 }
 
@@ -1347,9 +1347,10 @@ async function loadTab(reset = false) {
       const tr = document.createElement('tr')
       tr.innerHTML =
         '<td><strong>' + item.title + '</strong>' + (item.companyName ? ' <span class="meta">at ' + item.companyName + '</span>' : '') + '<br><a class="meta" href="' + item.url + '" target="_blank">View Source</a></td>' +
-        '<td>' + item.profFit + '</td>' +
-        '<td>' + item.evidenceCoverage + '</td>' +
         '<td><span class="badge ' + item.verdict + '">' + item.verdict + '</span></td>' +
+        '<td>' + item.profFit + '</td>' +
+        '<td>' + item.personalFit + '</td>' +
+        '<td>' + item.evidenceCoverage + '</td>' +
         '<td><div class="btn-group">' +
         '<button class="' + (item.userDecision === 'interested' ? 'active' : '') + '" title="Save" onclick="setDecision(\\'' + item.id + '\\', \\'interested\\')">⭐ Save</button>' +
         '<button class="' + (item.userDecision === 'applied' ? 'active' : '') + '" title="Apply" onclick="setDecision(\\'' + item.id + '\\', \\'applied\\')">✓ Apply</button>' +

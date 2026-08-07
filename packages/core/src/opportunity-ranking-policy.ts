@@ -10,6 +10,7 @@
 //   4. skip (hard constraint / eligibility violation)
 
 import type { UserOpportunityAssessment } from './market-catalog.js'
+import { encodeBookmark, decodeBookmark } from './opportunity-bookmark.js'
 
 export interface RankedOpportunity {
   readonly assessment: UserOpportunityAssessment
@@ -43,6 +44,7 @@ export interface PaginatedAttentionView {
   readonly tab: AttentionTab
   readonly items: readonly RankedOpportunity[]
   readonly nextCursor: string | null
+  readonly nextBookmark: string | null
   readonly totalInTab: number
 }
 
@@ -143,13 +145,31 @@ export class DefaultOpportunityRankingPolicy {
     cursorStr?: string | null,
     limit = 30,
   ): PaginatedAttentionView {
-    const cursor = cursorStr ? this.decodeCursor(cursorStr, tab) : null
+    const bookmark = cursorStr ? decodeBookmark(cursorStr, tab) : null
+    const cursor = !bookmark && cursorStr ? this.decodeCursor(cursorStr, tab) : null
 
     // Filter items to tab
     const tabItems = [...rankedItems].sort((a, b) => this.compareLexicographically(a.assessment, b.assessment))
 
     let startIndex = 0
-    if (cursor) {
+    if (bookmark) {
+      const foundIdx = tabItems.findIndex(item => {
+        const a = item.assessment
+        const comp = this.compareLexicographically(a, {
+          opportunityId: bookmark.id,
+          professionalFitScore: bookmark.pf,
+          confidence: bookmark.conf,
+          personalFitScore: 0,
+          evaluatedAt: bookmark.seen,
+        } as any)
+        return comp > 0 // item comes AFTER the cursor in sort order
+      })
+      if (foundIdx !== -1) {
+        startIndex = foundIdx
+      } else {
+        startIndex = tabItems.length
+      }
+    } else if (cursor) {
       const foundIdx = tabItems.findIndex(item => {
         const a = item.assessment
         const comp = this.compareLexicographically(a, {
@@ -176,10 +196,28 @@ export class DefaultOpportunityRankingPolicy {
       ? this.encodeCursor(tab, lastItem.assessment)
       : null
 
+    const tierNum = lastItem
+      ? (lastItem.tier === 'strong-candidate' ? 4 : lastItem.tier === 'consider' ? 3 : lastItem.tier === 'abstain' ? 2 : 1)
+      : 1
+
+    const nextBookmark = hasMore && lastItem
+      ? encodeBookmark({
+          bookmarkVersion: 1,
+          orderingVersion: 1,
+          tab,
+          tier: tierNum,
+          pf: Math.round(lastItem.assessment.professionalFitScore * 100) / 100,
+          conf: Math.round(lastItem.assessment.confidence * 100) / 100,
+          seen: lastItem.assessment.evaluatedAt || new Date().toISOString(),
+          id: lastItem.assessment.opportunityId,
+        })
+      : null
+
     return {
       tab,
       items: pageItems,
       nextCursor,
+      nextBookmark,
       totalInTab: tabItems.length,
     }
   }

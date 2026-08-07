@@ -3,7 +3,32 @@ import type {
   OpportunitySearchPort,
   RetrievalCriteria,
   CandidateOpportunity,
+  AttentionTab,
 } from '@provena/core'
+
+export interface KeysetSearchOptions {
+  readonly tab?: AttentionTab
+  readonly bookmark?: {
+    readonly tier: number
+    readonly pf: number
+    readonly conf: number
+    readonly seen: string
+    readonly id: string
+  } | null
+  readonly userId?: string
+  readonly profileId?: string
+  readonly limit?: number
+}
+
+export interface KeysetSearchResultItem extends CandidateOpportunity {
+  readonly recommendation?: string
+  readonly decisionTier?: number
+  readonly professionalFit?: number
+  readonly personalFit?: number
+  readonly confidence?: number
+  readonly evaluatedAt?: string
+  readonly userDecision?: string
+}
 
 export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
   constructor(private readonly sql: Sql) {}
@@ -86,6 +111,100 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
       rawDescription: r.raw_description,
       url: r.url,
       ...(r.published_at ? { publishedAt: new Date(r.published_at).toISOString() } : {}),
+    }))
+  }
+
+  async searchKeyset(options: KeysetSearchOptions): Promise<readonly KeysetSearchResultItem[]> {
+    const userId = options.userId || 'valentin'
+    const profileId = options.profileId || 'valentin'
+    const limit = options.limit || 30
+    const tab = options.tab || 'needs-attention'
+
+    const whereConditions = []
+
+    whereConditions.push(this.sql`p.status = 'ACTIVE'`)
+
+    if (tab === 'needs-attention') {
+      whereConditions.push(this.sql`a.decision_tier = 4 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
+    } else if (tab === 'worth-considering') {
+      whereConditions.push(this.sql`a.decision_tier = 3 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
+    } else if (tab === 'unresolved') {
+      whereConditions.push(this.sql`a.decision_tier IN (1, 2) AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
+    } else if (tab === 'decided') {
+      whereConditions.push(this.sql`d.user_decision IS NOT NULL AND d.user_decision != 'new'`)
+    }
+
+    if (options.bookmark) {
+      const { tier, pf, conf, seen, id } = options.bookmark
+      const seenDate = new Date(seen)
+      whereConditions.push(this.sql`
+        (
+          (a.decision_tier < ${tier}) OR
+          (a.decision_tier = ${tier} AND a.professional_fit < ${pf}) OR
+          (a.decision_tier = ${tier} AND a.professional_fit = ${pf} AND a.confidence < ${conf}) OR
+          (a.decision_tier = ${tier} AND a.professional_fit = ${pf} AND a.confidence = ${conf} AND a.evaluated_at < ${seenDate}) OR
+          (a.decision_tier = ${tier} AND a.professional_fit = ${pf} AND a.confidence = ${conf} AND a.evaluated_at = ${seenDate} AND o.id > ${id})
+        )
+      `)
+    }
+
+    const whereSql = whereConditions.reduce((acc, cond) => this.sql`${acc} AND ${cond}`)
+
+    const rows = await this.sql<Array<{
+      id: string
+      external_id: string
+      title: string
+      company_name: string
+      raw_description: string
+      url: string
+      published_at: Date | null
+      recommendation: string | null
+      decision_tier: number | null
+      professional_fit: number | null
+      personal_fit: number | null
+      confidence: number | null
+      evaluated_at: Date | null
+      user_decision: string | null
+    }>>`
+      SELECT
+        o.id,
+        p.external_id,
+        o.title,
+        o.company_name,
+        p.raw_description,
+        p.url,
+        p.published_at,
+        a.recommendation,
+        a.decision_tier,
+        a.professional_fit,
+        a.personal_fit,
+        a.confidence,
+        a.evaluated_at,
+        d.user_decision
+      FROM opportunities o
+      JOIN opportunity_postings p ON p.opportunity_id = o.id
+      JOIN current_opportunity_assessments a ON a.opportunity_id = o.id AND a.profile_id = ${profileId}
+      LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = o.id AND d.user_id = ${userId}
+      WHERE ${whereSql}
+      ORDER BY a.decision_tier DESC, a.professional_fit DESC, a.confidence DESC, a.evaluated_at DESC, o.id ASC
+      LIMIT ${limit}
+    `
+
+    return rows.map(r => ({
+      id: r.id,
+      externalId: r.external_id,
+      title: r.title,
+      companyName: r.company_name,
+      rawDescription: r.raw_description,
+      url: r.url,
+      ...(r.published_at ? { publishedAt: new Date(r.published_at).toISOString() } : {}),
+      ...(r.recommendation ? { recommendation: r.recommendation } : {}),
+      ...(r.decision_tier !== null ? { decisionTier: r.decision_tier } : {}),
+      ...(r.professional_fit !== null ? { professionalFit: r.professional_fit } : {}),
+      ...(r.personal_fit !== null ? { personalFit: r.personal_fit } : {}),
+      ...(r.confidence !== null ? { confidence: r.confidence } : {}),
+      ...(r.evaluated_at ? { evaluatedAt: new Date(r.evaluated_at).toISOString() } : {}),
+      ...(r.user_decision ? { userDecision: r.user_decision } : {}),
     }))
   }
 }

@@ -150,6 +150,9 @@ export { OpportunityAssessmentEngine } from './opportunity-assessment-engine.js'
 export type { RankedOpportunity, AttentionInbox, AttentionTab, AttentionCursorPayload, PaginatedAttentionView } from './opportunity-ranking-policy.js'
 export { DefaultOpportunityRankingPolicy } from './opportunity-ranking-policy.js'
 
+export type { OpportunityBookmark } from './opportunity-bookmark.js'
+export { encodeBookmark, decodeBookmark } from './opportunity-bookmark.js'
+
 // ── O2.8: Market Feed Service ────────────────────────────────────────
 export type { FeedSourceRegistration, DeltaSyncResult } from './market-feed-service.js'
 export { MarketFeedService } from './market-feed-service.js'

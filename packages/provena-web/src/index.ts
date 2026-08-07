@@ -23,11 +23,16 @@ import {
   MarketIngestionEngine,
   DeclarativeMarketRecognizer,
   DefaultOpportunityRankingPolicy,
+  encodeBookmark,
+  decodeBookmark,
 } from '@provena/core'
 import {
   PostgresMarketOpportunityRepository,
   PostgresMarketPostingRepository,
   PostgresMarketModelStore,
+  PostgresMarketAssessmentRepository,
+  PostgresUserDecisionRepository,
+  PostgresOpportunitySearchAdapter,
 } from '@provena/market-postgres'
 import postgres from 'postgres'
 import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab, UserOpportunityAssessment } from '@provena/core'
@@ -1091,14 +1096,14 @@ ${renderAppShell(
 )}
 <script>
 let currentTab = 'needs-attention'
-let currentCursor = null
+let currentBookmark = null
 let isLoading = false
 let hasMore = false
 let observer = null
 
 function switchTab(tab) {
   currentTab = tab
-  currentCursor = null
+  currentBookmark = null
   hasMore = false
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'))
   const activeBtn = document.getElementById('tab-' + tab)
@@ -1117,8 +1122,8 @@ async function loadTab(reset = false) {
   const url = new URL('/api/opportunities', location.origin)
   url.searchParams.set('tab', currentTab)
   url.searchParams.set('limit', '30')
-  if (currentCursor && !reset) {
-    url.searchParams.set('cursor', currentCursor)
+  if (currentBookmark && !reset) {
+    url.searchParams.set('bookmark', currentBookmark)
   }
 
   try {
@@ -1175,8 +1180,8 @@ async function loadTab(reset = false) {
       rows.appendChild(tr)
     }
 
-    currentCursor = data.nextCursor
-    hasMore = !!data.nextCursor
+    currentBookmark = data.nextBookmark
+    hasMore = !!data.nextBookmark
     sentinel.textContent = hasMore ? 'Scroll for more...' : 'End of list'
   } catch (e) {
     sentinel.textContent = 'Failed to load'
@@ -1229,10 +1234,120 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (request.method === 'GET' && url.pathname === '/api/opportunities') {
       const tab = (url.searchParams.get('tab') || 'needs-attention') as AttentionTab
-      const cursor = url.searchParams.get('cursor')
+      const bookmarkParam = url.searchParams.get('bookmark') || url.searchParams.get('cursor')
       const limit = parseInt(url.searchParams.get('limit') || '30', 10)
 
       try {
+        if (env.DATABASE_URL) {
+          const sql = postgres(env.DATABASE_URL, { max: 1 })
+          try {
+            const searchAdapter = new PostgresOpportunitySearchAdapter(sql)
+
+            const decodedBookmark = bookmarkParam ? decodeBookmark(bookmarkParam, tab) : null
+
+            const results = await searchAdapter.searchKeyset({
+              tab,
+              bookmark: decodedBookmark ? {
+                tier: decodedBookmark.tier,
+                pf: decodedBookmark.pf,
+                conf: decodedBookmark.conf,
+                seen: decodedBookmark.seen,
+                id: decodedBookmark.id,
+              } : null,
+              limit: limit + 1,
+            })
+
+            const hasMore = results.length > limit
+            const pageItems = hasMore ? results.slice(0, limit) : results
+
+            const items = pageItems.map(r => ({
+              id: r.id,
+              externalId: r.externalId,
+              title: r.title,
+              companyName: r.companyName,
+              rawDescription: r.rawDescription,
+              url: r.url,
+              userDecision: r.userDecision || 'new',
+              assessment: {
+                opportunityId: r.id,
+                userId: 'valentin',
+                marketKnowledgeVersion: '1.0.0',
+                protocolVersion: '1.0.0',
+                profileVersion: '1.0.0',
+                preferenceVersion: '1.0.0',
+                assessmentJson: {} as any,
+                professionalFitScore: r.professionalFit ?? 0,
+                personalFitScore: r.personalFit ?? 0,
+                confidence: r.confidence ?? 0.5,
+                recommendation: r.recommendation ?? 'abstain',
+                evaluatedAt: r.evaluatedAt || new Date().toISOString(),
+              },
+              rankScore: (r.professionalFit ?? 0) * (r.confidence ?? 0.5),
+              tier: r.recommendation || 'abstain',
+            }))
+
+            const lastItem = pageItems[pageItems.length - 1]
+            let nextBookmark: string | null = null
+            if (hasMore && lastItem) {
+              const tierNum = lastItem.decisionTier ?? (
+                lastItem.recommendation === 'strong-candidate' ? 4 :
+                lastItem.recommendation === 'consider' ? 3 :
+                lastItem.recommendation === 'abstain' ? 2 : 1
+              )
+              nextBookmark = encodeBookmark({
+                bookmarkVersion: 1,
+                orderingVersion: 1,
+                tab,
+                tier: tierNum,
+                pf: Math.round((lastItem.professionalFit ?? 0) * 100) / 100,
+                conf: Math.round((lastItem.confidence ?? 0) * 100) / 100,
+                seen: lastItem.evaluatedAt || new Date().toISOString(),
+                id: lastItem.id,
+              })
+            }
+
+            const countRows = await sql<Array<{ tab_name: string; count: string }>>`
+              SELECT 
+                CASE 
+                  WHEN a.decision_tier = 4 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'needs-attention'
+                  WHEN a.decision_tier = 3 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'worth-considering'
+                  WHEN a.decision_tier IN (1, 2) AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'unresolved'
+                  WHEN d.user_decision IS NOT NULL AND d.user_decision != 'new' THEN 'decided'
+                  ELSE 'other'
+                END as tab_name,
+                COUNT(*)::text as count
+              FROM current_opportunity_assessments a
+              JOIN opportunity_postings p ON p.opportunity_id = a.opportunity_id AND p.status = 'ACTIVE'
+              LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = a.opportunity_id AND d.user_id = 'valentin'
+              WHERE a.profile_id = 'valentin'
+              GROUP BY tab_name
+            `
+            const counts = {
+              'needs-attention': 0,
+              'worth-considering': 0,
+              'unresolved': 0,
+              'decided': 0,
+            }
+            for (const row of countRows) {
+              if (row.tab_name in counts) {
+                counts[row.tab_name as AttentionTab] = parseInt(row.count, 10)
+              }
+            }
+
+            return new Response(JSON.stringify({
+              tab,
+              counts,
+              items,
+              nextBookmark,
+              totalInTab: counts[tab] ?? items.length,
+            }), {
+              headers: { 'Content-Type': 'application/json' },
+            })
+          } finally {
+            await sql.end()
+          }
+        }
+
         const opps = env.PROVENA_KV ? await new KvOpportunityRepository(env.PROVENA_KV).list() : []
 
         // Evaluate and rank opportunities
@@ -1289,13 +1404,13 @@ window.addEventListener('DOMContentLoaded', () => {
           tabItems = ranked.filter(r => r.userDecision && r.userDecision !== 'new')
         }
 
-        const paginatedView = policy.paginateTab(tabItems, tab, cursor, limit)
+        const paginatedView = policy.paginateTab(tabItems, tab, bookmarkParam, limit)
 
         return new Response(JSON.stringify({
           tab,
           counts,
           items: paginatedView.items,
-          nextCursor: paginatedView.nextCursor,
+          nextBookmark: paginatedView.nextBookmark,
           totalInTab: paginatedView.totalInTab,
         }), {
           headers: { 'Content-Type': 'application/json' },
@@ -1305,7 +1420,7 @@ window.addEventListener('DOMContentLoaded', () => {
           tab,
           counts: { 'needs-attention': 0, 'worth-considering': 0, 'unresolved': 0, 'decided': 0 },
           items: [],
-          nextCursor: null,
+          nextBookmark: null,
           totalInTab: 0,
           error: e instanceof Error ? e.message : 'Failed to fetch opportunities',
         }), {
@@ -1320,6 +1435,16 @@ window.addEventListener('DOMContentLoaded', () => {
         const body = (await request.json()) as { id?: string; decision?: OpportunityUserDecision }
         if (!body.id || !body.decision) return new Response('Missing id or decision', { status: 400 })
 
+        if (env.DATABASE_URL) {
+          const sql = postgres(env.DATABASE_URL, { max: 1 })
+          try {
+            const decisionRepo = new PostgresUserDecisionRepository(sql)
+            await decisionRepo.setDecision(body.id, body.decision, 'valentin')
+          } finally {
+            await sql.end()
+          }
+        }
+
         if (env.PROVENA_KV) {
           await new KvOpportunityRepository(env.PROVENA_KV).updateDecision(body.id, body.decision)
         }
@@ -1333,6 +1458,82 @@ window.addEventListener('DOMContentLoaded', () => {
       try {
         const body = (await request.json()) as { boardToken?: string }
         const boardToken = body.boardToken || 'stripe'
+        
+        // Greenhouse's public board API is a fixed, known-safe domain (unlike arbitrary
+        // user-submitted URLs), so a larger board can legitimately exceed the general
+        // SSRF-guard default cap without it being a resource-exhaustion risk.
+        const source = new GreenhousePublicSource(boardToken, { maxSizeBytes: 10 * 1024 * 1024 })
+        const fetchedRawJobs = await source.fetchAllBoardJobs()
+
+        if (env.DATABASE_URL) {
+          const sql = postgres(env.DATABASE_URL, { max: 1 })
+          try {
+            const oppRepo = new PostgresMarketOpportunityRepository(sql)
+            const postRepo = new PostgresMarketPostingRepository(sql)
+            const modelStore = new PostgresMarketModelStore(sql)
+            const assessmentRepo = new PostgresMarketAssessmentRepository(sql)
+            const composedK = composeKnowledge(DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE)
+            const recognizer = new DeclarativeMarketRecognizer(composedK)
+
+            const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
+            const ingestResult = await engine.ingest(fetchedRawJobs, {
+              now: new Date().toISOString(),
+              marketKnowledgeVersion: composedK.version,
+              recognitionOrder: 100,
+              sourceType: 'greenhouse',
+              sourceBoardId: boardToken,
+            })
+
+            for (const rawOpp of fetchedRawJobs) {
+              const companyName = rawOpp.company ?? boardToken ?? 'Unknown'
+              const normalizedCompany = companyName.toLowerCase().replace(/[^a-z0-9]/g, '')
+              const externalId = rawOpp.externalId ?? rawOpp.url
+              const oppDedupeKey = `opp-${normalizedCompany}-${externalId}`
+
+              const marketModel = recognizer.extractMarketRequirements(rawOpp.description)
+              const resolved = resolveRequirements(marketModel, profile)
+              const suffList = resolved.map(evaluateSufficiency)
+              const profFit = projectProfessionalFit(suffList)
+              const prefAssessments = assessPreferences(rawOpp.description, profile.preferences)
+              const persFit = projectPersonalFit(prefAssessments)
+              const recCov = computeRecognitionCoverage(rawOpp.description, marketModel)
+              const assessment = applyPolicy(profFit, persFit, recCov)
+
+              const tierNum = assessment.recommendation === 'strong-candidate' ? 4 :
+                              assessment.recommendation === 'consider' ? 3 :
+                              assessment.recommendation === 'abstain' ? 2 : 1
+
+              await assessmentRepo.saveAssessment({
+                opportunityId: oppDedupeKey,
+                profileId: 'valentin',
+                profileVersion: '1.0.0',
+                protocolVersion: 1,
+                marketKnowledgeVersion: 1,
+                recommendation: assessment.recommendation,
+                decisionTier: tierNum,
+                professionalFit: profFit.score,
+                personalFit: persFit.assessedCount > 0 ? persFit.score : 0,
+                confidence: assessment.confidence,
+                evaluatedAt: new Date().toISOString(),
+              })
+            }
+
+            if (!env.PROVENA_KV) {
+              return new Response(JSON.stringify({
+                boardToken,
+                fetchedCount: fetchedRawJobs.length,
+                newlyAddedCount: ingestResult.newlyAddedPostings,
+                totalMemoryCount: ingestResult.totalIngested,
+                dbDirect: true,
+              }), {
+                headers: { 'Content-Type': 'application/json' },
+              })
+            }
+          } finally {
+            await sql.end()
+          }
+        }
+
         if (!env.PROVENA_KV) {
           return new Response(JSON.stringify({
             boardToken,
@@ -1342,11 +1543,6 @@ window.addEventListener('DOMContentLoaded', () => {
             message: 'PROVENA_KV is not configured in this environment.'
           }), { status: 200, headers: { 'Content-Type': 'application/json' } })
         }
-        // Greenhouse's public board API is a fixed, known-safe domain (unlike arbitrary
-        // user-submitted URLs), so a larger board can legitimately exceed the general
-        // SSRF-guard default cap without it being a resource-exhaustion risk.
-        const source = new GreenhousePublicSource(boardToken, { maxSizeBytes: 10 * 1024 * 1024 })
-        const fetchedRawJobs = await source.fetchAllBoardJobs()
 
         const repository = new KvOpportunityRepository(env.PROVENA_KV)
         const existing = await repository.list()

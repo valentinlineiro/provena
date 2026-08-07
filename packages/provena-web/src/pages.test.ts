@@ -169,3 +169,10 @@ test('GET /api/opportunities gracefully returns empty response when PROVENA_KV i
   assert.deepEqual(json.items, [])
   assert.equal(json.totalInTab, 0)
 })
+
+test('GET /api/opportunities accepts bookmark param and returns nextBookmark field', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/api/opportunities?tab=unresolved&limit=30'), env)
+  const json = await res.json() as any
+  assert.ok('nextBookmark' in json)
+  assert.ok(!('nextCursor' in json))
+})

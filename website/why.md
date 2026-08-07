@@ -1,82 +1,74 @@
 # Why Provena
 
-## The problem
+## The Problem
 
-Your résumé says one thing. Your LinkedIn says something slightly different.
-Your speaker bio is outdated. Your website still shows last year's projects.
+Every week, thousands of new opportunities appear across dozens of job boards.
 
-Nobody notices until they don't match.
+Most professionals solve this by searching repeatedly. The result is predictable:
 
-Every time you update your career, you manually rebuild the same information
-in five places. It's tedious, error-prone, and never ends.
+- Endless scrolling and duplicated opportunities
+- Constant fear of missing out and cognitive friction
+- Endless attention spent evaluating positions that were never a good fit
 
-## Why it happens
+The problem is no longer finding opportunities. **The problem is deciding which ones deserve your attention.**
 
-Your professional identity is not stored anywhere. What you have are platform
-profiles — LinkedIn hosts one version, your résumé is a file on your laptop,
-your GitHub profile is another. Each platform treats your identity as content
-*it* owns. None of them talks to the others.
+---
 
-So the same fact — "I worked on X in 2024" — exists in multiple copies. And
-copies diverge.
+## Why Current Tools Fail
 
-## What Provena proposes
+Traditional job platforms optimize for **engagement**.
 
-Store your professional identity **once**. Derive everything else from it.
+The longer you search, the more successful they are. They notify you about everything, encourage daily browsing, and treat job discovery as a consumer product built for click-through rate.
 
-```
-YAML workspace (facts)
-       ↓
-  Identity (canonical model)
-       ↓
-  resume.md · resume.json · (more formats)
-```
+They do not know your professional identity deeply enough to decide what actually matters.
 
-Your LinkedIn, résumé, and website stop being separate documents. They become
-different views of the same underlying facts.
+---
 
-Update one fact. Every representation reflects it.
+## What Provena Proposes
 
-## What Provena is not
+Instead of helping you search better, **Provena helps you stop searching.**
 
-Provena does not replace LinkedIn, résumé builders, or portfolio platforms.
-It does not host your profile. It does not have a UI.
+You define your professional identity once. You connect the market sources you care about.
 
-It is a domain model with a CLI — a tool for developers who want to own their
-professional identity as structured data.
+Provena continuously observes the market, evaluates every opportunity deterministically, and only interrupts you when something deserves your attention.
 
-## An example
-
-```yaml
-# person.yaml
-name: "Alex Morgan"
-title: "Software Engineer"
-summary: "Engineer focused on distributed systems."
+```text
+Professional Identity  ──►  Market Sources  ──►  Continuous Observation  ──►  Deterministic Assessment  ──►  Attention Inbox
 ```
 
-That's your canonical identity.
+---
 
-Running:
+## The Role of Identity
 
-```bash
-provena render .
-```
+Canonical professional identity is the foundation that makes automated evaluation possible.
 
-produces `resume.md`. Running:
+Provena can only decide what deserves your attention because it starts from a referentially sound representation of your actual facts, evidence, and capabilities.
 
-```bash
-provena render . --format jsonresume
-```
+> **Your résumé is not the source.**
+>
+> **Your LinkedIn is not the source.**
+>
+> **Your identity is.**
 
-produces `resume.json`. Same facts. Different formats. Always in sync.
+A résumé or LinkedIn profile is merely a projection. Your canonical identity is the invariant that allows a deterministic decision engine to evaluate professional fit, personal fit, and recognition coverage without LLM hallucinations.
 
-## The deeper idea
+---
 
-> Facts over formatting. Evidence over claims.
-> The domain model is canonical. Everything else is replaceable.
+## What Provena Is Not
 
-A résumé is not your identity. It is a *projection* of your identity — one
-possible representation, optimized for one audience. Confusing the projection
-for the source is why professional identity drifts.
+Provena is not another job board, résumé builder, or AI job matcher.
 
-Provena separates the two. The identity is the invariant. Everything else is a view.
+It is a **continuous observation system** built around a canonical professional identity and deterministic decision making.
+
+The product exposes:
+- **Sources (`/sources`)**: Observation adapters for Greenhouse, Ashby, Lever, and job streams.
+- **Attention Inbox (`/opportunities`)**: Semantic tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`) filtering out market noise.
+- **Decision Engine**: Auditable, falsifiable evaluations (`APPLY`, `CONSIDER`, `SKIP`) traced to canonical profile facts.
+
+---
+
+## The Core Thesis
+
+> **Traditional job platforms optimize for engagement. Provena optimizes for preserved attention.**
+>
+> **Helping to look less.**

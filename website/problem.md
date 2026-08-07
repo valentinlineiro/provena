@@ -1,75 +1,46 @@
-# The problem
+# The Problem
 
-Every time you update your career, you manually rebuild the same identity five times: LinkedIn, your résumé, your GitHub profile, your speaker bio, your conference proposals. Copies drift. Professional identity is fragmented.
+## The Attention & Information Crisis in Job Search
 
-Provena is a canonical model for that identity.
+Every week, thousands of new opportunities appear across dozens of job boards. Most professionals solve this by searching repeatedly.
 
-```
-It stores:   facts · evidence · history
-It generates: résumé, LinkedIn, website — any representation you need
-```
+The result is predictable:
+- **Attention Drain**: Endless scrolling through duplicate, noisy postings.
+- **Engagement Traps**: Platforms designed to maximize clicks and browsing time, not decisions.
+- **Evaluation Friction**: Hours spent evaluating positions that were never a good fit.
 
-## The cost
+The problem is no longer finding opportunities. **The problem is deciding which ones deserve your attention.**
 
-You update your LinkedIn.
+---
 
-Six months later:
+## The Root Cause: Identity is Fragmented & Disconnected
 
-```
-Your résumé still says "Tech Lead."
-Your bio still says "Software Architect."
-Your portfolio still shows the old projects.
+Traditional job search tools treat your professional identity as a static PDF or a platform profile.
 
-Your professional identity has silently forked.
-```
+Because job platforms don't know your canonical identity, they cannot evaluate opportunities on your behalf. Instead, they blast notifications, encourage daily searching, and push you to manually review hundreds of irrelevant job descriptions.
 
-Every update to one makes the rest outdated. Maintenance becomes overhead. People notice the inconsistency, and it erodes credibility.
-
-## The root cause
-
-The problem is not where your profile is published. The problem is who owns the underlying truth.
-
-Platforms treat your identity as content they host. You paste the same facts into five different boxes. The boxes know nothing about each other — none of them owns the facts, so none of them can keep the others honest.
-
-## Not LinkedIn 2.0
-
-Provena does not replace your profiles. It separates the source from the presentation layer — LinkedIn, your résumé, your website stay exactly where they are. Provena just stops being the place the facts live.
-
-## The insight
-
-Your career is not a collection of platform profiles. It is a body of knowledge with many possible representations.
-
-```
-                    SOURCE OF TRUTH
-
-                  Provena identity model
-
-        ┌───────────┬────────────┬───────────┐
-        │ Evidence  │  History   │  Skills   │
-        └───────────┴────────────┴───────────┘
-
-              ↓            ↓            ↓
-
-          LinkedIn      Résumé       Website
-
-          Same source. Different projections.
+```text
+Traditional Job Search                  Provena Continuous Observation
+──────────────────────                  ──────────────────────────────
+Search repeatedly                       Connect identity & sources once
+Manual scrolling                        Continuous automated observation
+Platform engagement                     Deterministic evaluation
+High cognitive friction                  Attention Inbox ("Helping to look less")
 ```
 
-The solution is not a better résumé builder. It is a canonical model that owns the facts and treats every platform as a projection of it.
+---
 
-## Before / after
+## Not Another Job Board
 
-```
-Before                          After
+Provena is not another job portal, résumé builder, or opaque AI matcher.
 
-LinkedIn ── Experience copy     Provena
-Résumé   ── Experience copy       Experience · Projects · Skills · Evidence
-Website  ── Experience copy            ↓
-                                 LinkedIn | Résumé | Website
+It separates **Canonical Identity** from **Market Observation** and **Deterministic Assessment**:
+- Your identity remains plain, referentially sound structured data.
+- Continuous observation adapters monitor market feeds in the background.
+- Deterministic decision engines evaluate every posting with auditable, traceable evidence.
 
-Three copies, always diverging.  One model, always in sync.
-```
+---
 
-## Why now
+## The Insight
 
-AI multiplies the number of representations you need — agents summarizing your work, tools generating tailored pitches, platforms scraping your profile into their own format. More representations means more copies to keep honest. A canonical identity layer stops being a nice-to-have and becomes infrastructure.
+> **Traditional job platforms optimize for engagement. Provena optimizes for preserved attention.**

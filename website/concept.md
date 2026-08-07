@@ -1,48 +1,42 @@
 # Concept
 
-One identity. Multiple projections.
+## From Profile Compiler to Continuous Market Observer
 
-Professional identity is not an abstraction — it is skills, experience, evidence, and narrative context. Provena models those facts once and derives everything else from them.
+Provena combines a **Canonical Professional Identity** with a **Continuous Market Observation Engine** to minimize human attention in job discovery.
 
-```
-   Domain (canonical identity model)
-     ↓
- Projection (context-optimized view)
-     ↓
-Presentation (renderer)
+```text
+Canonical Identity  ──►  Continuous Observation  ──►  Deterministic Assessment  ──►  Attention Inbox
 ```
 
-Storage — where the identity model lives — is a separate concern. See [Architecture](/architecture).
+---
 
-## The core principle
+## 1. Canonical Identity (The Foundation)
 
-> Authority flows inward. Formatting flows outward.
+Professional identity is not an abstraction or a PDF — it is a referentially sound body of experience, capabilities, and evidence. Provena models those facts once in plain YAML:
+
+- **Domain Model**: Pure, validated identity entities (`Person`, `Experience`, `Capability`, `Evidence`). Skills carry explicit evidence references.
+- **Projections**: Context-optimized representations (`Resume`, `LinkedIn`, `Career Compass`) derived directly from the identity without mutating it.
+
+> **Authority flows inward. Formatting flows outward.**
+
+---
+
+## 2. Continuous Market Observation & Decision Engine
+
+Once canonical identity is established, Provena turns outward to observe the job market continuously:
+
+- **Sources (`/sources`)**: Observation adapters poll ATS job boards (Greenhouse, Ashby, Lever) to build a global, deduplicated market catalog.
+- **Decision Engine (Protocol v1)**: Deterministic evaluation functions (`evaluateOpportunity(jd, profile)`) measure professional fit, personal fit, and recognition coverage.
+- **Attention Inbox (`/opportunities`)**: Evaluated market postings are sorted into semantic attention tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`).
+
+---
+
+## 3. Preserved Attention ("Helping to look less")
+
+The ultimate purpose of Provena is not to help you browse longer or generate endless CV variations.
+
+It is to filter out market noise automatically and preserve human attention for decisions that truly matter.
+
+> **Traditional job platforms optimize for engagement.**
 >
-> The identity model owns meaning. Every representation is derived.
-
-## Domain
-
-A canonical model of professional identity. Pure types with no dependencies. Entities like Person, Experience, Project, Capability, and Evidence. Capabilities reference evidence — skills are not free-form claims.
-
-## Projection
-
-A projection selects and reshapes the canonical model for a specific context. It never modifies the identity — it only adapts it to a context. The identity underneath stays the same.
-
-- **Résumé** — full experiences, all achievements, evidence-backed skills.
-- **LinkedIn** — recent 4 experiences, top 10 capabilities, featured projects.
-- **Bio** — condensed narrative for a specific audience.
-- **AI agent** — extracts the experience relevant to a specific proposal, on demand.
-
-The same identity produces different projections without modification.
-
-## Presentation
-
-Renderers consume a projection and produce output. They have no access to the domain model. A résumé renderer writes Markdown. A LinkedIn renderer respects character limits and platform conventions.
-
-## Why this matters
-
-Platforms change. Your source should remain yours.
-
-Provena never locks your identity into a proprietary format.
-
-> The domain model is the invariant. Everything else is a projection.
+> **Provena optimizes for preserved attention.**

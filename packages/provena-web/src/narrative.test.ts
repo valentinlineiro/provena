@@ -2,8 +2,21 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const rootDir = path.resolve(process.cwd(), '../..')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+function findRepoRoot(dir: string): string {
+  if (fs.existsSync(path.join(dir, 'PRODUCT.md'))) {
+    return dir
+  }
+  const parent = path.dirname(dir)
+  if (parent === dir) throw new Error('Repo root not found')
+  return findRepoRoot(parent)
+}
+
+const rootDir = findRepoRoot(__dirname)
 
 function readDoc(relPath: string): string {
   const fullPath = path.join(rootDir, relPath)

@@ -1,8 +1,8 @@
 # Provena
 
-Connect your career to the market once. Provena continuously observes thousands of opportunities, evaluates them against your professional identity, and only interrupts you when something deserves your attention.
+**Stop searching. Provena continuously watches the job market and only interrupts you when an opportunity deserves your attention.**
 
-> **"Helping to look less."** — Preserve human attention for decisions that matter.
+> **Traditional job platforms optimize for engagement. Provena optimizes for preserved attention.**
 
 ```bash
 git clone https://github.com/valentinlineiro/provena.git
@@ -19,27 +19,29 @@ npm run dev
 
 Provena decouples professional identity from static CV formats and integrates continuous market observation to minimize human attention in job search.
 
-- **Capture once**: Plain, referentially verified YAML workspaces (`Profile`).
-- **Continuous market observer**: Autonomous board ingestion (Greenhouse, Ashby, Lever), deduplication, Neon PostgreSQL market memory, and Cloudflare Worker cron sync.
-- **Deterministic evaluation**: Traceable APPLY / CONSIDER / SKIP verdicts against your canonical identity.
-- **Attention Inbox**: Context-filtered market opportunities organized by semantic tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`).
-- **Sources management**: Explicit feed configuration — Inbox strictly consumes evaluated market facts.
+1. **Build your identity**: Plain, referentially verified YAML workspaces (`Profile`).
+2. **Connect market sources**: Autonomous board ingestion (Greenhouse, Ashby, Lever), deduplication, and PostgreSQL market memory.
+3. **Deterministic evaluation**: Traceable APPLY / CONSIDER / SKIP verdicts evaluated deterministically against your canonical identity.
+4. **Review only what matters**: Attention Inbox organized into semantic tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`).
 
 ---
 
 ## System Architecture
 
 ```text
-Identity Layer
+Identity Domain
       │
       ▼
-Decision Protocol (Protocol v1)
+Continuous Market Observation (Sources & Market Catalog)
       │
       ▼
-Shared Market Architecture (O2)
+Decision Engine (Protocol v1 & Deterministic Assessment)
       │
       ▼
-Attention Inbox UI
+Attention Inbox UI (Product)
+      │
+      ▼
+Helping to look less
 ```
 
 ---
@@ -77,10 +79,10 @@ npm run --prefix packages/provena-web dev
 |-----------|--------|-------------|
 | **Identity Domain** | ✅ **Stable** | Profile aggregate, referential integrity, YAML workspace loader/writer |
 | **Decision Protocol** | ✅ **Stable** | Protocol v1 deterministic evaluation, OE-1/2/3 policies, traceable evidence |
-| **Shared Market (O2)** | ✅ **Stable** | Greenhouse/Ashby/Lever board sync, posting deduplication, Neon PostgreSQL + Cloudflare Cron |
+| **Shared Market (O2)** | ✅ **Stable** | Greenhouse/Ashby/Lever board sync, posting deduplication, PostgreSQL + Cloudflare Cron |
 | **Sources Management** | ✅ **Stable** | Continuous observation adapters, feed configuration (`/sources`) |
 | **Attention Inbox** | ✅ **Stable** | Semantic tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`), cursor pagination |
-| **K12 Knowledge Acquisition** | 🧪 **Experimental** | Market requirement pattern extraction (`MarketPatternDefinitions`) |
-| **Attention Validation** | 📋 **Planned** | Empirical measurement of observation time reduction (*Helping to look less*) |
+| **K12 Knowledge Acquisition** | 🔬 **Research** | Market requirement pattern extraction & clustering (`MarketPatternDefinitions`) |
+| **Attention Validation** | 🔬 **Research** | Empirical measurement of observation time reduction (*Helping to look less*) |
 
 For full details, see [Live Project Status](docs/project-status.md), [ADR-001 Governance](docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), and [Architecture Freeze Record](docs/architecture/freeze-v0.7.0.md).

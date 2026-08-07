@@ -335,7 +335,7 @@ test('K5A Acceptance: projectProfessionalFit — monotonicity direct > adjacent 
   assert.ok(adjProj.score > uncProj.score, `adjacent(${adjProj.score}) > uncertain(${uncProj.score})`)
 })
 
-test('K5A Acceptance: projectProfessionalFit — unknown excluded from score but counted in coverage gap', async () => {
+test('K5A Acceptance: projectProfessionalFit — unknown requirements count as 0 in denominator', async () => {
   const { projectProfessionalFit } = await import('./opportunity.js')
 
   const assessments: import('./opportunity.js').EvidenceSufficiencyAssessment[] = [
@@ -345,16 +345,14 @@ test('K5A Acceptance: projectProfessionalFit — unknown excluded from score but
   ]
   const result = projectProfessionalFit(assessments)
 
-  // Score reflects only the 1 assessable requirement (Python SUFFICIENT DIRECT = 10.0)
-  assert.equal(result.score, 10)
-  // Coverage = 1 assessed / 3 total = 0.333
+  // Score = 1×1.0 / 3 = 0.333 → ×10 = 3.3
+  // unknowns count as 0 in denominator so "Head of Marketing" can't score 10.0 for an engineering profile
+  assert.ok(result.score < 5, `score(${result.score}) must be penalised by unresolved requirements`)
+  // assessmentCoverage = assessable (non-unknown) / total = 1/3 ≈ 0.333
   assert.ok(result.assessmentCoverage < 0.4, `assessmentCoverage(${result.assessmentCoverage}) should be ~0.333`)
   assert.equal(result.totalRequirements, 3)
-  assert.equal(result.assessedCount, 1)
+  assert.equal(result.assessedCount, 3)  // all 3 count in denominator
   assert.equal(result.unknownCount, 2)
-
-  // Key: unknown should NOT collapse to zero — score is 10, not (10+0+0)/3 = 3.3
-  assert.ok(result.score > 5, `score(${result.score}) must not be diluted by unknown requirements`)
 })
 
 test('K5A Acceptance: projectProfessionalFit — breakdown is auditable per requirement', async () => {
@@ -577,11 +575,12 @@ test('K6 Acceptance: ABSTAIN is epistemological — high score + low coverage �
   const persFit = projectPersonalFit([])
 
   const assessment = applyPolicy(profFit, persFit)
-  // score = 10/10 (only Python assessed), coverage = 1/6 → ABSTAIN
+  // score = 1×1.0 / 6 ≈ 1.7 (unknowns penalise: only 1 of 6 requirements matched)
+  // confidence = assessmentCoverage ≈ 1/6 ≈ 0.167 < 0.25 → ABSTAIN
   assert.equal(assessment.recommendation, 'abstain')
   assert.ok(assessment.confidence < 0.25)
-  // Key invariant: ABSTAIN is not a bad score — professional fit is still 10
-  assert.equal(assessment.professionalFit.score, 10)
+  // Key invariant: low score AND low confidence → ABSTAIN is epistemological
+  assert.ok(assessment.professionalFit.score < 5, `profFit(${assessment.professionalFit.score}) should be penalised`)
 })
 
 test('K6B Acceptance: SB-007 fix — confidence is bounded by recognitionCoverage', async () => {

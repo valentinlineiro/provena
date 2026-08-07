@@ -490,15 +490,15 @@ ${renderAppShell(
   '</select>' +
   '</section>' +
   '<section>' +
-  '<label>Generate summary automatically</label>' +
-  '<div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>' +
+  '<label>Professional summary</label>' +
+  '<div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate from canonical identity</label></div>' +
   '</section>' +
   '<section>' +
-  '<label>Experiences (uncheck to exclude)</label>' +
+  '<label>Included experience</label>' +
   '<div class="check" id="experiences"></div>' +
   '</section>' +
   '<section>' +
-  '<label>Suggested emphasis (from your strengths — edit freely)</label>' +
+  '<label>Recommended focus (derived from Compass strengths)</label>' +
   '<div class="check" id="caps"></div>' +
   '</section>' +
   '<div class="meta" id="meta"></div>' +
@@ -523,7 +523,7 @@ ${renderAppShell(
   '<div class="bottom-sheet-overlay" onclick="closeCustomize()"></div>' +
   '<div class="bottom-sheet">' +
   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">' +
-  '<h2 style="font-size:1rem;font-weight:700;">Customize CV</h2>' +
+  '<h2 style="font-size:1rem;font-weight:700;">Projection Settings</h2>' +
   '<button type="button" onclick="closeCustomize()" style="width:auto;margin-top:0;padding:0.375rem 0.75rem;background:#e5e5e5;color:#1a1a1a;">Done</button>' +
   '</div>' +
   '<section>' +
@@ -543,16 +543,16 @@ ${renderAppShell(
   '</select>' +
   '</section>' +
   '<section>' +
-  '<label>Generate summary automatically</label>' +
-  '<div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate</label></div>' +
+  '<label>Professional summary</label>' +
+  '<div class="check"><label><input type="checkbox" id="autoSummary"> Auto-generate from canonical identity</label></div>' +
   '</section>' +
   '<section>' +
-  '<label>Experiences (uncheck to exclude)</label>' +
-  '<div class="check" id="experiences"></div>' +
+  '<label>Included experience</label>' +
+  '<div class="check" id="experiences-bs"></div>' +
   '</section>' +
   '<section>' +
-  '<label>Suggested emphasis (from your strengths — edit freely)</label>' +
-  '<div class="check" id="caps"></div>' +
+  '<label>Recommended focus (derived from Compass strengths)</label>' +
+  '<div class="check" id="caps-bs"></div>' +
   '</section>' +
   '<div class="meta" id="meta"></div>' +
   '<div class="meta" id="readiness"></div>' +

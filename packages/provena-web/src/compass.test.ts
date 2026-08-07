@@ -117,7 +117,7 @@ test('insufficient evidence refuses to judge instead of saying "developing"', ()
 
 test('cvReadiness surfaces the compass gap as a strengthening suggestion', () => {
   const text = cvReadiness({ targetRole: 'Staff Software Engineer' }, COMPASS)
-  assert.match(text, /This CV is good/)
-  assert.match(text, /One more milestone from VINCLE/)
+  assert.match(text, /Projection Quality: Good/)
+  assert.match(text, /One additional milestone from VINCLE/)
   assert.match(text, /for Staff Software Engineer opportunities/)
 })

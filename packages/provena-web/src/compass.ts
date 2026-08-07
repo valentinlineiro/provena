@@ -71,9 +71,9 @@ export function cvReadiness(context: CVContext, compass: CareerCompass): string 
   if (!gap) return ''
   const goal = role ? ' for ' + role + ' opportunities' : ''
   const opening = compass.positioning === 'market-ready' || compass.positioning === 'positioned'
-    ? 'This CV is good.'
-    : 'This CV is still developing.'
-  return opening + ' One more milestone from ' + gap.organization + ' would strengthen it' + goal + '.'
+    ? 'Projection Quality: Good.'
+    : 'Projection Quality: Still developing.'
+  return opening + ' One additional milestone from ' + gap.organization + ' would improve evidence coverage' + goal + '.'
 }
 
 export interface CompassNarrative {

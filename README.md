@@ -1,57 +1,83 @@
 # Provena
 
-Your professional identity as a single source of truth. Manage once. Export everywhere.
+Your professional identity as a canonical source of truth and continuous market observer.
 
 ```bash
-npx provena init my-profile     # guided setup (60 seconds)
-cd my-profile && provena render # generates resume.md, resume.json
+git clone https://github.com/valentinlineiro/provena.git
+cd provena
+npm install && npm test && npm run build
+npm run dev
 ```
 
-**Why:** Your resume, LinkedIn, website, and portfolio all diverge over time.
-Provena stores your identity as structured data and projects it into any format.
+---
 
-## Product Principles
+## Core Thesis
 
-- **Capture once.** Never reconstruct professional history from memory.
-- **One source of truth.** Every representation is generated from the canonical profile.
-- **Projections are disposable.** CVs, LinkedIn, portfolios are outputs, not the product.
-- **Events drive the roadmap.** Ideas do not enter the roadmap without a real friction event.
+> **Professional identity is an immutable history of evidence. Communication is a projection optimized for a decision.**
 
-### 60-second demo
+Provena decouples professional identity from static CV formats and integrates continuous market observation to minimize job search friction.
+
+- **Capture once**: Never reconstruct professional history from memory.
+- **One source of truth**: Plain, referentially verified YAML workspaces (`Profile`).
+- **Decision-aware projections**: Deterministic evaluation (`evaluateOpportunity(jd, profile)`) producing traceable APPLY / CONSIDER / SKIP verdicts.
+- **Continuous market observer (O2)**: Autonomous board ingestion, deduplication, Neon PostgreSQL market memory, and background Cloudflare Worker sync.
+- **Attention Inbox**: Context-filtered market opportunities organized by relevance.
+
+---
+
+## System Architecture
+
+```text
+Identity Layer
+      │
+      ▼
+Decision Protocol (Protocol v1)
+      │
+      ▼
+Shared Market Architecture (O2)
+      │
+      ▼
+Attention Inbox UI
+```
+
+---
+
+## Quick Start (Developer & Local Execution)
 
 ```bash
-git clone https://github.com/valenlb/provena.git && cd provena
-npm install && npm run build
-provena demo
+# 1. Run full test suite & monorepo build
+npm test
+npm run build
+
+# 2. Render canonical profile demo via CLI
+npm run demo
+
+# 3. Start local web application & worker dev server
+npm run --prefix packages/provena-web dev
 ```
 
-You'll see a complete resume rendered from a canonical profile — no files to
-create, no YAML to touch.
+---
 
-### Next: create your own profile
-
-```bash
-provena init my-profile
-# answer 10 questions
-provena render my-profile --stdout     # Markdown resume
-provena render my-profile --format linkedin --stdout  # LinkedIn summary
-provena render my-profile --format jsonresume         # JSON Resume schema
-```
-
-Edit the YAML files to add achievements, projects, and detail. Re-render
-and all outputs stay in sync.
-
-### CLI reference
+## CLI Reference
 
 | Command | What it does |
 |---------|-------------|
-| `provena init <dir>` | Guided questionnaire — creates workspace |
 | `provena render <dir>` | Generates resume.md (default), use `--format` for others |
 | `provena demo` | Shows an example profile rendered immediately |
-| `provena validate <dir>` | Checks for missing references or duplicates |
-| `provena import linkedin <file.zip>` | Imports LinkedIn data export |
+| `provena validate <dir>` | Checks for missing references or duplicate IDs |
+| `provena import linkedin <file.zip>` | Imports LinkedIn data export into canonical workspace |
 
-### Status
+---
 
-Working: init, render (Markdown, HTML, JSON Resume, LinkedIn), validate,
-LinkedIn import, merge engine, referential integrity checks.
+## Subsystem Status (`v0.7.0`)
+
+| Subsystem | Status | Description |
+|-----------|--------|-------------|
+| **Identity Domain** | ✅ **Stable** | Profile aggregate, referential integrity, YAML workspace loader/writer |
+| **Decision Protocol** | ✅ **Stable** | Protocol v1 deterministic evaluation, traceable evidence |
+| **Shared Market (O2)** | ✅ **Stable** | Greenhouse board sync, posting deduplication, Neon PostgreSQL + Cloudflare Cron |
+| **Attention Inbox** | ✅ **Stable** | Semantic tabs (`Needs Attention`, `Worth Considering`), cursor pagination |
+| **K12 Knowledge Acquisition** | 🧪 **Experimental** | Market requirement pattern extraction (`MarketPatternDefinitions`) |
+| **Attention Validation** | 📋 **Planned** | Empirical measurement of observation time reduction |
+
+For full details, see [Live Project Status](docs/project-status.md), [ADR-001 Governance](docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), and [Architecture Freeze Record](docs/architecture/freeze-v0.7.0.md).

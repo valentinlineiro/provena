@@ -1,159 +1,91 @@
 # Architecture
 
-Provena follows a four-layer architecture that separates concerns along clear boundaries.
+Provena follows a multi-tier pipeline that separates canonical identity, decision evaluation, shared market observation, and attention presentation along clear boundaries.
 
-## Layers
+---
 
-```
-Persistence
-     ↓
-   Domain
-     ↓
- Projection
-     ↓
-Presentation
-```
-
-### Persistence
-
-Loading and storing the canonical identity.
-
-Responsible for reading raw data from a source (filesystem, git, API) and producing a `Profile`. The domain model has no knowledge of how data is stored. Multiple loaders can coexist: YAML, JSON, SQLite, Notion — all produce the same `Profile` type.
-
-Interface: `WorkspaceLoader`
-
-### Domain
-
-The canonical model of professional identity. Pure types with no I/O, no dependencies, no plugins. Contains:
-
-- Entity types (Person, Experience, Project, Education, Publication, Certification, Recommendation, Capability, Evidence)
-- Aggregate root (Identity, Profile)
-- Cross-reference validation
-
-The domain is the only layer that is never a plugin. Everything else can be replaced.
-
-### Projection
-
-A projection transforms a `Profile` into a context-optimized representation. Each projection selects, filters, and reshapes the canonical model for a specific purpose:
-
-- A resume projection includes all experiences with full achievements.
-- A LinkedIn projection includes the most recent 4 experiences and top 10 capabilities.
-- A staff-engineer projection would highlight architectural leadership.
-
-Projections are pure functions: `Profile → Projection`. The same Profile can produce many projections without modifying the original.
-
-### Presentation
-
-Renderers consume a projection and produce output. They have no access to `Profile`, no knowledge of the domain model, and no I/O. A renderer is a pure function: `Projection → string`.
-
-The renderer interface is generic over projection types, allowing any renderer to work with any compatible projection.
-
-```
-Renderer<ResumeProjection> → Markdown
-Renderer<ResumeProjection> → HTML
-Renderer<ResumeProjection> → PDF
-Renderer<LinkedInProjection> → LinkedIn-compatible text
-```
-
-## Relationship to a Compiler
-
-The architecture mirrors a compiler pipeline:
-
-| Compiler | Provena |
-|----------|---------|
-| Source code | Workspace (YAML files) |
-| AST | Profile |
-| IR | Projection |
-| Code generation | Renderer |
-
-This is not a forced analogy but a useful lens for decisions: when in doubt about where a responsibility belongs, ask whether it fits the domain model (AST), the transformation (IR), or the output generation (backend).
-
-## Package Layout
-
-```
-packages/
-  core/       Domain types, Profile, projections, validators, interfaces
-  yaml/       YamlWorkspaceLoader (Persistence)
-  markdown/   MarkdownResumeRenderer (Presentation)
-  linkedin/   (future) LinkedIn renderer
-  html/       (future) HTML renderer
-  cli/        (future) CLI
-```
-
-## Core Contract
-
-Core has no dependencies, no I/O, no plugins. It is the only package that is part of the platform rather than a plugin.
-
-Core owns: domain model, validation, projection types, selector functions, renderer interface, workspace loader interface.
-
-Core never owns: YAML parsing, file system access, CLI arguments, HTTP requests, template engines, AI integration.
-
-## Plugin Philosophy
-
-Everything except the domain model is a plugin. A plugin:
-
-- Implements an interface defined in core
-- Has no access to the domain model's internals beyond the public API
-- Can be developed, tested, and published independently
-- Adds zero cost when not installed
-
-This keeps the core stable while allowing the ecosystem to grow without architectural drift.
-
-### Projection principle
-
-A projection is `Profile → TModel` with phases executed in order:
-`Selection → Presentation → Summary → Rendering`. Selection decides which
-experiences are included (explicit, or later derived from the target role);
-Presentation orders and filters capabilities; Summary generates the narrative
-(Explicit → Auto → none); Rendering serializes a representation. The `Profile`
-is never adapted — only the projections change.
-
-### I7 — Selection is explicit or target-role-derived
-A technology list can never remove an experience. Experience selection is a
-high-level decision with its own rule.
-
-### I8 — Projectors share primitives, never results
-The Career Compass and the CV projector both consume `career.ts` primitives
-(`deriveStrengths`, `deriveEvidenceCount`, `findEvidenceGaps`). Neither calls
-the other. If the Compass's weighting changes, the CV does not change unless
-the underlying primitive changes.
-
-## CV Projection contract
-
-The CV projection is the first renderer-neutral contract. A `CvProjection` is a
-flat, presentable model — no Profile shape leaks into it:
-
-```ts
-interface CvProjection {
-  identity: CvIdentity;
-  headline: string;
-  summary: string;
-  expertise: string[];
-  technologies: string[];
-  experiences: CvExperience[];
-  projects: CvProject[];
-  education: CvEducation[];
-  certifications: CvCertification[];
-}
-```
-
-The renderer only maps it:
+## The System Pipeline
 
 ```text
-CvProjection → Markdown
-CvProjection → HTML
-CvProjection → PDF
+Identity
+   │
+   ▼
+Decision Protocol (Protocol v1)
+   │
+   ▼
+Shared Market Architecture (O2)
+   │
+   ▼
+Attention Inbox
 ```
 
-Never `Profile → PDF`. The Projection phase extracts meaning; Presentation only
-formats it.
+### 1. Identity Layer
+The single canonical source of professional truth. Loading raw data from storage (YAML workspaces, JSON, imports) into the immutable `Profile` aggregate root. It has zero knowledge of projections, rendering formats, or external market boards.
 
-### I9 — The renderer does not reason
-Selection, ranking, budgeting and deduplication live in the projection. A
-renderer never decides what is important, never filters evidence, and never
-compresses content — it receives an already editorialised projection. Decision
-Context (target role, audience) feeds the projection, not the renderer.
+### 2. Decision Layer (Protocol v1)
+Evaluates candidate identity against decision contexts or job opportunities. Pure, deterministic evaluation (`evaluateOpportunity(jd, profile)`) producing traceable `OpportunityEvaluation` verdicts (APPLY / CONSIDER / SKIP) without LLM hallucinations.
 
-Selection heuristics (relevance, evidence-over-claim, deduplication, recency,
-global budget) are the CV policy; they belong to the projection and are
-documented in `decision-model.md`.
+### 3. Shared Market Architecture (O2)
+Autonomous, continuous market observation layer. Ingests public market posting boards (e.g. Greenhouse), deduplicates postings via `makePostingDedupeKey`, and maintains global market posting records in Neon PostgreSQL synchronized via Cloudflare Workers & Cron triggers.
+
+### 4. Attention Layer
+Presents context-filtered, high-relevance opportunities to the user. Evaluates professional fit, personal preference alignment, and candidate coverage to eliminate market noise and minimize time spent searching.
+
+---
+
+## Three System Loops
+
+Provena coordinates three distinct feedback loops across identity and market:
+
+1. **Observation Loop (O2 — Stable)**:
+   Autonomous ingestion → Deduplication → Shared Market Memory → Continuous sync.
+2. **Knowledge Acquisition Loop (K12 — Experimental)**:
+   Market requirement cluster mining → `MarketPatternDefinitions` → GTM splits & pattern recognition audit.
+3. **Attention Reduction Loop (Planned)**:
+   Evaluation feedback → Preference refinement → Measurable reduction of job-seeking search friction.
+
+---
+
+## Package Layout & Core Contract
+
+```text
+packages/
+  core/             Domain models, Profile aggregate, Protocol v1 decision evaluator, interfaces
+  yaml/             YamlWorkspaceLoader & Writer (Persistence)
+  markdown/         MarkdownResumeRenderer (Presentation)
+  html/             HtmlResumeRenderer (Presentation)
+  cli/              Provena Command Line Interface
+  linkedin-import/  LinkedIn archive zip loader into Profile domain
+  market-postgres/  PostgreSQL Repositories for Shared Market Memory (O2)
+  provena-web/      Web application & Cloudflare Worker (App Shell, Compass, Inbox, Cron Sync)
+```
+
+### Core Contract Invariants
+
+- **Core Ownership**: Domain model, referential validation, projection interfaces, Protocol v1 evaluation engine, workspace loader interface.
+- **Core Exclusions**: Core never owns database connection pools, file system I/O, CLI argument parsing, HTTP frameworks, or AI models.
+- **I8 — Independent Primitives**: Projectors consume shared domain primitives (`career.ts`), never each other's outputs.
+- **I9 — Pure Renderer**: Presentation renderers receive pre-editorialised projections and perform zero selection, ranking, or filtering logic.
+
+---
+
+## Relationship to a Compiler Pipeline
+
+```text
+Compiler Phase      Provena Component
+──────────────      ─────────────────
+Source Code    ──►  Workspace (YAML files)
+AST            ──►  Profile aggregate
+IR             ──►  CvProjection / OpportunityEvaluation
+Backend / Code ──►  Markdown / HTML Renderers / Attention Inbox UI
+```
+
+---
+
+## Governance & Versioning Hierarchy
+
+Refer to [ADR-001](file:///home/valentin/code/provena/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md) and [freeze-v0.7.0.md](file:///home/valentin/code/provena/docs/architecture/freeze-v0.7.0.md) for official component classification:
+
+- **Monorepo Package Version (`v0.7.0`)**: Release version of software packages, web app, CLI, and database schemas.
+- **Decision Protocol Version (`Protocol v1`)**: Canonical evaluation invariants and contract.
+- **Operational Knowledge Version (`0`)**: Promoted production operational knowledge version.

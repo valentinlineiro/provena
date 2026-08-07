@@ -2,6 +2,19 @@
 
 All notable changes to Provena are documented here.
 
+## v0.7.0 — Continuous Market & Architectural Reconciliation (2026-08-07)
+
+**From a profile compiler to a continuous market observer and attention system.** Code, documentation, roadmap, and versioning are reconciled under explicit governance.
+
+- Governance: [ADR-001](docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md) and [Architecture Freeze Record](docs/architecture/freeze-v0.7.0.md) establishing component boundaries
+- Shared Market Architecture (O2): Greenhouse board ingestion, deduplication keys, Neon PostgreSQL repositories, and Cloudflare Cron autonomous sync
+- Attention Inbox `/opportunities`: semantic attention tabs (`Needs Attention`, `Worth Considering`, `Unresolved`, `Decided`) and Base64URL cursor pagination
+- Clean In-Memory Fallbacks: graceful execution when `DATABASE_URL` is omitted
+- Live Project Status: [`docs/project-status.md`](docs/project-status.md) added for real-time subsystem visibility
+- Monorepo Version Alignment: synchronized root and all packages to `0.7.0`; Operational Knowledge Version set to `0`
+
+[Full release notes](docs/releases/v0.7.0.md)
+
 ## v0.6.0 — Evaluate, then prepare (2026-08-04)
 
 **From a story you maintain to a decision you can justify.** Provena looks at

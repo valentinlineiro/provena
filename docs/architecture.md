@@ -103,4 +103,4 @@ packages/
 - **Monorepo Package Version (`v0.7.1`)**: Release version of software packages, web app, CLI, and database schemas.
 - **Decision Protocol Version (`Protocol v1`)**: Canonical evaluation invariants and contract.
 - **Operational Knowledge Version (`0`)**: Promoted production operational knowledge version.
-- **ADR Governance**: Refer to [ADR-001](file:///home/valentin/code/provena/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md) and [Architecture Freeze Record](file:///home/valentin/code/provena/docs/architecture/freeze-v0.7.0.md).
+- **ADR Governance**: Refer to [ADR-001](architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md) and [Architecture Freeze Record](architecture/freeze-v0.7.0.md).

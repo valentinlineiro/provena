@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-07  
 **Status:** Spec Approved & Finalized  
-**Reference ADR:** [ADR-002](file:///home/valentin/code/provena/docs/architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
+**Reference ADR:** [ADR-002](../../architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
 
 ---
 

@@ -76,7 +76,7 @@ The UI must faithfully mirror the three frozen architectural domains:
     - *Experimental*: Market Knowledge Learning, Attention Validation.
   - **Philosophy**: *"Helping to look less. Preserve human attention for decisions that matter."*
 - **Repository Alignment**:
-  - Audit and synchronize [`README.md`](file:///home/valentin/code/provena/README.md), [`CONTRIBUTING.md`](file:///home/valentin/code/provena/CONTRIBUTING.md), [`docs/roadmap.md`](file:///home/valentin/code/provena/docs/roadmap.md), and [`docs/project-status.md`](file:///home/valentin/code/provena/docs/project-status.md).
+  - Audit and synchronize [`README.md`](../../../README.md), [`CONTRIBUTING.md`](../../../CONTRIBUTING.md), [`docs/roadmap.md`](../../roadmap.md), and [`docs/project-status.md`](../../project-status.md).
 
 ---
 

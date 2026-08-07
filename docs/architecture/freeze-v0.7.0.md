@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-07  
 **Status:** Frozen for v0.7.0 Release  
-**Reference:** [ADR-001](file:///home/valentin/code/provena/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md)
+**Reference:** [ADR-001](adr/ADR-001-v0.7.0-architectural-reconciliation.md)
 
 ---
 

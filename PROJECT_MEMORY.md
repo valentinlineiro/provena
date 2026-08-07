@@ -39,7 +39,7 @@ Traditional CVs force candidates to manually rebuild their story for every chann
 
 ## 3. Current Architecture & Research Governance (v0.7.0)
 
-As established in [ADR-001](file:///home/valentin/code/provena/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md):
+As established in [ADR-001](docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md):
 
 - **Software Monorepo (`v0.7.0`)**: Production-ready core engine, CLI, PostgreSQL market storage, Cloudflare Workers API, and web application.
 - **Decision Protocol (`Protocol v1`)**: Stable evaluation protocol.

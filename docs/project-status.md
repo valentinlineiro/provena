@@ -1,11 +1,11 @@
 # Provena Project Status
 
 **Last Updated:** 2026-08-07  
-**Software Release:** v0.7.0  
+**Software Release:** v0.7.1  
 **Decision Protocol Version:** Protocol v1  
 **Current Operational Knowledge Version:** 0  
-**Architecture Freeze Reference:** [freeze-v0.7.0.md](file:///home/valentin/code/provena/docs/architecture/freeze-v0.7.0.md)  
-**Governance ADRs:** [ADR-001](file:///home/valentin/code/provena/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), [ADR-002](file:///home/valentin/code/provena/docs/architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
+**Architecture Freeze Reference:** [freeze-v0.7.0.md](architecture/freeze-v0.7.0.md)  
+**Governance ADRs:** [ADR-001](architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), [ADR-002](architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
 
 ---
 
@@ -23,14 +23,14 @@
 
 | Subsystem / Area | Maturity Status | Monorepo Location | Primary Responsibility |
 |------------------|-----------------|-------------------|------------------------|
-| **Canonical Professional Identity** | ✅ **Stable** | [`packages/core`](file:///home/valentin/code/provena/packages/core), [`packages/yaml`](file:///home/valentin/code/provena/packages/yaml) | Single source of professional truth, YAML loaders, referential integrity |
-| **Decision Protocol (Protocol v1)** | ✅ **Stable** | [`packages/core`](file:///home/valentin/code/provena/packages/core) | Deterministic evaluation `evaluateOpportunity(jd, profile)` (APPLY / CONSIDER / SKIP), traceable evidence |
-| **Shared Market Architecture (O2)** | ✅ **Stable** | [`packages/market-postgres`](file:///home/valentin/code/provena/packages/market-postgres), [`packages/provena-web`](file:///home/valentin/code/provena/packages/provena-web) | Board sync (Greenhouse), deduplication, Neon PostgreSQL canonical store + Cloudflare Cron sync |
-| **Attention Inbox & Keyset Bookmarks** | ✅ **Stable** | [`packages/provena-web`](file:///home/valentin/code/provena/packages/provena-web) | Relational market inbox, Base64URL keyset reading bookmarks (`nextBookmark`), relevance ranking |
-| **Continuous Synchronization** | ✅ **Stable** | [`packages/provena-web`](file:///home/valentin/code/provena/packages/provena-web) | Pure Worker Orchestrator + Cron + Neon PostgreSQL pipeline |
-| **Market Knowledge Acquisition (K12)** | 🧪 **Experimental** | [`experiments/k12-learning/`](file:///home/valentin/code/provena/experiments/k12-learning), [`experiments/k12a/`](file:///home/valentin/code/provena/experiments/k12a) | Market requirement pattern extraction (`MarketPatternDefinitions`), GTM splits, empirical learning |
-| **Attention Validation** | 📋 **Planned** | [`docs/research/`](file:///home/valentin/code/provena/docs/research) | Empirical measurement of observation time reduction |
-| **Outcome Learning** | 🔭 **Vision** | [`docs/research/`](file:///home/valentin/code/provena/docs/research) | Feedback loop from actual hiring outcomes |
+| **Canonical Professional Identity** | ✅ **Stable** | [`packages/core`](../packages/core), [`packages/yaml`](../packages/yaml) | Single source of professional truth, YAML loaders, referential integrity |
+| **Decision Protocol (Protocol v1)** | ✅ **Stable** | [`packages/core`](../packages/core) | Deterministic evaluation `evaluateOpportunity(jd, profile)` (APPLY / CONSIDER / SKIP), traceable evidence |
+| **Shared Market Architecture (O2)** | ✅ **Stable** | [`packages/market-postgres`](../packages/market-postgres), [`packages/provena-web`](../packages/provena-web) | Board sync (Greenhouse/Ashby/Lever), deduplication, PostgreSQL canonical store + Cloudflare Cron sync |
+| **Sources Management & Inbox** | ✅ **Stable** | [`packages/provena-web`](../packages/provena-web) | Continuous market feed adapters (`/sources`), semantic tabs (`/opportunities`), Base64URL cursor reading bookmarks |
+| **Continuous Synchronization** | ✅ **Stable** | [`packages/provena-web`](../packages/provena-web) | Pure Worker Orchestrator + Cron + PostgreSQL pipeline |
+| **Market Knowledge Acquisition (K12)** | 🔬 **Research** | [`experiments/k12-learning/`](../experiments/k12-learning) | Market requirement pattern extraction (`MarketPatternDefinitions`), GTM splits, empirical learning |
+| **Attention Validation** | 🔬 **Research** | [`docs/research/`](research) | Empirical measurement of observation time reduction (*Helping to look less*) |
+| **Outcome Learning** | 🔭 **Vision** | [`docs/research/`](research) | Feedback loop from actual hiring outcomes |
 
 ---
 

@@ -102,6 +102,6 @@ packages/
 
 | Document | Purpose |
 |----------|---------|
-| [`docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md`](file:///home/valentin/code/provena/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md) | Official architectural boundaries and subsystem governance |
-| [`docs/architecture/freeze-v0.7.0.md`](file:///home/valentin/code/provena/docs/architecture/freeze-v0.7.0.md) | Architecture freeze record |
-| [`docs/roadmap.md`](file:///home/valentin/code/provena/docs/roadmap.md) | Product roadmap (v0.7.1 → v0.8.0 → v0.9.0 → v1.0.0) |
+| [ADR-001 Governance](https://github.com/valentinlineiro/provena/blob/main/docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md) | Official architectural boundaries and subsystem governance |
+| [Architecture Freeze Record](https://github.com/valentinlineiro/provena/blob/main/docs/architecture/freeze-v0.7.0.md) | Architecture freeze record |
+| [Product Roadmap](/roadmap) | Release roadmap & strategic program sequence |

@@ -1360,7 +1360,17 @@ async function loadTab(reset = false) {
 
     currentBookmark = data.nextBookmark
     hasMore = !!data.nextBookmark
-    sentinel.textContent = hasMore ? 'Scroll for more...' : 'End of list'
+    sentinel.textContent = hasMore ? 'Scroll for more...' : ''
+
+    // IntersectionObserver only fires on state changes. If the first page
+    // doesn't push the sentinel below the fold, it stays visible but the
+    // observer won't fire again. Trigger the next page automatically.
+    if (hasMore) {
+      const rect = sentinel.getBoundingClientRect()
+      if (rect.top < window.innerHeight) {
+        setTimeout(() => loadTab(false), 80)
+      }
+    }
   } catch (e) {
     sentinel.textContent = 'Failed to load'
   } finally {

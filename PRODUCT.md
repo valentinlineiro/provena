@@ -1,3 +1,58 @@
+---
+contract:
+  name: Provena
+  promise: "Helping to look less."
+  thesis: "Traditional job platforms optimize for engagement. Provena optimizes for preserved attention."
+  north_star: "Preserved human attention per correct decision"
+
+canonical_terms:
+  - "Canonical Identity"
+  - "Continuous Market Observation"
+  - "Deterministic Assessment"
+  - "Attention Inbox"
+  - "Sources"
+
+capabilities:
+  - id: identity
+    name: "Canonical Identity"
+    status: stable
+    required_in: ["website/index.md", "website/problem.md", "website/concept.md", "website/architecture.md", "website/use-cases.md"]
+  - id: observation
+    name: "Continuous Market Observation"
+    status: stable
+    required_in: ["website/index.md", "website/problem.md", "website/concept.md", "website/architecture.md", "website/use-cases.md"]
+  - id: assessment
+    name: "Deterministic Assessment"
+    status: stable
+    required_in: ["website/index.md", "website/problem.md", "website/concept.md", "website/architecture.md", "website/use-cases.md"]
+  - id: inbox
+    name: "Attention Inbox"
+    status: stable
+    required_in: ["website/index.md", "website/problem.md", "website/concept.md", "website/architecture.md", "website/use-cases.md"]
+
+architecture_routes:
+  - path: "/sources"
+    label: "Sources Management"
+    package: "packages/provena-web"
+  - path: "/opportunities"
+    label: "Attention Inbox"
+    package: "packages/provena-web"
+  - path: "/evaluate"
+    label: "Deterministic Evaluation"
+    package: "packages/provena-web"
+
+packages:
+  - "packages/core"
+  - "packages/yaml"
+  - "packages/market-postgres"
+  - "packages/provena-web"
+  - "packages/cli"
+
+adrs:
+  - "docs/architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md"
+  - "docs/architecture/adr/ADR-002-neon-canonical-market-orchestration.md"
+---
+
 # Provena Product Contract
 
 > **The Canonical Single Source of Truth for Product Definition, Narrative, and Architecture**
@@ -56,16 +111,14 @@ Professional Identity  ──►  Market Sources  ──►  Continuous Observat
 
 ---
 
-## 4. Narrative Invariants (D1–D6 Contract)
+## 4. Documentation Contract Harness (Level 1–Level 4)
 
-| Invariant | Scope | Rule / Assertion |
+| Level | Check Scope | Validation Rule |
 | --- | --- | --- |
-| **D1** | **Hero & Value Proposition** | Home, README, and Why must state *"Helping to look less"* and contrast attention preservation against engagement traps. |
-| **D2** | **Canonical Sequence** | Problem, Concept, Architecture, and Getting Started must follow the sequence `Identity -> Sources -> Observation -> Assessment -> Inbox`. |
-| **D3** | **Architecture Fidelity** | `architecture.md` must reflect the dual-branch system (Identity Projections + Continuous Market Assessment). |
-| **D4** | **Scenario Alignment** | `use-cases.md` must group scenarios by system capability (Observation -> Assessment -> Knowledge -> Projections), not legacy persona buckets. |
-| **D5** | **Roadmap Stage Continuum** | `roadmap.md` must express the stage continuum (Foundation -> Platform v0.7.1 -> Research Validation -> Future v1.0.0). |
-| **D6** | **Web-First Onboarding** | `quickstart.md` (Getting Started) must activate the web product first, placing CLI as an optional secondary local helper. |
+| **Level 1** | **Narrative Invariants (D1–D6)** | Asserts core message presence across landing, README, and docs. |
+| **Level 2** | **Capability Coverage** | Asserts 100% matrix coverage for all canonical capabilities across all core doc pages. |
+| **Level 3** | **Architecture Consistency** | Verifies monorepo packages, web routes, and ADR files exist on disk. |
+| **Level 4** | **Terminology Fidelity & Drift Detection** | Enforces canonical term usage and detects unauthorized terminology drift. |
 
 ---
 

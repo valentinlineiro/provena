@@ -1135,11 +1135,17 @@ async function loadTab(reset = false) {
     }
 
     const rows = document.getElementById('opp-rows')
+    if (!rows) { isLoading = false; return }
+
     if (reset && data.items.length === 0) {
-      document.getElementById('inbox').innerHTML = '<div class="card" style="margin-top:1rem;"><p>No opportunities in this view.</p></div>'
-      sentinel.textContent = ''
+      rows.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#666;">No opportunities in this view.</td></tr>'
+      if (sentinel) sentinel.textContent = ''
       isLoading = false
       return
+    }
+
+    if (reset) {
+      rows.innerHTML = ''
     }
 
     for (const item of data.items) {

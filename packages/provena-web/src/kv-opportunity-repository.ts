@@ -2,20 +2,38 @@ import type { OpportunityRepository, OpportunityUserDecision, StoredOpportunity 
 
 const KV_KEY = 'opportunities_memory'
 
-// ponytail: single JSON blob under one KV key (same storage already deployed for O1.2),
-// not per-id keys + an index — at this scale (a few hundred opportunities at most) a blob
-// well under KV's 25MB value limit is simpler and has no index-consistency failure mode.
-// Split into `opportunity:{id}` keys + a listing index if that stops being true.
 export class KvOpportunityRepository implements OpportunityRepository {
   constructor(private readonly kv: KVNamespace) {}
 
   private async readAll(): Promise<StoredOpportunity[]> {
-    const raw = await this.kv.get(KV_KEY, 'json')
-    return (raw as { opportunities: StoredOpportunity[] } | null)?.opportunities ?? []
+    if (!this.kv) return []
+    try {
+      const raw = await this.kv.get(KV_KEY, 'json')
+      return (raw as { opportunities: StoredOpportunity[] } | null)?.opportunities ?? []
+    } catch (e) {
+      console.error('[KvOpportunityRepository.readAll] KV read error:', e)
+      return []
+    }
   }
 
   private async writeAll(opportunities: StoredOpportunity[]): Promise<void> {
-    await this.kv.put(KV_KEY, JSON.stringify({ opportunities }))
+    if (!this.kv) return
+    // Strip heavy HTML description text to keep KV blob lightweight (~50KB instead of 20MB)
+    // so reading/parsing JSON in Cloudflare Workers never hits RAM or CPU limits.
+    const lightweight = opportunities.map(o => {
+      const { description, ...lightRaw } = (o.raw || {}) as any
+      const evalCopy = o.evaluation ? ({ ...o.evaluation } as any) : undefined
+      if (evalCopy && evalCopy.rawOpportunity) {
+        const { description: _, ...lightRawOpp } = evalCopy.rawOpportunity
+        evalCopy.rawOpportunity = lightRawOpp
+      }
+      return {
+        ...o,
+        raw: lightRaw,
+        evaluation: evalCopy,
+      } as StoredOpportunity
+    })
+    await this.kv.put(KV_KEY, JSON.stringify({ opportunities: lightweight }))
   }
 
   async findById(id: string): Promise<StoredOpportunity | null> {

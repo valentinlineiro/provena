@@ -574,14 +574,14 @@ const expHtml = profile.identity.experienceIds.map(id => {
   if (!e) return ''
   return '<label><input type="checkbox" data-exp="' + id + '" checked> ' + e.organization + '</label>'
 }).join('')
-document.querySelectorAll('#experiences').forEach(el => { el.innerHTML = expHtml })
+document.querySelectorAll('#experiences, #experiences-bs').forEach(el => { el.innerHTML = expHtml })
 
 const capNames = [...suggestions.strengths]
 for (const name of prefillEmphasize) if (!capNames.includes(name)) capNames.push(name)
 const capsHtml = capNames.map(s =>
   '<label><input type="checkbox" data-cap="' + esc(s) + '" checked> ' + esc(s) + '</label>'
 ).join('')
-document.querySelectorAll('#caps').forEach(el => { el.innerHTML = capsHtml })
+document.querySelectorAll('#caps, #caps-bs').forEach(el => { el.innerHTML = capsHtml })
 
 document.querySelectorAll('[data-cap]').forEach(el => {
   if (prefillEmphasize.length && !prefillEmphasize.includes(el.dataset.cap)) el.checked = false

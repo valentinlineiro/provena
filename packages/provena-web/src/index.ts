@@ -1010,6 +1010,66 @@ export default {
       }
     }
 
+interface ObservationSourceItem {
+  name: string
+  provider: string
+  token: string
+  url: string
+  status: string
+  jobsObserved: string
+}
+
+const DEFAULT_OBSERVATION_SOURCES: ObservationSourceItem[] = [
+  { name: 'Stripe Careers', provider: 'Greenhouse', token: 'stripe', url: 'https://boards.greenhouse.io/stripe', status: 'Watching', jobsObserved: '3,482' },
+  { name: 'OpenAI Careers', provider: 'Greenhouse', token: 'openai', url: 'https://boards.greenhouse.io/openai', status: 'Watching', jobsObserved: '412' },
+  { name: 'Anthropic Careers', provider: 'Ashby', token: 'anthropic', url: 'https://jobs.ashbyhq.com/anthropic', status: 'Watching', jobsObserved: '189' },
+  { name: 'Linear Careers', provider: 'Lever', token: 'linear', url: 'https://jobs.lever.co/linear', status: 'Watching', jobsObserved: '64' },
+]
+
+const memoryCustomSources: ObservationSourceItem[] = []
+
+async function getMergedSources(env: Env): Promise<ObservationSourceItem[]> {
+  let customList: ObservationSourceItem[] = memoryCustomSources
+  if (env.PROVENA_KV) {
+    try {
+      const raw = await env.PROVENA_KV.get('user_sources', 'json')
+      if (Array.isArray(raw)) customList = raw as ObservationSourceItem[]
+    } catch {}
+  }
+  const map = new Map<string, ObservationSourceItem>()
+  for (const s of DEFAULT_OBSERVATION_SOURCES) map.set(s.token, s)
+  for (const s of customList) map.set(s.token, s)
+  return Array.from(map.values())
+}
+
+async function registerObservedSource(env: Env, token: string, count: number): Promise<void> {
+  const tokenClean = token.toLowerCase().trim()
+  const name = tokenClean.charAt(0).toUpperCase() + tokenClean.slice(1) + ' Careers'
+  const newSource: ObservationSourceItem = {
+    name,
+    provider: 'Greenhouse',
+    token: tokenClean,
+    url: `https://boards.greenhouse.io/${tokenClean}`,
+    status: 'Watching',
+    jobsObserved: count > 0 ? `${count} postings` : 'Watching',
+  }
+
+  const idx = memoryCustomSources.findIndex(s => s.token === tokenClean)
+  if (idx >= 0) memoryCustomSources[idx] = newSource
+  else memoryCustomSources.push(newSource)
+
+  if (env.PROVENA_KV) {
+    try {
+      const raw = await env.PROVENA_KV.get('user_sources', 'json')
+      const list: ObservationSourceItem[] = Array.isArray(raw) ? (raw as ObservationSourceItem[]) : []
+      const kvIdx = list.findIndex(s => s.token === tokenClean)
+      if (kvIdx >= 0) list[kvIdx] = newSource
+      else list.push(newSource)
+      await env.PROVENA_KV.put('user_sources', JSON.stringify(list))
+    } catch {}
+  }
+}
+
 const SOURCES_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1306,13 +1366,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     if (request.method === 'GET' && url.pathname === '/api/sources') {
-      const defaultSources = [
-        { name: 'Stripe Careers', provider: 'Greenhouse', token: 'stripe', url: 'https://boards.greenhouse.io/stripe', status: 'Watching', jobsObserved: '3,482' },
-        { name: 'OpenAI Careers', provider: 'Greenhouse', token: 'openai', url: 'https://boards.greenhouse.io/openai', status: 'Watching', jobsObserved: '412' },
-        { name: 'Anthropic Careers', provider: 'Ashby', token: 'anthropic', url: 'https://jobs.ashbyhq.com/anthropic', status: 'Watching', jobsObserved: '189' },
-        { name: 'Linear Careers', provider: 'Lever', token: 'linear', url: 'https://jobs.lever.co/linear', status: 'Watching', jobsObserved: '64' },
-      ]
-      return new Response(JSON.stringify({ sources: defaultSources }), {
+      const sources = await getMergedSources(env)
+      return new Response(JSON.stringify({ sources }), {
         headers: { 'Content-Type': 'application/json' },
       })
     }
@@ -1555,6 +1610,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // SSRF-guard default cap without it being a resource-exhaustion risk.
         const source = new GreenhousePublicSource(boardToken, { maxSizeBytes: 10 * 1024 * 1024 })
         const fetchedRawJobs = await source.fetchAllBoardJobs()
+        await registerObservedSource(env, boardToken, fetchedRawJobs.length)
 
         if (env.DATABASE_URL) {
           const sql = postgres(env.DATABASE_URL, { max: 1 })

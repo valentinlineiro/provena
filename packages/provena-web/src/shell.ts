@@ -12,8 +12,11 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportuniti
     '<a class="brand" href="/">Provena</a>' +
     '<div class="links">' + sections.map(s => link(s.label, s.href, s.id === section)).join('') + '</div>' +
     '<button class="theme-toggle" type="button" onclick="' +
-    'var d=document.documentElement,k=d.classList.toggle(\'dark\');' +
-    'try{localStorage.setItem(\'provena-theme\',k?\'dark\':\'light\')}catch(e){}' +
+    'var d=document.documentElement,' +
+    'isDark=d.classList.contains(\'dark\')||(!d.classList.contains(\'light\')&&matchMedia(\'(prefers-color-scheme: dark)\').matches),' +
+    'next=isDark?\'light\':\'dark\';' +
+    'd.classList.remove(\'dark\',\'light\');d.classList.add(next);' +
+    'try{localStorage.setItem(\'provena-theme\',next)}catch(e){}' +
     '" aria-label="Toggle dark mode" title="Toggle dark mode">' +
     '<span class="icon-sun">☀️</span><span class="icon-moon">🌙</span>' +
     '</button>' +
@@ -21,12 +24,15 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportuniti
   )
 }
 
-// Runs before first paint so the page never flashes the wrong theme.
+// Runs before first paint so the page never flashes the wrong theme. Always
+// sets an explicit dark/light class rather than relying on the prefers-
+// color-scheme media query alone, so a manual toggle away from the system
+// theme sticks instead of being overridden by that media query.
 export const THEME_INIT_SCRIPT =
   '<script>(function(){try{' +
   'var t=localStorage.getItem("provena-theme");' +
-  'if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))' +
-  'document.documentElement.classList.add("dark")' +
+  'var dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);' +
+  'document.documentElement.classList.add(dark?"dark":"light")' +
   '}catch(e){}})()</script>'
 
 export function renderAppShell(

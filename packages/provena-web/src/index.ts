@@ -659,7 +659,11 @@ function exportPdf() {
   if (!lastResult) return
   const w = window.open('', '_blank')
   if (w) {
-    w.document.write(lastResult.docHtml + '<script>window.onload=function(){window.print();}</' + 'script>')
+    const htmlWithPrint = lastResult.html.replace(
+      '</body>',
+      '<script>window.onload=function(){setTimeout(function(){window.print();},100);}</' + 'script></body>'
+    )
+    w.document.write(htmlWithPrint)
     w.document.close()
     w.focus()
   }

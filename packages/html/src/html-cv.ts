@@ -30,6 +30,8 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
         font-size: 9.5pt;
         line-height: 1.5;
         text-align: left;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
 
       .cv-document * {
@@ -151,6 +153,8 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
         padding: 0.15rem 0.5rem;
         border-radius: 999px;
         border: 1px solid #e2e8f0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
 
       .cv-cert-item {
@@ -174,8 +178,14 @@ export class HtmlCvRenderer implements Renderer<CVProjection> {
       }
 
       @media print {
+        body {
+          background: #ffffff !important;
+          padding: 0 !important;
+        }
         .cv-document {
           padding: 8mm 10mm;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
         .cv-document h2 {
           page-break-after: avoid;

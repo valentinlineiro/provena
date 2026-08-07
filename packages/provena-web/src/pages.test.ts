@@ -204,3 +204,11 @@ test('Inbox Materialization Invariant: sum of tab counts equals totalEvaluatedCo
     assert.equal(data.totalEvaluatedCount ?? sum, sum, 'Total evaluated count must equal the sum of the 4 tabs')
   }
 })
+
+test('GET /api/opportunities?tab=unresolved materializes all non-attention non-consider items', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/api/opportunities?tab=unresolved'), env)
+  assert.equal(res.status, 200)
+  const json = await res.json() as any
+  assert.equal(json.tab, 'unresolved')
+  assert.equal(typeof json.counts['unresolved'], 'number')
+})

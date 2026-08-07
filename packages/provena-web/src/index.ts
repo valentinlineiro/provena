@@ -1589,24 +1589,30 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         }).filter((item): item is NonNullable<typeof item> => item !== null)
 
+        const isNew = (r: typeof ranked[0]) => !r.userDecision || r.userDecision === 'new'
+        const isNeedsAtt = (r: typeof ranked[0]) => isNew(r) && (String(r.tier) === 'strong-candidate' || String(r.tier) === 'apply' || String(r.tier) === 'STRONG_FIT' || (r.assessment && (r.assessment as any).decisionTier === 4))
+        const isWorthCons = (r: typeof ranked[0]) => isNew(r) && (String(r.tier) === 'consider' || String(r.tier) === 'CONSIDER' || (r.assessment && (r.assessment as any).decisionTier === 3))
+        const isDecided = (r: typeof ranked[0]) => !!r.userDecision && r.userDecision !== 'new'
+        const isUnresolved = (r: typeof ranked[0]) => !isDecided(r) && !isNeedsAtt(r) && !isWorthCons(r)
+
         // Count items per tab
         const counts = {
-          'needs-attention': ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate').length,
-          'worth-considering': ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider').length,
-          'unresolved': ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip')).length,
-          'decided': ranked.filter(r => r.userDecision && r.userDecision !== 'new').length,
+          'needs-attention': ranked.filter(isNeedsAtt).length,
+          'worth-considering': ranked.filter(isWorthCons).length,
+          'unresolved': ranked.filter(isUnresolved).length,
+          'decided': ranked.filter(isDecided).length,
         }
 
         // Filter to current tab
         let tabItems = ranked
         if (tab === 'needs-attention') {
-          tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'strong-candidate')
+          tabItems = ranked.filter(isNeedsAtt)
         } else if (tab === 'worth-considering') {
-          tabItems = ranked.filter(r => r.userDecision === 'new' && r.tier === 'consider')
+          tabItems = ranked.filter(isWorthCons)
         } else if (tab === 'unresolved') {
-          tabItems = ranked.filter(r => r.userDecision === 'new' && (r.tier === 'abstain' || r.tier === 'skip'))
+          tabItems = ranked.filter(isUnresolved)
         } else if (tab === 'decided') {
-          tabItems = ranked.filter(r => r.userDecision && r.userDecision !== 'new')
+          tabItems = ranked.filter(isDecided)
         }
 
         const paginatedView = policy.paginateTab(tabItems, tab, bookmarkParam, limit)

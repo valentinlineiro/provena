@@ -1292,7 +1292,7 @@ function switchTab(tab) {
   const activeBtn = document.getElementById('tab-' + tab)
   if (activeBtn) activeBtn.classList.add('active')
   const container = document.getElementById('inbox')
-  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Personal</th><th>Evidence Coverage</th><th>Decision</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
+  container.innerHTML = '<table class="opp-table"><thead><tr><th>Opportunity</th><th>Prof Fit</th><th>Evidence</th><th>Verdict</th><th>Action</th></tr></thead><tbody id="opp-rows"></tbody></table>'
   loadTab(true)
 }
 
@@ -1348,13 +1348,12 @@ async function loadTab(reset = false) {
       tr.innerHTML =
         '<td><strong>' + item.title + '</strong>' + (item.companyName ? ' <span class="meta">at ' + item.companyName + '</span>' : '') + '<br><a class="meta" href="' + item.url + '" target="_blank">View Source</a></td>' +
         '<td>' + item.profFit + '</td>' +
-        '<td>' + item.personalFit + '</td>' +
         '<td>' + item.evidenceCoverage + '</td>' +
         '<td><span class="badge ' + item.verdict + '">' + item.verdict + '</span></td>' +
         '<td><div class="btn-group">' +
-        '<button class="' + (item.userDecision === 'interested' ? 'active' : '') + '" onclick="setDecision(\\'' + item.id + '\\', \\'interested\\')">⭐</button>' +
-        '<button class="' + (item.userDecision === 'applied' ? 'active' : '') + '" onclick="setDecision(\\'' + item.id + '\\', \\'applied\\')">✓</button>' +
-        '<button class="' + (item.userDecision === 'dismissed' ? 'active' : '') + '" onclick="setDecision(\\'' + item.id + '\\', \\'dismissed\\')">✗</button>' +
+        '<button class="' + (item.userDecision === 'interested' ? 'active' : '') + '" title="Save" onclick="setDecision(\\'' + item.id + '\\', \\'interested\\')">⭐ Save</button>' +
+        '<button class="' + (item.userDecision === 'applied' ? 'active' : '') + '" title="Apply" onclick="setDecision(\\'' + item.id + '\\', \\'applied\\')">✓ Apply</button>' +
+        '<button class="' + (item.userDecision === 'dismissed' ? 'active' : '') + '" title="Dismiss" onclick="setDecision(\\'' + item.id + '\\', \\'dismissed\\')">✗ Dismiss</button>' +
         '</div></td>'
       rows.appendChild(tr)
     }
@@ -1500,9 +1499,9 @@ window.addEventListener('DOMContentLoaded', () => {
             const countRows = await sql<Array<{ tab_name: string; count: string }>>`
               SELECT 
                 CASE 
-                  WHEN a.decision_tier = 4 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'needs-attention'
-                  WHEN a.decision_tier = 3 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'worth-considering'
                   WHEN d.user_decision IS NOT NULL AND d.user_decision != 'new' THEN 'decided'
+                  WHEN a.decision_tier = 4 AND a.confidence >= 0.25 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'needs-attention'
+                  WHEN a.decision_tier = 3 AND a.confidence >= 0.25 AND (d.user_decision IS NULL OR d.user_decision = 'new') THEN 'worth-considering'
                   ELSE 'unresolved'
                 END as tab_name,
                 COUNT(*)::text as count

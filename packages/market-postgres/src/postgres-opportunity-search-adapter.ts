@@ -125,11 +125,11 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
     whereConditions.push(this.sql`p.active = true`)
 
     if (tab === 'needs-attention') {
-      whereConditions.push(this.sql`a.decision_tier = 4 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
+      whereConditions.push(this.sql`a.decision_tier = 4 AND a.confidence >= 0.25 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
     } else if (tab === 'worth-considering') {
-      whereConditions.push(this.sql`a.decision_tier = 3 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
+      whereConditions.push(this.sql`a.decision_tier = 3 AND a.confidence >= 0.25 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
     } else if (tab === 'unresolved') {
-      whereConditions.push(this.sql`(a.decision_tier IS NULL OR a.decision_tier NOT IN (3, 4)) AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
+      whereConditions.push(this.sql`(a.decision_tier IS NULL OR a.decision_tier NOT IN (3, 4) OR a.confidence < 0.25) AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
     } else if (tab === 'decided') {
       whereConditions.push(this.sql`d.user_decision IS NOT NULL AND d.user_decision != 'new'`)
     }

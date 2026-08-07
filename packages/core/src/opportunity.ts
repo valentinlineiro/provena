@@ -652,7 +652,10 @@ export function projectProfessionalFit(
   for (const a of assessments) {
     const points = assessmentPoints(a)
     if (points === null) {
+      // unknown requirements count as 0 in the denominator so unresolved
+      // market requirements correctly penalise the score.
       unknownCount++
+      assessedCount++
       breakdown.push({
         requirementConcept: a.requirementConcept,
         status: a.status,
@@ -672,7 +675,7 @@ export function projectProfessionalFit(
   }
 
   const score = assessedCount === 0 ? 0 : Math.round((sumPoints / assessedCount) * 100) / 10
-  const assessmentCoverage = total === 0 ? 0 : Math.round((assessedCount / total) * 1000) / 1000
+  const assessmentCoverage = total === 0 ? 0 : Math.round(((assessedCount - unknownCount) / total) * 1000) / 1000
 
   return {
     score,

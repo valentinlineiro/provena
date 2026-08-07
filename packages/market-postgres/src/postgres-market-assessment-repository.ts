@@ -78,7 +78,13 @@ export class PostgresMarketAssessmentRepository {
         profile_version,
         protocol_version,
         market_knowledge_version
-      ) DO NOTHING
+      ) DO UPDATE SET
+        recommendation = EXCLUDED.recommendation,
+        decision_tier = EXCLUDED.decision_tier,
+        professional_fit = EXCLUDED.professional_fit,
+        personal_fit = EXCLUDED.personal_fit,
+        confidence = EXCLUDED.confidence,
+        evaluated_at = EXCLUDED.evaluated_at
     `
 
     if (assessment.evidences && assessment.evidences.length > 0) {

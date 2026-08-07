@@ -178,12 +178,12 @@ test('GET /api/opportunities accepts bookmark param and returns nextBookmark fie
   assert.ok(!('nextCursor' in json))
 })
 
-test('GET /sources renders within app-shell with Sources title and feeds list', async () => {
+test('GET /sources renders within app-shell with Observation Sources title and feeds list', async () => {
   const res = await worker.fetch(new Request('https://provena.example/sources'), env)
   assert.equal(res.status, 200)
   const html = await res.text()
   assert.ok(html.includes('<div class="app-shell">'))
-  assert.ok(html.includes('<h1>Market Feeds &amp; Observation Sources</h1>') || html.includes('Market Feeds & Observation Sources'))
+  assert.ok(html.includes('<h1>Observation Sources</h1>'))
   assert.ok(html.includes('<a class="active" href="/sources">Sources</a>'))
 })
 
@@ -193,5 +193,5 @@ test('GET /api/sources returns list of active market feeds', async () => {
   const json = await res.json() as any
   assert.ok(Array.isArray(json.sources))
   assert.ok(json.sources.length >= 4)
-  assert.equal(json.sources[0].name, 'Stripe')
+  assert.equal(json.sources[0].name, 'Stripe Careers')
 })

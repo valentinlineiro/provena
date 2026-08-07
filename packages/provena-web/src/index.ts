@@ -1013,7 +1013,7 @@ export default {
 const SOURCES_PAGE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Provena — Sources</title>
+<title>Provena — Observation Sources</title>
 <style>
 ${APP_SHELL_CSS}
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1022,9 +1022,9 @@ h1 { font-size: 1.125rem; font-weight: 700; }
 .subtitle { color: #666; font-size: 0.875rem; margin-top: 0.125rem; }
 .sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
 .source-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; }
-.source-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.source-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
 .source-name { font-weight: 700; font-size: 1rem; }
-.source-provider { font-size: 0.75rem; background: #f0f0f0; color: #555; padding: 0.15rem 0.4rem; border-radius: 0.25rem; text-transform: uppercase; font-weight: 600; }
+.source-provider { font-size: 0.75rem; background: #f0f0f0; color: #555; padding: 0.15rem 0.4rem; border-radius: 0.25rem; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
 .source-meta { font-size: 0.8125rem; color: #666; margin-top: 0.5rem; line-height: 1.5; }
 .source-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
 .source-actions button { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.8125rem; border-radius: 0.25rem; min-height: 36px; cursor: pointer; }
@@ -1039,13 +1039,13 @@ h1 { font-size: 1.125rem; font-weight: 700; }
 ${renderAppShell(
   'sources',
   '<div class="page-header">' +
-  '<h1>Market Feeds & Observation Sources</h1>' +
-  '<p class="subtitle">Continuous observation adapters for ATS boards (Greenhouse, Ashby, Lever). The Inbox strictly consumes market from here.</p>' +
+  '<h1>Observation Sources</h1>' +
+  '<p class="subtitle">Connect career pages once. Provena continuously watches your targeted companies in the background.</p>' +
   '</div>',
   '<div class="readable">' +
   '<div class="sync-bar">' +
-  '<input id="newBoardToken" type="text" placeholder="Greenhouse board token (e.g. stripe, gitlab, openai)" value="stripe">' +
-  '<button class="btn-primary" style="width:auto;margin:0;" onclick="addAndSyncSource()">Connect & Sync Source</button>' +
+  '<input id="newBoardToken" type="text" placeholder="Career page URL (e.g. https://boards.greenhouse.io/openai or company name)" value="https://boards.greenhouse.io/stripe">' +
+  '<button class="btn-primary" style="width:auto;margin:0;" onclick="addAndSyncSource()">+ Connect Source</button>' +
   '</div>' +
   '<div id="sources-status" style="margin-bottom:1rem;font-size:0.875rem;color:#666;"></div>' +
   '<div class="sources-grid" id="sources-list">' +
@@ -1067,8 +1067,8 @@ async function loadSources() {
       '<span class="source-provider">' + s.provider + '</span>' +
       '</div>' +
       '<div class="source-meta">' +
-      '<div>Token: <code>' + s.token + '</code></div>' +
-      '<div>Status: <span class="status-pill"><span class="status-dot"></span>' + s.status + '</span></div>' +
+      '<div style="word-break:break-all;"><a href="' + (s.url || '#') + '" target="_blank" style="color:#666;text-decoration:none;">' + (s.url || s.token) + '</a></div>' +
+      '<div style="margin-top:0.25rem;">Status: <span class="status-pill"><span class="status-dot"></span>' + (s.status || 'Watching') + '</span></div>' +
       '<div>Observed Jobs: ' + s.jobsObserved + '</div>' +
       '</div>' +
       '</div>' +
@@ -1100,8 +1100,13 @@ async function syncSource(token) {
 }
 
 async function addAndSyncSource() {
-  const token = document.getElementById('newBoardToken').value.trim()
-  if (!token) return
+  const rawInput = document.getElementById('newBoardToken').value.trim()
+  if (!rawInput) return
+  let token = rawInput
+  if (rawInput.includes('/')) {
+    const parts = rawInput.split('/').filter(Boolean)
+    token = parts[parts.length - 1] || rawInput
+  }
   await syncSource(token)
 }
 
@@ -1302,10 +1307,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (request.method === 'GET' && url.pathname === '/api/sources') {
       const defaultSources = [
-        { name: 'Stripe', provider: 'Greenhouse', token: 'stripe', status: 'active', jobsObserved: '3,482' },
-        { name: 'OpenAI', provider: 'Greenhouse', token: 'openai', status: 'active', jobsObserved: '412' },
-        { name: 'Anthropic', provider: 'Ashby', token: 'anthropic', status: 'active', jobsObserved: '189' },
-        { name: 'Linear', provider: 'Lever', token: 'linear', status: 'active', jobsObserved: '64' },
+        { name: 'Stripe Careers', provider: 'Greenhouse', token: 'stripe', url: 'https://boards.greenhouse.io/stripe', status: 'Watching', jobsObserved: '3,482' },
+        { name: 'OpenAI Careers', provider: 'Greenhouse', token: 'openai', url: 'https://boards.greenhouse.io/openai', status: 'Watching', jobsObserved: '412' },
+        { name: 'Anthropic Careers', provider: 'Ashby', token: 'anthropic', url: 'https://jobs.ashbyhq.com/anthropic', status: 'Watching', jobsObserved: '189' },
+        { name: 'Linear Careers', provider: 'Lever', token: 'linear', url: 'https://jobs.lever.co/linear', status: 'Watching', jobsObserved: '64' },
       ]
       return new Response(JSON.stringify({ sources: defaultSources }), {
         headers: { 'Content-Type': 'application/json' },

@@ -1,7 +1,7 @@
 # Neon Canonical Market Ingestion & Read Bookmark Design
 
 **Date:** 2026-08-07  
-**Status:** Spec Written & Under Review  
+**Status:** Spec Approved & Finalized  
 **Reference ADR:** [ADR-002](file:///home/valentin/code/provena/docs/architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
 
 ---
@@ -11,25 +11,30 @@
 Transition Provena's market ingestion, persistence, evaluation, and attention reading pipeline from Cloudflare KV blob storage to **Neon PostgreSQL as the Single Canonical Market Store**.
 
 - Eliminate all KV blob usage for job posting payloads and opportunity list indices.
-- Store observed market facts, relational evaluation assessments, and candidate decision states in native PostgreSQL tables.
-- Eliminate numeric `OFFSET` pagination from API contracts and SQL queries in favor of Base64URL versioned `nextBookmark` keyset continuation.
+- Store observed market facts, immutable relational evaluation assessments, and candidate decision states in native PostgreSQL tables.
+- Expose a `current_opportunity_assessments` SQL view for ultra-fast UI reads while keeping full historical auditability.
+- Maintain a strict boundary: O2 observes, persists, and evaluates using promoted operational knowledge; K12 exclusively produces experimental knowledge versions.
+- Eliminate numeric `OFFSET` pagination from API contracts and SQL queries in favor of Base64URL versioned `nextBookmark` keyset continuation (with explicit `bookmarkVersion` and `orderingVersion`).
 - Maintain a non-destructive lifecycle (`ACTIVE → NOT_SEEN → INACTIVE → ARCHIVED`) for all market postings.
 
 ---
 
-## 2. Architecture & System Flow
+## 2. Pipeline Sequence
 
 ```text
-ATS Board (Greenhouse API)
-       │
-       ▼
-Cloudflare Worker (Pure Orchestrator)
-       │
-       ├─► Batch Upsert Facts ────► Neon: opportunities & opportunity_postings
-       │
-       ├─► Evaluate Protocol v1 ──► Neon: opportunity_assessments & assessment_evidences
-       │
-       └─► Query Keyset Bookmark ─► SQL Read: JOIN opportunities + postings + assessments + decisions
+Board Fetch
+      │
+      ▼
+Canonical Persistence
+      │
+      ▼
+Deterministic Assessment
+      │
+      ▼
+Attention Materialization
+      │
+      ▼
+Bookmark API
 ```
 
 ---
@@ -76,10 +81,11 @@ CREATE TABLE IF NOT EXISTS opportunity_posting_history (
     status TEXT NOT NULL
 );
 
--- 2. Derived Relational Assessments & Evidences
+-- 2. Derived Relational Assessments (Immutable Historical Events)
 CREATE TABLE IF NOT EXISTS opportunity_assessments (
     opportunity_id TEXT NOT NULL REFERENCES opportunities(id) ON DELETE CASCADE,
     profile_id TEXT NOT NULL DEFAULT 'valentin',
+    profile_version TEXT NOT NULL DEFAULT '1.0.0',
     protocol_version INT NOT NULL DEFAULT 1,
     market_knowledge_version INT NOT NULL DEFAULT 0,
     recommendation TEXT NOT NULL, -- 'strong-candidate' | 'consider' | 'abstain' | 'skip'
@@ -88,7 +94,13 @@ CREATE TABLE IF NOT EXISTS opportunity_assessments (
     personal_fit REAL NOT NULL,
     confidence REAL NOT NULL,
     evaluated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (opportunity_id, profile_id, protocol_version, market_knowledge_version)
+    PRIMARY KEY (
+        opportunity_id,
+        profile_id,
+        profile_version,
+        protocol_version,
+        market_knowledge_version
+    )
 );
 
 CREATE TABLE IF NOT EXISTS assessment_evidences (
@@ -102,7 +114,24 @@ CREATE TABLE IF NOT EXISTS assessment_evidences (
     evaluated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 3. Candidate Attention Decisions
+-- 3. SQL View for Current Assessment Resolution
+CREATE OR REPLACE VIEW current_opportunity_assessments AS
+SELECT DISTINCT ON (opportunity_id, profile_id)
+    opportunity_id,
+    profile_id,
+    profile_version,
+    protocol_version,
+    market_knowledge_version,
+    recommendation,
+    decision_tier,
+    professional_fit,
+    personal_fit,
+    confidence,
+    evaluated_at
+FROM opportunity_assessments
+ORDER BY opportunity_id, profile_id, evaluated_at DESC;
+
+-- 4. Candidate Attention Decisions
 CREATE TABLE IF NOT EXISTS user_opportunity_decisions (
     opportunity_id TEXT NOT NULL REFERENCES opportunities(id) ON DELETE CASCADE,
     user_id TEXT NOT NULL DEFAULT 'valentin',
@@ -111,7 +140,7 @@ CREATE TABLE IF NOT EXISTS user_opportunity_decisions (
     PRIMARY KEY (opportunity_id, user_id)
 );
 
--- 4. Audit Ingestion Runs
+-- 5. Audit Ingestion Runs
 CREATE TABLE IF NOT EXISTS ingestion_runs (
     id TEXT PRIMARY KEY,
     source_id TEXT NOT NULL,
@@ -133,23 +162,27 @@ CREATE INDEX IF NOT EXISTS idx_user_decisions_tab ON user_opportunity_decisions(
 
 ## 4. Phase-Based Ingestion Pipeline
 
-### Phase 1: ATS Board Fetch
-Fetch raw postings from public board API (e.g. Greenhouse).
+```text
+Board Fetch
+      │
+      ▼
+Canonical Persistence
+      │
+      ▼
+Deterministic Assessment
+      │
+      ▼
+Attention Materialization
+      │
+      ▼
+Bookmark API
+```
 
-### Phase 2: Relational Upsert & Lifecycle Reconciliation
-For each posting:
-- Upsert canonical `opportunities` row.
-- Upsert `opportunity_postings` row (`status = 'ACTIVE'`, `consecutive_absent_runs = 0`).
-- Record `opportunity_posting_history` entry.
-- Identify missing postings previously seen for this source: increment `consecutive_absent_runs`. If `absent_runs >= 3`, transition `status = 'INACTIVE'`. If `absent_days >= 90`, transition `status = 'ARCHIVED'`. Zero `DELETE` statements.
-
-### Phase 3: Protocol v1 Deterministic Assessment
-Execute `evaluateOpportunity` engine for new/updated postings:
-- Upsert `opportunity_assessments` row.
-- Replace `assessment_evidences` rows for the opportunity.
-
-### Phase 4: Audit Run Recording
-Record summary metrics in `ingestion_runs`.
+1. **Board Fetch**: Fetch raw postings from public board API (e.g. Greenhouse).
+2. **Canonical Persistence**: Upsert `opportunities` and `opportunity_postings`, record `opportunity_posting_history`, and reconcile active vs absent postings.
+3. **Deterministic Assessment**: Evaluate Protocol v1 engine for new/updated postings under promoted `market_knowledge_version = 0`. Insert immutable `opportunity_assessments` historical event row and `assessment_evidences`.
+4. **Attention Materialization**: Update `current_opportunity_assessments` view and candidate decision default states.
+5. **Bookmark API**: Expose Base64URL keyset continuation bookmarks for UI pagination.
 
 ---
 
@@ -173,7 +206,7 @@ Record summary metrics in `ingestion_runs`.
     "decided": 0
   },
   "items": [ ... ],
-  "nextBookmark": "eyJ2IjoxLCJ0YWIiOiJ1bnJlc29sdmVkIiwidGllciI6MiwicGYiOjAuNCwiY29uZiI6MC41LCJzZWVuIjoiMjAyNi0wOC0wN1QxMDozMDowMFoiLCJpZCI6Im9wcC0xMjMifQ",
+  "nextBookmark": "eyJib29rbWFya1ZlcnNpb24iOjEsIm9yZGVyaW5nVmVyc2lvbiI6MSwidGFiIjoidW5yZXNvbHZlZCIsInRpZXIiOjIsInBmIjowLjQsImNvbmYiOjAuNSwic2VlbiI6IjIwMjYtMDgtMDdUMTA6MzA6MDBaIiwiaWQiOiJvcHAtMTIzIn0",
   "totalInTab": 543
 }
 ```
@@ -181,7 +214,8 @@ Record summary metrics in `ingestion_runs`.
 ### Bookmark Payload Structure
 ```json
 {
-  "v": 1,
+  "bookmarkVersion": 1,
+  "orderingVersion": 1,
   "tab": "unresolved",
   "tier": 2,
   "pf": 0.4,
@@ -208,7 +242,7 @@ SELECT
     a.confidence
 FROM opportunities o
 JOIN opportunity_postings p ON p.opportunity_id = o.id
-JOIN opportunity_assessments a ON a.opportunity_id = o.id
+JOIN current_opportunity_assessments a ON a.opportunity_id = o.id
 LEFT JOIN user_opportunity_decisions ud ON ud.opportunity_id = o.id AND ud.user_id = $userId
 WHERE p.status = 'ACTIVE'
   AND ($tabFilter = 'decided' OR (ud.user_decision IS NULL OR ud.user_decision = 'new'))
@@ -230,6 +264,6 @@ LIMIT 30;
 ## 6. Spec Self-Review
 
 1. **Placeholder scan**: Zero TBDs or TODOs.
-2. **Internal consistency**: Schema, ingestion pipeline, non-destructive lifecycle, and keyset bookmark SQL query align perfectly with ADR-002.
-3. **Scope check**: Focused purely on Neon PostgreSQL market ingestion, non-destructive lifecycle, relational assessments, and keyset reading bookmarks.
-4. **Ambiguity check**: Keyset bookmark versioning and tuple fields are explicitly defined.
+2. **Internal consistency**: Immutable assessment events, SQL view, versioned bookmarks, and O2/K12 boundary match ADR-002 perfectly.
+3. **Scope check**: Focused on Neon PostgreSQL market ingestion, non-destructive lifecycle, relational assessments, and keyset bookmarks.
+4. **Ambiguity check**: Bookmark payload structure and ordering versions are explicit.

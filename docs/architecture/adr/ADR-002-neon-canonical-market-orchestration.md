@@ -20,34 +20,39 @@ Nueva:     Mercado → Neon (Canonical SQL) → Relational Assessment → SQL Ke
 
 1. **Worker as Pure Orchestrator**: Cloudflare Workers do NOT buffer large payloads or persist market data in KV. Workers consume ATS streams, execute batch SQL upserts to Neon, and serve paginated reading bookmarks.
 2. **Relational Schema (Zero JSONB in Assessments)**: Observed market facts (`opportunities`, `opportunity_postings`, `opportunity_posting_history`), derived assessments (`opportunity_assessments`, `assessment_evidences`), and candidate decisions (`user_opportunity_decisions`) are stored as native SQL columns (`REAL`, `INT`, `TIMESTAMPTZ`, `TEXT`).
-3. **Non-Destructive Posting Lifecycle (Zero DELETE)**: Postings are NEVER deleted from the database. They transition across states: `ACTIVE → NOT_SEEN → INACTIVE → ARCHIVED`. Disappearance of a posting is valuable market intelligence for longitudinal K12 learning and retrospective attention validation.
-4. **Read Bookmark Continuation (Zero OFFSET)**: API pagination uses strict keyset bookmarks (`nextBookmark` in Base64URL). Numeric offsets and page numbers are completely eliminated.
-5. **KV Reserved for Telemetry**: Cloudflare KV is restricted to lightweight runtime counters and sync timestamps (`lastSync`, `marketFeedState`).
+3. **Immutable Assessment Events**: `opportunity_assessments` is strictly immutable. Assessments are never overwritten in place. Each re-evaluation under a new `profile_version`, `protocol_version`, or `market_knowledge_version` inserts a new immutable historical row.
+4. **Current Assessment View (`current_opportunity_assessments`)**: The UI reads from a materialized SQL view `current_opportunity_assessments` that resolves the latest valid assessment per opportunity, keeping queries fast while preserving complete historical auditability.
+5. **Strict O2 / K12 Boundary**: O2 never modifies market knowledge. O2 observes, persists, and evaluates using an already promoted version of knowledge. The production of new versions of `market_knowledge_version` belongs exclusively to the experimental program K12.
+6. **Non-Destructive Posting Lifecycle (Zero DELETE)**: Postings are NEVER deleted from the database. They transition across states: `ACTIVE → NOT_SEEN → INACTIVE → ARCHIVED`. Disappearance of a posting is valuable market intelligence for longitudinal K12 learning and retrospective attention validation.
+7. **Read Bookmark Continuation (Zero OFFSET)**: API pagination uses strict keyset bookmarks (`nextBookmark` in Base64URL). Numeric offsets and page numbers are completely eliminated.
+8. **KV Reserved for Telemetry**: Cloudflare KV is restricted to lightweight runtime counters and sync timestamps (`lastSync`, `marketFeedState`).
 
-## Architectural Schema (Neon PostgreSQL)
+## System Pipeline Sequence
 
-### 1. Observed Market Facts
-- `opportunities`: Canonical job entity (`id`, `company_name`, `company_domain`, `title`, `normalized_title`, `role_family`, `role_level`).
-- `opportunity_postings`: Specific source posting carrying `raw_description` HTML/prose (`id`, `opportunity_id`, `source_type`, `external_id`, `url`, `location`, `published_at`, `first_seen_at`, `last_seen_at`, `status`, `consecutive_absent_runs`).
-- `opportunity_posting_history`: Audit trail tracking every observation run (`posting_id`, `ingestion_run_id`, `seen_at`, `status`).
-
-### 2. Derived Relational Assessments & Evidences
-- `opportunity_assessments`: Deterministic Protocol v1 evaluation metrics (`opportunity_id`, `profile_id`, `protocol_version`, `market_knowledge_version`, `recommendation`, `decision_tier`, `professional_fit`, `personal_fit`, `confidence`, `evaluated_at`).
-- `assessment_evidences`: Relational evidence traces (`opportunity_id`, `profile_id`, `capability_id`, `weight`, `matched_text`, `source_taxon`, `evaluated_at`).
-
-### 3. Candidate Decision State
-- `user_opportunity_decisions`: Candidate attention actions (`opportunity_id`, `user_id`, `user_decision`, `updated_at`).
-
-### 4. Audit Runs
-- `ingestion_runs`: Execution metrics per board sync (`id`, `source_id`, `source_type`, `fetched_count`, `added_count`, `updated_count`, `deactivated_count`, `executed_at`).
+```text
+Board Fetch
+      │
+      ▼
+Canonical Persistence
+      │
+      ▼
+Deterministic Assessment
+      │
+      ▼
+Attention Materialization
+      │
+      ▼
+Bookmark API
+```
 
 ## Bookmark Keyset Continuation Protocol
 
-Pagination uses Base64URL versioned `nextBookmark` payloads encoding strictly the resume tuple:
+Pagination uses Base64URL versioned `nextBookmark` payloads encoding strictly the resume tuple with explicit `bookmarkVersion` and `orderingVersion`:
 
 ```json
 {
-  "v": 1,
+  "bookmarkVersion": 1,
+  "orderingVersion": 1,
   "tab": "needs-attention",
   "tier": 4,
   "pf": 8.3,
@@ -57,13 +62,25 @@ Pagination uses Base64URL versioned `nextBookmark` payloads encoding strictly th
 }
 ```
 
-Resuming query execution in PostgreSQL:
+Resuming query execution in PostgreSQL via `current_opportunity_assessments`:
 
 ```sql
-SELECT ...
+SELECT 
+    o.id,
+    o.title,
+    o.company_name,
+    p.url,
+    p.published_at,
+    p.last_seen_at,
+    COALESCE(ud.user_decision, 'new') AS user_decision,
+    a.recommendation,
+    a.decision_tier,
+    a.professional_fit,
+    a.personal_fit,
+    a.confidence
 FROM opportunities o
 JOIN opportunity_postings p ON p.opportunity_id = o.id
-JOIN opportunity_assessments a ON a.opportunity_id = o.id
+JOIN current_opportunity_assessments a ON a.opportunity_id = o.id
 LEFT JOIN user_opportunity_decisions ud ON ud.opportunity_id = o.id AND ud.user_id = :userId
 WHERE p.status = 'ACTIVE'
   AND (:bookmarkTier IS NULL OR (
@@ -81,5 +98,6 @@ LIMIT 30;
 
 ## Consequences & Benefits
 - **Zero Worker Crashes**: Eliminates Worker memory/CPU isolation limits.
-- **Relational Integrity**: Allows native SQL indexes, analytical queries, and transparent schema migrations.
+- **Auditability & Traceability**: Immutable assessment events allow comparing decision changes across protocol or knowledge versions.
+- **Strict Domain Boundaries**: Guarantees O2 never mutates operational knowledge contracts.
 - **Longitudinal Intelligence**: Preserving historical postings enables K12 market trend learning and retrospective attention validation.

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { siteNav, renderAppShell } from './index.js'
+import { siteNav, renderAppShell } from './shell.js'
 
 test('siteNav renders the brand and both section links', () => {
   const html = siteNav('story')
@@ -21,10 +21,8 @@ test('siteNav never renders the reserved Career section', () => {
   assert.ok(!siteNav('prepare').includes('Career'))
 })
 
-test('siteNav renders the Evaluate section', () => {
-  assert.ok(siteNav('story').includes('<a href="/evaluate">Evaluate</a>'))
-  assert.ok(siteNav('evaluate').includes('<a class="active" href="/evaluate">Evaluate</a>'))
-  assert.ok(!siteNav('evaluate').includes('class="active" href="/"'))
+test('siteNav does not render the legacy Evaluate link in top-level navigation', () => {
+  assert.ok(!siteNav('story').includes('<a href="/evaluate">Evaluate</a>'))
 })
 
 test('renderAppShell outputs structural wrapper with app-shell, app-header, site-nav, page, page-content, and header/content HTML', () => {
@@ -43,16 +41,11 @@ test('renderAppShell outputs structural wrapper with app-shell, app-header, site
   assert.ok(html.includes(contentHtml))
 })
 
-test('renderAppShell outputs correct active section links for prepare and evaluate', () => {
+test('renderAppShell outputs correct active section link for prepare', () => {
   const prepareHtml = renderAppShell('prepare', '', '')
   assert.ok(prepareHtml.includes('<nav class="site-nav">'))
   assert.ok(prepareHtml.includes('<a class="active" href="/cv">Identity</a>'))
   assert.ok(!prepareHtml.includes('class="active" href="/"'))
-
-  const evaluateHtml = renderAppShell('evaluate', '', '')
-  assert.ok(evaluateHtml.includes('<nav class="site-nav">'))
-  assert.ok(evaluateHtml.includes('<a class="active" href="/evaluate">Evaluate</a>'))
-  assert.ok(!evaluateHtml.includes('class="active" href="/"'))
 })
 
 test('siteNav renders the Sources section', () => {

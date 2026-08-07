@@ -37,9 +37,6 @@ architecture_routes:
   - path: "/opportunities"
     label: "Attention Inbox"
     package: "packages/provena-web"
-  - path: "/evaluate"
-    label: "Deterministic Evaluation"
-    package: "packages/provena-web"
 
 packages:
   - "packages/core"

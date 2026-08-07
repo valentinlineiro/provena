@@ -503,10 +503,10 @@ ${renderAppShell(
   '</section>' +
   '<div class="meta" id="meta"></div>' +
   '<div class="meta" id="readiness"></div>' +
-  '<div class="your-cv">Export Projections</div>' +
+  '<div class="your-cv">Export</div>' +
   '<div class="row">' +
-  '<button onclick="exportMd()">Download .md</button>' +
-  '<button onclick="exportHtml()">Open HTML / Print PDF</button>' +
+  '<button onclick="exportPdf()">Download PDF</button>' +
+  '<button onclick="exportJsonResume()" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;">JSON Resume</button>' +
   '</div>' +
   '</aside>' +
   '<main class="cv-canvas">' +
@@ -515,9 +515,8 @@ ${renderAppShell(
   '</div>' +
   '<div class="action-bar cv-action-bar">' +
   '<div class="row">' +
-  '<button type="button" onclick="openCustomize()">Projection Settings</button>' +
-  '<button type="button" onclick="exportHtml()">Open HTML / Print PDF</button>' +
-  '<button type="button" onclick="exportMd()">Download .md</button>' +
+  '<button type="button" onclick="openCustomize()" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;">Projection Settings</button>' +
+  '<button type="button" onclick="exportPdf()">Download PDF</button>' +
   '</div>' +
   '</div>' +
   '<div class="bottom-sheet-overlay" onclick="closeCustomize()"></div>' +
@@ -656,19 +655,23 @@ async function preview() {
   })
 }
 
-function exportMd() {
-  if (!lastResult) return
-  const blob = new Blob([lastResult.markdown], { type: 'text/markdown' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = 'cv.md'
-  a.click()
-}
-
-function exportHtml() {
+function exportPdf() {
   if (!lastResult) return
   const w = window.open('', '_blank')
-  if (w) { w.document.write(lastResult.html); w.document.close(); w.focus() }
+  if (w) {
+    w.document.write(lastResult.docHtml + '<script>window.onload=function(){window.print();}</' + 'script>')
+    w.document.close()
+    w.focus()
+  }
+}
+
+function exportJsonResume() {
+  if (!lastResult) return
+  const blob = new Blob([JSON.stringify(lastResult.cv, null, 2)], { type: 'application/json' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'resume.json'
+  a.click()
 }
 
 function openCustomize() {

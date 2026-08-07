@@ -105,7 +105,7 @@ export function reconcilePostingStatus(
     status = 'INACTIVE'
   }
 
-  const active = status === 'ACTIVE' || status === 'NOT_SEEN'
+  const active = status === 'NOT_SEEN'
 
   return {
     ...posting,
@@ -276,10 +276,10 @@ export class MarketIngestionEngine {
       const oppPostings = await this.postings.listByOpportunity(opp.id)
       for (const p of oppPostings) {
         if (p.sourceType === context.sourceType && !seenPostingIdsInCurrentSync.has(p.id)) {
-          const wasActive = p.status === 'ACTIVE'
+          const wasActive = p.active
           const updated = reconcilePostingStatus(p, false, context.now)
           await this.postings.save(updated)
-          if (wasActive && updated.status !== 'ACTIVE') {
+          if (wasActive && !updated.active) {
             deactivatedPostings++
           }
         }

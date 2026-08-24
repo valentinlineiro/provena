@@ -160,3 +160,8 @@ export { encodeBookmark, decodeBookmark } from './opportunity-bookmark.js'
 // ── O2.8: Market Feed Service ────────────────────────────────────────
 export type { FeedSourceRegistration, DeltaSyncResult } from './market-feed-service.js'
 export { MarketFeedService } from './market-feed-service.js'
+
+// ── Verdict Quality Benchmark Fixtures ─────────────────────────────
+export type { GroundTruthOpportunity } from './fixtures/verdict-ground-truth.js'
+export { VERDICT_GROUND_TRUTH_DATASET } from './fixtures/verdict-ground-truth.js'
+

@@ -257,7 +257,13 @@ export function parseRoleRequirement(jd: string): RoleRequirement {
     family = 'executive-management'
   } else if (/\b(?:docente|profesor|catedrático|universitario|aneca)\b/i.test(lower)) {
     family = 'academia'
-  } else if (/\b(?:recepción|receptionist|hr generalist|payroll|sales representative|warehouse|helpdesk|executive assistant|call center|data entry|retail|medical billing|accounting assistant|paralegal|construction|product designer|ui\/ux|ux\/ui|manual qa|qa tester|software tester|marketing|social media|soc tier|security operations)\b/i.test(lower)) {
+  } else if (
+    /\b(?:recepción|receptionist|hr generalist|payroll|sales representative|warehouse|helpdesk|executive assistant|call center|data entry|retail|medical billing|accounting assistant|paralegal|construction|product designer|ui\/ux|ux\/ui|manual qa|qa tester|software tester|marketing|social media|soc tier|security operations)\b/i.test(lower) ||
+    /\b(?:pre-sales|sales enablement|rfp proposals?|sales architect)\b/i.test(lower) ||
+    /\b(?:0% coding|pure people management|administrative manager|direct reports only)\b/i.test(lower) ||
+    /\b(?:firmware|microcontroller|rtos|pcb design|hardware engineer)\b/i.test(lower) ||
+    /\b(?:game engine|graphics renderer|vulkan|opengl|shader developer)\b/i.test(lower)
+  ) {
     family = 'non-engineering'
   } else if (/\b(?:ai engineer|applied ai|machine learning engineer|ml engineer)\b/i.test(lower)) {
     family = 'ai-engineering'

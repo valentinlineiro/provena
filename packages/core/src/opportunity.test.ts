@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { evaluateOpportunity, resolveRequirements } from './opportunity.js'
 import { extractMarketRequirements } from './market.js'
-import type { Profile } from './profile.js'
+import { getEmbeddedProfile, type Profile } from './profile.js'
 
 function makeProfile(overrides: Partial<Profile> = {}): Profile {
   return {
@@ -1056,6 +1056,23 @@ test('Triad Empirical Benchmark Gate: pattern expansion increases coverage and q
     'Decision protocol must produce valid deterministic verdict'
   )
 })
+
+test('evaluateOpportunity classifies pre-sales, pure management, and embedded firmware as out-of-profile skip', () => {
+  const profile = getEmbeddedProfile()
+
+  const preSales = evaluateOpportunity(
+    'Enterprise Solutions Architect - Pre-Sales\nRole focused on technical demos, RFPs, and sales enablement.',
+    profile
+  )
+  assert.equal(preSales.verdict, 'skip')
+
+  const pureManager = evaluateOpportunity(
+    'Engineering Manager - Core Platform\nPure people management role with 0% coding and 100% administrative direct reports management.',
+    profile
+  )
+  assert.equal(pureManager.verdict, 'skip')
+})
+
 
 
 

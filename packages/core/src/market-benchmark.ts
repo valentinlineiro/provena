@@ -53,7 +53,7 @@ export function runMarketRequirementBenchmark(
   }
 
   const avgCoverage = Math.round((totalCoverage / corpus.length) * 100) / 100
-  const qualifierRate = totalReqs > 0 ? Math.round((totalQualifiers / totalReqs) * 100) / 100 : 0
+  const qualifierRate = Math.round((totalQualifiers / corpus.length) * 100) / 100
   // False positive estimate based on isolated non-domain single-letter matches (baseline 0 for declarative patterns)
   const fpRate = 0
 

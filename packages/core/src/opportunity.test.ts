@@ -1049,7 +1049,8 @@ test('Triad Empirical Benchmark Gate: pattern expansion increases coverage and q
 
   // Decision Protocol Invariant Check: evaluateOpportunity logic remains deterministic
   const baselineProfile = makeProfile()
-  const ev1 = evaluateOpportunity(testCorpus[0], baselineProfile)
+  const jd = testCorpus[0] ?? ''
+  const ev1 = evaluateOpportunity(jd, baselineProfile)
   assert.ok(
     ['apply', 'consider', 'skip'].includes(ev1.verdict),
     'Decision protocol must produce valid deterministic verdict'

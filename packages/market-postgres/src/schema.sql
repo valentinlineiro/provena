@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS opportunity_postings (
     first_seen_at TIMESTAMPTZ NOT NULL,
     last_seen_at TIMESTAMPTZ NOT NULL,
     status TEXT NOT NULL DEFAULT 'ACTIVE',
+    active BOOLEAN NOT NULL DEFAULT true,
     consecutive_absent_runs INT NOT NULL DEFAULT 0,
     raw_description TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

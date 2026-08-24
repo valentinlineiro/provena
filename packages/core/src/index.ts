@@ -176,6 +176,8 @@ export type { AttentionValidationMetrics } from './attention-validation.js'
 export { runAttentionValidationAtScale } from './attention-validation.js'
 export type { GeneralizationBenchmarkResult, BorderCaseFailure } from './attention-validation-v2.js'
 export { runGeneralizationBenchmarkV2 } from './attention-validation-v2.js'
+export type { OOSValidationBenchmarkResult, OOSFailure } from './attention-validation-oos.js'
+export { runOutOfSampleValidationBenchmark } from './attention-validation-oos.js'
 
 
 

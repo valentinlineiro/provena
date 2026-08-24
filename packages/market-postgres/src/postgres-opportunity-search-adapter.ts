@@ -40,7 +40,7 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
     const whereConditions = []
 
     if (activeOnly) {
-      whereConditions.push(this.sql`p.active = true`)
+      whereConditions.push(this.sql`p.status = 'ACTIVE'`)
     }
 
     // ── Hard Exclusions ──────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
 
     const whereConditions = []
 
-    whereConditions.push(this.sql`p.active = true`)
+    whereConditions.push(this.sql`p.status = 'ACTIVE'`)
 
     if (tab === 'needs-attention') {
       whereConditions.push(this.sql`a.decision_tier = 4 AND a.confidence >= 0.25 AND (d.user_decision IS NULL OR d.user_decision = 'new')`)
@@ -183,7 +183,7 @@ export class PostgresOpportunitySearchAdapter implements OpportunitySearchPort {
         d.user_decision
       FROM current_opportunity_assessments a
       JOIN opportunities o ON o.id = a.opportunity_id
-      JOIN opportunity_postings p ON p.opportunity_id = a.opportunity_id AND p.active = true
+      JOIN opportunity_postings p ON p.opportunity_id = a.opportunity_id AND p.status = 'ACTIVE'
       LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = a.opportunity_id AND d.user_id = ${userId}
       WHERE a.profile_id = ${profileId} AND ${whereSql}
       ORDER BY a.decision_tier DESC, a.professional_fit DESC, a.confidence DESC, a.evaluated_at DESC, o.id ASC

@@ -4,6 +4,7 @@ import type {
   OpportunityPosting,
   OpportunityPostingId,
   OpportunityId,
+  PostingStatus,
   SourceType,
 } from '@provena/core'
 import { makeOpportunityPostingId, makeOpportunityId } from '@provena/core'
@@ -22,14 +23,15 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
       ...(row.published_at ? { publishedAt: new Date(row.published_at).toISOString() } : {}),
       firstSeenAt: new Date(row.first_seen_at).toISOString(),
       lastSeenAt: new Date(row.last_seen_at).toISOString(),
-      active: row.active,
+      active: row.status === 'ACTIVE' || row.status === 'NOT_SEEN',
+      status: row.status as PostingStatus,
       rawDescription: row.raw_description,
     }
   }
 
   async findById(id: OpportunityPostingId): Promise<OpportunityPosting | null> {
     const rows = await this.sql`
-      SELECT id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, active, raw_description
+      SELECT id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, status, raw_description
       FROM opportunity_postings
       WHERE id = ${id}
     `
@@ -39,7 +41,7 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
 
   async findBySource(sourceType: SourceType, externalId: string): Promise<OpportunityPosting | null> {
     const rows = await this.sql`
-      SELECT id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, active, raw_description
+      SELECT id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, status, raw_description
       FROM opportunity_postings
       WHERE source_type = ${sourceType} AND external_id = ${externalId}
     `
@@ -49,7 +51,7 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
 
   async listByOpportunity(opportunityId: OpportunityId): Promise<readonly OpportunityPosting[]> {
     const rows = await this.sql`
-      SELECT id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, active, raw_description
+      SELECT id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, status, raw_description
       FROM opportunity_postings
       WHERE opportunity_id = ${opportunityId}
     `
@@ -57,9 +59,10 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
   }
 
   async save(posting: OpportunityPosting): Promise<void> {
+    const status: PostingStatus = posting.status ?? (posting.active ? 'ACTIVE' : 'INACTIVE')
     await this.sql`
       INSERT INTO opportunity_postings (
-        id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, active, raw_description
+        id, opportunity_id, source_type, external_id, url, location, published_at, first_seen_at, last_seen_at, status, raw_description
       ) VALUES (
         ${posting.id},
         ${posting.opportunityId},
@@ -70,7 +73,7 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
         ${posting.publishedAt ?? null},
         ${posting.firstSeenAt},
         ${posting.lastSeenAt},
-        ${posting.active},
+        ${status},
         ${posting.rawDescription}
       )
       ON CONFLICT (id) DO UPDATE SET
@@ -82,7 +85,7 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
         published_at = EXCLUDED.published_at,
         first_seen_at = EXCLUDED.first_seen_at,
         last_seen_at = EXCLUDED.last_seen_at,
-        active = EXCLUDED.active,
+        status = EXCLUDED.status,
         raw_description = EXCLUDED.raw_description,
         updated_at = NOW()
     `
@@ -91,7 +94,7 @@ export class PostgresMarketPostingRepository implements MarketPostingRepository 
   async markInactive(id: OpportunityPostingId, lastSeenAt: string): Promise<void> {
     await this.sql`
       UPDATE opportunity_postings
-      SET active = false,
+      SET status = 'INACTIVE',
           last_seen_at = ${lastSeenAt},
           updated_at = NOW()
       WHERE id = ${id}

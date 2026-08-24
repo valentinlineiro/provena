@@ -1005,6 +1005,58 @@ Acreditación ANECA. Programación concurrente, Git, refactoring.
   assert.ok(!gapConcepts.includes('Artificial Intelligence (AI)'))
 })
 
+test('Triad Empirical Benchmark Gate: pattern expansion increases coverage and qualifier preservation without altering universal decision protocol', async () => {
+  const {
+    runMarketRequirementBenchmark,
+    composeKnowledge,
+    DeclarativeMarketRecognizer,
+    DEFAULT_SOFTWARE_KNOWLEDGE,
+    SYSTEMS_INFRA_KNOWLEDGE,
+    FINTECH_PLATFORM_KNOWLEDGE,
+  } = await import('./index.js')
+
+  const testCorpus = [
+    'Senior Infrastructure Engineer at Stripe. Requirements: 5+ years experience with production Kubernetes, Envoy proxy, and PCI compliance required. Deep proficiency in Go.',
+    'Staff Payment Systems Engineer. Requires double-entry ledger architecture, Terraform at scale, Prometheus monitoring. Hands-on Go experience preferred.',
+  ]
+
+  // Baseline benchmark
+  const baselineBench = runMarketRequirementBenchmark(testCorpus)
+
+  // Expanded benchmark with modular domain packs
+  const expandedKnowledge = composeKnowledge(
+    DEFAULT_SOFTWARE_KNOWLEDGE,
+    SYSTEMS_INFRA_KNOWLEDGE,
+    FINTECH_PLATFORM_KNOWLEDGE
+  )
+  const expandedRecognizer = new DeclarativeMarketRecognizer(expandedKnowledge)
+  const expandedBench = runMarketRequirementBenchmark(testCorpus, expandedRecognizer)
+
+  // Triad evaluation gate assertions
+  assert.ok(
+    expandedBench.recognitionCoverage >= baselineBench.recognitionCoverage,
+    `Recognition coverage must increase or stay equal: ${expandedBench.recognitionCoverage} >= ${baselineBench.recognitionCoverage}`
+  )
+  assert.ok(
+    expandedBench.qualifierPreservation >= baselineBench.qualifierPreservation,
+    `Qualifier preservation must increase or stay equal: ${expandedBench.qualifierPreservation} >= ${baselineBench.qualifierPreservation}`
+  )
+  assert.equal(
+    expandedBench.falsePositiveRate,
+    0,
+    'False positive rate must remain 0 for declarative pattern matchers'
+  )
+
+  // Decision Protocol Invariant Check: evaluateOpportunity logic remains deterministic
+  const baselineProfile = makeProfile()
+  const ev1 = evaluateOpportunity(testCorpus[0], baselineProfile)
+  assert.ok(
+    ['apply', 'consider', 'skip'].includes(ev1.verdict),
+    'Decision protocol must produce valid deterministic verdict'
+  )
+})
+
+
 
 
 

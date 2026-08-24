@@ -29,3 +29,24 @@ test('extractMarketRequirements preserves rawText provenance', () => {
   assert.ok(k8sReq)
   assert.equal(k8sReq.rawText, 'k8s')
 })
+
+test('extractMarketRequirements preserves constraint_type (required vs preferred) and scale qualifiers', () => {
+  const jd = 'Must have 5+ years experience in Kubernetes for cloud systems. Deep proficiency required. Python preferred.'
+  const model = extractMarketRequirements(jd)
+
+  const reqK8s = model.requirements.find(r => r.concept.toLowerCase().includes('kubernetes'))
+  assert.ok(reqK8s, 'Should extract Kubernetes requirement')
+  assert.ok(reqK8s.qualifiers, 'Kubernetes requirement must carry qualifiers')
+
+  const constraintQual = reqK8s.qualifiers.find(q => q.kind === 'constraint_type')
+  assert.ok(constraintQual, 'Must preserve constraint_type qualifier (required vs preferred)')
+  assert.equal(constraintQual.value, 'required')
+
+  const reqPython = model.requirements.find(r => r.concept.toLowerCase().includes('python'))
+  assert.ok(reqPython, 'Should extract Python requirement')
+  assert.ok(reqPython.qualifiers, 'Python requirement must carry qualifiers')
+  const prefQual = reqPython.qualifiers.find(q => q.kind === 'constraint_type')
+  assert.ok(prefQual, 'Must preserve constraint_type qualifier for Python')
+  assert.equal(prefQual.value, 'preferred')
+})
+

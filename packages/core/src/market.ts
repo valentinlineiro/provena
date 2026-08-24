@@ -2,7 +2,7 @@ import { DeclarativeMarketRecognizer } from './market-knowledge.js'
 import { DEFAULT_SOFTWARE_KNOWLEDGE } from './default-knowledge.js'
 
 export interface RequirementQualifier {
-  readonly kind: 'context' | 'proficiency' | 'scale' | 'duration' | 'cardinality'
+  readonly kind: 'context' | 'proficiency' | 'scale' | 'duration' | 'cardinality' | 'constraint_type'
   readonly value: string
   readonly rawText: string
 }

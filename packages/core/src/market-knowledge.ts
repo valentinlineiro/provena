@@ -57,6 +57,17 @@ function extractSentenceQualifiers(sentence: string): RequirementQualifier[] {
     })
   }
 
+  const constraintMatch = /(?:required|must(?: have)?|essential|mandatory|preferred|nice to have|plus|optional)/i.exec(sentence)
+  if (constraintMatch) {
+    const text = constraintMatch[0].toLowerCase()
+    const isRequired = /required|must|essential|mandatory/.test(text)
+    qualifiers.push({
+      kind: 'constraint_type',
+      value: isRequired ? 'required' : 'preferred',
+      rawText: constraintMatch[0],
+    })
+  }
+
   return qualifiers
 }
 

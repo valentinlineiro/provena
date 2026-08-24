@@ -1241,7 +1241,8 @@ h1 { font-size: 1.125rem; font-weight: 700; }
 .opp-table { width: 100%; border-collapse: collapse; background: var(--c-surface); border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--c-border); margin-top: 0.75rem; }
 .opp-table th, .opp-table td { padding: 0.75rem 1rem; text-align: left; font-size: 0.875rem; border-bottom: 1px solid var(--c-border); }
 .opp-table th { background: var(--c-surface-hover); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-text-faint); }
-.badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.opp-table td:nth-child(2) { font-weight: 600; }
+.badge { display: inline-block; padding: 0.3rem 0.65rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .badge.strong-candidate { background: #e8f5e9; color: #2e7d32; }
 .badge.consider { background: #fff3e0; color: #ef6c00; }
 .badge.abstain { background: #f3e5f5; color: #6a1b9a; }

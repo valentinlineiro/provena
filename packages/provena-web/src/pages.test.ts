@@ -212,3 +212,23 @@ test('GET /api/opportunities?tab=unresolved materializes all non-attention non-c
   assert.equal(json.tab, 'unresolved')
   assert.equal(typeof json.counts['unresolved'], 'number')
 })
+
+test('Attention Inbox presentation contract: column order and Verdict visual dominance', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/opportunities'), env)
+  const html = await res.text()
+
+  // Column order verification
+  const expectedHeaderPattern = /<table class="opp-table"><thead><tr><th>Opportunity<\/th><th>Verdict<\/th><th>Prof Fit<\/th><th>Personal Fit<\/th><th>Evidence<\/th><th>Action<\/th><\/tr><\/thead>/
+  assert.ok(expectedHeaderPattern.test(html), 'Table columns must follow presentation contract: Opportunity → Verdict → Prof Fit → Personal Fit → Evidence → Action')
+
+  // Verdict visual dominance verification
+  assert.ok(html.includes('.badge {'), 'Must include .badge CSS definition')
+  assert.ok(html.includes('font-weight: 800'), 'Verdict badges must use font-weight: 800 for visual dominance')
+  assert.ok(html.includes('padding: 0.3rem 0.65rem'), 'Verdict badges must use padding: 0.3rem 0.65rem')
+  assert.ok(html.includes('letter-spacing: 0.04em'), 'Verdict badges must use letter-spacing: 0.04em')
+  assert.ok(html.includes('box-shadow: 0 1px 2px rgba(0,0,0,0.05)'), 'Verdict badges must use box-shadow')
+  assert.ok(html.includes('.opp-table td:nth-child(2) { font-weight: 600; }'), 'Must set font-weight: 600 for second column cells')
+  assert.ok(html.includes('.badge.strong-candidate'), 'Must style strong-candidate verdict')
+  assert.ok(html.includes('.badge.consider'), 'Must style consider verdict')
+  assert.ok(html.includes('.badge.skip'), 'Must style skip verdict')
+})

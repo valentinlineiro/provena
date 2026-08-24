@@ -232,3 +232,20 @@ test('Attention Inbox presentation contract: column order and Verdict visual dom
   assert.ok(html.includes('.badge.consider'), 'Must style consider verdict')
   assert.ok(html.includes('.badge.skip'), 'Must style skip verdict')
 })
+
+test('Attention Inbox responsive contract: mobile hides metrics and prioritizes Opportunity + Verdict + Action', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/opportunities'), env)
+  const html = await res.text()
+
+  assert.ok(
+    html.includes('@media (max-width: 640px)') || html.includes('@container page (max-width: 40rem)'),
+    'Must include mobile media query or container query breakpoint'
+  )
+  assert.ok(html.includes('.opp-table th:nth-child(3)'), 'Must target th:nth-child(3)')
+  assert.ok(html.includes('.opp-table td:nth-child(3)'), 'Must target td:nth-child(3)')
+  assert.ok(html.includes('.opp-table th:nth-child(4)'), 'Must target th:nth-child(4)')
+  assert.ok(html.includes('.opp-table td:nth-child(4)'), 'Must target td:nth-child(4)')
+  assert.ok(html.includes('.opp-table th:nth-child(5)'), 'Must target th:nth-child(5)')
+  assert.ok(html.includes('.opp-table td:nth-child(5)'), 'Must target td:nth-child(5)')
+  assert.ok(html.includes('display: none'), 'Must set display: none for columns 3, 4, 5 on compact viewports')
+})

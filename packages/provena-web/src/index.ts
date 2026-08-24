@@ -1255,6 +1255,20 @@ h1 { font-size: 1.125rem; font-weight: 700; }
 .btn-group button:hover { background: var(--c-surface-hover); }
 .btn-group button.active { background: var(--c-accent-bg); color: var(--c-white); border-color: var(--c-text); }
 .sentinel { text-align: center; padding: 1.5rem; color: var(--c-text-faint); font-size: 0.875rem; }
+@media (max-width: 640px) {
+  .opp-table th:nth-child(3), .opp-table td:nth-child(3),
+  .opp-table th:nth-child(4), .opp-table td:nth-child(4),
+  .opp-table th:nth-child(5), .opp-table td:nth-child(5) {
+    display: none;
+  }
+}
+@container page (max-width: 40rem) {
+  .opp-table th:nth-child(3), .opp-table td:nth-child(3),
+  .opp-table th:nth-child(4), .opp-table td:nth-child(4),
+  .opp-table th:nth-child(5), .opp-table td:nth-child(5) {
+    display: none;
+  }
+}
 </style>
 ${renderAppShell(
   'opportunities',

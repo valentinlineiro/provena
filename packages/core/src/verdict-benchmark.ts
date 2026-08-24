@@ -1,5 +1,6 @@
 import type { GroundTruthOpportunity } from './fixtures/verdict-ground-truth.js'
-import { evaluateOpportunity, type Profile, type OpportunityEvaluation } from './opportunity.js'
+import type { Profile } from './profile.js'
+import { evaluateOpportunity, type OpportunityEvaluation } from './opportunity.js'
 import type { IMarketRecognizer } from './market-knowledge.js'
 
 export interface VerdictBenchmarkMetrics {
@@ -58,7 +59,7 @@ export function runVerdictQualityBenchmark(
     } else if (verdict === 'apply' || verdict === 'consider' || verdict === 'interested') {
       if (item.groundTruth === 'WORTH_ATTENTION') {
         tp++
-      } else {
+      } else if (item.groundTruth === 'NOT_WORTH') {
         fp++
       }
     } else if (verdict === 'skip' || verdict === 'dismissed') {

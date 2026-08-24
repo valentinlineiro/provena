@@ -24,6 +24,7 @@ export type {
 } from './types.js'
 
 export type { Profile } from './profile.js'
+export { getEmbeddedProfile } from './profile.js'
 
 export type {
   Projector,

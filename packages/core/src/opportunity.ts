@@ -2,6 +2,7 @@ import type { Profile } from './profile.js'
 import type { Preferences } from './types.js'
 import type { DecisionContext } from './cv-projector.js'
 import { extractMarketRequirements, type MarketModel } from './market.js'
+import type { IMarketRecognizer } from './market-knowledge.js'
 
 export type Verdict = 'apply' | 'consider' | 'skip'
 export type CriterionStatus = 'satisfied' | 'violated' | 'unknown'
@@ -1021,7 +1022,11 @@ export function applyPolicy(
 
 // ---- legacy policy --------------------------------------------------------
 
-export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEvaluation {
+export function evaluateOpportunity(
+  jd: string,
+  profile: Profile,
+  recognizer?: IMarketRecognizer
+): OpportunityEvaluation {
   const prefs = profile.preferences
   const criteria: CriterionCheck[] = [
     checkCompensation(jd, prefs),
@@ -1030,7 +1035,7 @@ export function evaluateOpportunity(jd: string, profile: Profile): OpportunityEv
     checkAvoid(jd, prefs),
   ]
 
-  const marketModel = extractMarketRequirements(jd)
+  const marketModel = recognizer ? recognizer.extractMarketRequirements(jd) : extractMarketRequirements(jd)
   const resolved = resolveRequirements(marketModel, profile)
 
   const demonstrated: SignalMatch[] = resolved

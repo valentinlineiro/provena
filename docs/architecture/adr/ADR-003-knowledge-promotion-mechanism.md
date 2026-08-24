@@ -1,7 +1,13 @@
 # ADR-003 — Isolated-OOS Knowledge Promotion Mechanism: Redesign-or-Delete Decision
 
 ## Status
-**Decided — deferred.** We are not choosing "redesign" or "eliminate" yet. We are choosing to diagnose the root cause first, before committing to either. (2026-08-24)
+**Decided: REDESIGN.** (2026-08-24, updated same day after CARD-007's diagnosis)
+
+The deferred decision below (originally: diagnose first) is resolved. CARD-007 found the root cause is structural, not a narrow wiring defect: the knowledge pack *does* causally affect `coverage` and the per-item verdict (`EMPTY` → `consider`, `DEFAULT_SOFTWARE_KNOWLEDGE` → `apply`, same item), but `runVerdictQualityBenchmark` buckets `apply` and `consider` into the same "surfaced" outcome, and `skip` is gated entirely by pack-independent preference criteria — so the pack's real, observed effect never reaches the three §3 metrics.
+
+**Operator's decision:** since the pack has a demonstrated causal effect on the system (`consider` → `apply`), the promotion *concept* (empirical, per-pack, evidence-gated) is not wrong — the *instrument* measuring it was blind to the one thing the pack actually moves. Redesign the measurement to a causal-contribution (ablation) design: compare a baseline composite against that composite with the candidate pack added (and, for re-auditing an already-promoted pack, against that composite with it removed), rather than evaluating one pack in total isolation. See [`causal-contribution-benchmark-design.md`](../causal-contribution-benchmark-design.md) (CARD-008) for the design — not yet implemented.
+
+Eliminating the mechanism (Alternative B, below) was explicitly rejected: the causal evidence argues for fixing the instrument, not abandoning the concept it was trying to measure.
 
 ## Lineage
 
@@ -51,4 +57,4 @@ Committing to a path before knowing which of these is true risks either over-eng
 - Does not revert or invalidate CARD-002's or CARD-004's recorded "eligible per §3" verdicts — they stand, with CARD-005's caveat attached, as literal (if now known to be weak) threshold-passes.
 - Does not change `Operational Knowledge Version` (still `1`, `DEFAULT_SOFTWARE_KNOWLEDGE` only, per CARD-003).
 - Does not touch the Decision Engine, the benchmark engine, or Corpus v3.
-- Does not evaluate `FINTECH_PLATFORM_KNOWLEDGE`, `OCCUPATIONAL_CONTEXT_KNOWLEDGE`, `MLOPS_KNOWLEDGE`, or `DATA_AGENTIC_KNOWLEDGE` — that remains blocked until this lineage is resolved.
+- Does not evaluate `FINTECH_PLATFORM_KNOWLEDGE`, `OCCUPATIONAL_CONTEXT_KNOWLEDGE`, `MLOPS_KNOWLEDGE`, or `DATA_AGENTIC_KNOWLEDGE` — that remains blocked until the redesigned mechanism (CARD-008's design) is implemented and validated. CARD-008 is design-only; implementing the new benchmark engine is a separate, not-yet-authorized card.

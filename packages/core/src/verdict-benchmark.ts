@@ -48,7 +48,8 @@ export function runVerdictQualityBenchmark(
   let trueEvidenceGapsInAbstain = 0
 
   for (const item of dataset) {
-    const evaluation: OpportunityEvaluation = evaluateOpportunity(item.jd, profile, recognizer)
+    const fullJd = item.title ? `${item.title}\n${item.jd}` : item.jd
+    const evaluation: OpportunityEvaluation = evaluateOpportunity(fullJd, profile, recognizer)
     const verdict = evaluation.verdict.toLowerCase()
 
     if (verdict === 'abstain') {

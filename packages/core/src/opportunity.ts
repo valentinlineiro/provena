@@ -240,40 +240,71 @@ export interface RoleRequirement {
 export function parseRoleRequirement(jd: string): RoleRequirement {
   const lower = jd.toLowerCase()
 
+  // Extract candidate raw title line if present, otherwise use first non-empty line
+  const firstLine = jd.split('\n').map(l => l.trim()).filter(Boolean)[0] ?? ''
+  const titleLine = jd.split('\n').find(l => /^(?:role|position|job title):/i.test(l)) ?? firstLine
+  const rawTitle = titleLine.replace(/^(?:role|position|job title):\s*/i, '').trim() || jd.slice(0, 60).trim()
+  const lowerTitle = rawTitle.toLowerCase()
+
   // 1. Level extraction
   let level: RoleRequirement['level'] = 'unknown'
-  if (/\bjunior\b/i.test(lower)) level = 'junior'
-  else if (/\bmid-?level\b/i.test(lower)) level = 'mid'
-  else if (/\bstaff\b/i.test(lower)) level = 'staff'
-  else if (/\bprincipal\b/i.test(lower)) level = 'principal'
-  else if (/\b(?:ceo|cto|cpo|executive|vice president|vp)\b/i.test(lower)) level = 'executive'
-  else if (/\b(?:senior|lead|head of)\b/i.test(lower)) level = 'senior'
+  if (
+    /\b(?:junior|intern|internship|graduate program|entry-level|associate software engineer|intermediate)\b/i.test(lowerTitle) ||
+    /\b(?:0-1 year|undergraduate|recent university graduates)\b/i.test(lower)
+  ) {
+    level = 'junior'
+  } else if (/\bmid-?level\b/i.test(lowerTitle)) {
+    level = 'mid'
+  } else if (/\bstaff\b/i.test(lowerTitle)) {
+    level = 'staff'
+  } else if (/\bprincipal\b/i.test(lowerTitle)) {
+    level = 'principal'
+  } else if (/\b(?:ceo|cto|cpo|executive|vice president|vp|cfo)\b/i.test(lowerTitle)) {
+    level = 'executive'
+  } else if (/\b(?:senior|lead|head of)\b/i.test(lowerTitle)) {
+    level = 'senior'
+  }
 
-  // 2. Family extraction
+  // 2. Disambiguation flags
+  const isPreSales =
+    /\b(?:pre-sales|sales enablement|rfp proposals?|sales architect|field sales|account executive)\b/i.test(lower) &&
+    !/\b(?:70% hands-on|hands-on prototyping|hands-on software|coding)\b/i.test(lower)
+  const isPureManagement =
+    (/(?:0%|100%)\s*(?:coding|people management)|no hands-on coding|pure people management|administrative manager|direct reports management|direct reports only/i.test(lower) ||
+      (/\b(?:engineering manager|manager)\b/i.test(lowerTitle) && /(?:100%|0%)\s*(?:people management|coding)|no hands-on coding/i.test(lower))) &&
+    !/\b(?:60% hands-on|70% hands-on|hands-on prototyping|tech lead manager)\b/i.test(lower)
+  const isEmbeddedHardware = /\b(?:firmware|microcontroller|rtos|pcb design|hardware engineer|embedded hardware|bare-metal|cabling)\b/i.test(lower)
+  const isGameGraphics = /\b(?:game engine|graphics renderer|vulkan|opengl|shader developer|directx|graphics rendering)\b/i.test(lower)
+  const isFrontendMobileUI =
+    /\b(?:frontend|ui\/ux|ux\/ui|react|tailwindcss|next\.js|ios|android|swift|swiftui|kotlin|jetpack compose|mobile app|mobile application|wordpress|php webmaster)\b/i.test(lowerTitle) &&
+    !/\b(?:backend engineer|infrastructure engineer|distributed systems engineer|sre|site reliability engineer)\b/i.test(lowerTitle)
+  const isNonTechOther = /\b(?:recruiter|facilities|legal counsel|intellectual property|growth marketing|clinical|medical assistant|fleet logistics|freight|industrial electrician|pharmacy|real estate broker|executive chef|customer success|content strategist|copywriter|procurement|supply chain|soc lead|security operations analyst|data scientist|scrum master|\bdba\b|oracle database administrator)\b/i.test(lower)
+
+  // 3. Family extraction
   let family: RoleRequirement['family'] = 'unknown'
-  if (/\b(?:project manager|jefe de proyecto|pmp|program manager)\b/i.test(lower)) {
+  if (/\b(?:project manager|jefe de proyecto|pmp|program manager)\b/i.test(lowerTitle)) {
     family = 'project-management'
-  } else if (/\b(?:ceo|cpo|p&l executive)\b/i.test(lower)) {
+  } else if (/\b(?:ceo|cpo|p&l executive|cfo)\b/i.test(lowerTitle)) {
     family = 'executive-management'
-  } else if (/\b(?:docente|profesor|catedrático|universitario|aneca)\b/i.test(lower)) {
+  } else if (/\b(?:docente|profesor|catedrático|universitario|aneca)\b/i.test(lowerTitle)) {
     family = 'academia'
   } else if (
-    /\b(?:recepción|receptionist|hr generalist|payroll|sales representative|warehouse|helpdesk|executive assistant|call center|data entry|retail|medical billing|accounting assistant|paralegal|construction|product designer|ui\/ux|ux\/ui|manual qa|qa tester|software tester|marketing|social media|soc tier|security operations)\b/i.test(lower) ||
-    /\b(?:pre-sales|sales enablement|rfp proposals?|sales architect)\b/i.test(lower) ||
-    /\b(?:0% coding|pure people management|administrative manager|direct reports only)\b/i.test(lower) ||
-    /\b(?:firmware|microcontroller|rtos|pcb design|hardware engineer)\b/i.test(lower) ||
-    /\b(?:game engine|graphics renderer|vulkan|opengl|shader developer)\b/i.test(lower)
+    isPreSales ||
+    isPureManagement ||
+    isEmbeddedHardware ||
+    isGameGraphics ||
+    isFrontendMobileUI ||
+    isNonTechOther ||
+    /\b(?:recepción|receptionist|hr generalist|payroll|warehouse|helpdesk|executive assistant|call center|data entry|retail|medical billing|accounting assistant|paralegal|construction|product designer|manual qa|qa tester|software tester)\b/i.test(lower)
   ) {
     family = 'non-engineering'
   } else if (/\b(?:ai engineer|applied ai|machine learning engineer|ml engineer)\b/i.test(lower)) {
     family = 'ai-engineering'
-  } else if (/\b(?:software engineer|backend engineer|fullstack|full-stack|cto|solutions engineer|tech lead|engineering manager)\b/i.test(lower)) {
+  } else if (
+    /\b(?:software engineer|backend engineer|fullstack|full-stack|cto|solutions engineer|tech lead|engineering manager|systems engineer|infrastructure engineer|platform engineer|sre|site reliability engineer|cloud architect|solutions architect|devsecops|performance engineer|storage engineer|kernel engineer)\b/i.test(lower)
+  ) {
     family = 'software-engineering'
   }
-
-  // Extract candidate raw title line if present
-  const titleLine = jd.split('\n').find(l => /^(?:role|position|job title):/i.test(l)) ?? ''
-  const rawTitle = titleLine.replace(/^(?:role|position|job title):\s*/i, '').trim() || jd.slice(0, 60).trim()
 
   return { rawTitle, family, level }
 }

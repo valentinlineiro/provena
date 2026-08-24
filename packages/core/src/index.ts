@@ -68,6 +68,9 @@ export { evaluateOpportunity, resolveRequirements, evaluateSufficiency, evaluate
 export type { MarketRequirement, MarketModel } from './market.js'
 export { extractMarketRequirements } from './market.js'
 
+export type { MarketBenchmarkResult } from './market-benchmark.js'
+export { runMarketRequirementBenchmark } from './market-benchmark.js'
+
 export type { MarketPatternDefinition, MarketKnowledge, IMarketRecognizer } from './market-knowledge.js'
 export { DeclarativeMarketRecognizer, composeKnowledge } from './market-knowledge.js'
 export { DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE } from './default-knowledge.js'

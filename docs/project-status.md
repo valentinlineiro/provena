@@ -3,7 +3,7 @@
 **Last Updated:** 2026-08-07  
 **Software Release:** v0.7.1  
 **Decision Protocol Version:** Protocol v1  
-**Current Operational Knowledge Version:** 0  
+**Current Operational Knowledge Version:** 1  
 **Architecture Freeze Reference:** [freeze-v0.7.0.md](architecture/freeze-v0.7.0.md)  
 **Governance ADRs:** [ADR-001](architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), [ADR-002](architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
 
@@ -37,8 +37,9 @@
 ## Operational Knowledge Versioning
 
 ```text
-Current Operational Knowledge Version: 0
+Current Operational Knowledge Version: 1
 ```
 
-- **Definition**: Represents the promoted operational knowledge consumed by the decision engine in production.
+- **Definition**: Represents the promoted operational knowledge — packs that have cleared the [promotion contract](architecture/knowledge-promotion-contract.md)'s eligibility gate. See [`operational-knowledge-v1.md`](architecture/operational-knowledge-v1.md) for the current composition and an explicit gap note about production not yet consuming exactly this set.
 - **Rule**: Research and experimental knowledge artifacts (such as `K12-GTM-002`) do **not** increment this version until formally promoted into production operational knowledge.
+- **v1 composition**: `DEFAULT_SOFTWARE_KNOWLEDGE` only.

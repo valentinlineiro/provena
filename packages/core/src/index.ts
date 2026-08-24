@@ -178,6 +178,13 @@ export type { GeneralizationBenchmarkResult, BorderCaseFailure } from './attenti
 export { runGeneralizationBenchmarkV2 } from './attention-validation-v2.js'
 export type { OOSValidationBenchmarkResult, OOSFailure } from './attention-validation-oos.js'
 export { runOutOfSampleValidationBenchmark } from './attention-validation-oos.js'
+export type {
+  PerItemResult,
+  VerdictTransition,
+  CausalContributionMetrics,
+  CausalContributionBenchmarkResult,
+} from './causal-contribution-benchmark.js'
+export { runCausalContributionBenchmark } from './causal-contribution-benchmark.js'
 
 
 

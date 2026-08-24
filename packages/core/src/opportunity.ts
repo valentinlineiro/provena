@@ -233,7 +233,7 @@ function roleTokens(s: string): string[] {
 
 export interface RoleRequirement {
   readonly rawTitle: string
-  readonly family: 'software-engineering' | 'ai-engineering' | 'project-management' | 'executive-management' | 'academia' | 'unknown'
+  readonly family: 'software-engineering' | 'ai-engineering' | 'project-management' | 'executive-management' | 'academia' | 'non-engineering' | 'unknown'
   readonly level: 'junior' | 'mid' | 'senior' | 'staff' | 'principal' | 'executive' | 'unknown'
 }
 
@@ -257,6 +257,8 @@ export function parseRoleRequirement(jd: string): RoleRequirement {
     family = 'executive-management'
   } else if (/\b(?:docente|profesor|catedrático|universitario|aneca)\b/i.test(lower)) {
     family = 'academia'
+  } else if (/\b(?:recepción|receptionist|hr generalist|payroll|sales representative|warehouse|helpdesk|executive assistant|call center|data entry|retail|medical billing|accounting assistant|paralegal|construction|product designer|ui\/ux|ux\/ui)\b/i.test(lower)) {
+    family = 'non-engineering'
   } else if (/\b(?:ai engineer|applied ai|machine learning engineer|ml engineer)\b/i.test(lower)) {
     family = 'ai-engineering'
   } else if (/\b(?:software engineer|backend engineer|fullstack|full-stack|cto|solutions engineer|tech lead|engineering manager)\b/i.test(lower)) {
@@ -283,7 +285,7 @@ export function findMatchedRole(jd: string, roles: readonly string[]): string | 
   if (roleReq.level === 'junior' || roleReq.level === 'mid') return null
 
   // Incompatible family guard: non-engineering families do not match engineering preferences
-  if (roleReq.family === 'project-management' || roleReq.family === 'executive-management' || roleReq.family === 'academia') {
+  if (roleReq.family === 'project-management' || roleReq.family === 'executive-management' || roleReq.family === 'academia' || roleReq.family === 'non-engineering') {
     return null
   }
 
@@ -304,7 +306,7 @@ function checkRoles(jd: string, prefs: Preferences | undefined): CriterionCheck 
   const roleReq = parseRoleRequirement(jd)
 
   // 1. Incompatible Family Check
-  if (roleReq.family === 'project-management' || roleReq.family === 'executive-management' || roleReq.family === 'academia') {
+  if (roleReq.family === 'project-management' || roleReq.family === 'executive-management' || roleReq.family === 'academia' || roleReq.family === 'non-engineering') {
     return {
       criterion: 'roles',
       status: 'violated',

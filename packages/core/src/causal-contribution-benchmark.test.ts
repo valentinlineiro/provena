@@ -24,9 +24,19 @@ test('Causal-contribution benchmark: Composite vs Composite+X (SYSTEMS_INFRA_KNO
   // Causal metrics must be real numbers, not NaN/undefined -- the engine
   // must actually complete the per-item diff over the full corpus.
   assert.ok(Number.isFinite(result.causal.coverageDelta))
+  assert.ok(Number.isFinite(result.causal.coverageIncrease))
+  assert.ok(Number.isFinite(result.causal.coverageDecrease))
   assert.ok(Number.isFinite(result.causal.verdictTransitionCount))
   assert.ok(Number.isFinite(result.causal.coincidentGroundTruthAlignment))
   assert.ok(typeof result.causal.verdictTransitionDirection === 'object')
+
+  // Direction must be preserved, not collapsed by coverageDelta's
+  // Math.abs(): on this real fixture pair, the one transition is a pure
+  // regression (apply->consider), so coverageIncrease must be 0 and
+  // coverageDecrease must carry the full signed movement. Before the fix,
+  // coverageDelta alone made this indistinguishable from an improvement.
+  assert.equal(result.causal.coverageIncrease, 0)
+  assert.ok(result.causal.coverageDecrease > 0)
 
   // transitions[] and verdictTransitionCount must agree -- internal
   // consistency of the diff, not a promotion-threshold assertion (CARD-009

@@ -20,7 +20,12 @@ export interface VerdictTransition {
 }
 
 export interface CausalContributionMetrics {
+  /** Mean absolute coverage movement -- magnitude only, direction-blind. */
   readonly coverageDelta: number
+  /** Mean coverage gain over items where candidate.coverage > base.coverage (0 if none). */
+  readonly coverageIncrease: number
+  /** Mean coverage loss (positive number) over items where candidate.coverage < base.coverage (0 if none). */
+  readonly coverageDecrease: number
   readonly verdictTransitionCount: number
   readonly verdictTransitionDirection: Readonly<Record<string, number>>
   readonly coincidentGroundTruthAlignment: number
@@ -92,6 +97,10 @@ export function runCausalContributionBenchmark(
 
   let coverageDeltaSum = 0
   let coverageDeltaCount = 0
+  let coverageIncreaseSum = 0
+  let coverageIncreaseCount = 0
+  let coverageDecreaseSum = 0
+  let coverageDecreaseCount = 0
   const transitions: VerdictTransition[] = []
   const direction: Record<string, number> = {}
 
@@ -99,9 +108,17 @@ export function runCausalContributionBenchmark(
     const base = byId.get(candidate.itemId)
     if (!base) continue
 
+    const signedDelta = candidate.coverage - base.coverage
     if (base.coverage > 0 || candidate.coverage > 0) {
-      coverageDeltaSum += Math.abs(candidate.coverage - base.coverage)
+      coverageDeltaSum += Math.abs(signedDelta)
       coverageDeltaCount++
+    }
+    if (signedDelta > 0) {
+      coverageIncreaseSum += signedDelta
+      coverageIncreaseCount++
+    } else if (signedDelta < 0) {
+      coverageDecreaseSum += -signedDelta
+      coverageDecreaseCount++
     }
 
     if (base.verdict !== candidate.verdict) {
@@ -119,6 +136,8 @@ export function runCausalContributionBenchmark(
   }
 
   const coverageDelta = coverageDeltaCount > 0 ? coverageDeltaSum / coverageDeltaCount : 0
+  const coverageIncrease = coverageIncreaseCount > 0 ? coverageIncreaseSum / coverageIncreaseCount : 0
+  const coverageDecrease = coverageDecreaseCount > 0 ? coverageDecreaseSum / coverageDecreaseCount : 0
   const alignedCount = transitions.filter(t => t.alignedWithGroundTruth).length
   const coincidentGroundTruthAlignment = transitions.length > 0 ? alignedCount / transitions.length : 0
 
@@ -127,6 +146,8 @@ export function runCausalContributionBenchmark(
     candidateResults,
     causal: {
       coverageDelta,
+      coverageIncrease,
+      coverageDecrease,
       verdictTransitionCount: transitions.length,
       verdictTransitionDirection: direction,
       coincidentGroundTruthAlignment,

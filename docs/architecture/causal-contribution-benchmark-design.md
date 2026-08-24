@@ -58,7 +58,9 @@ Computed by diffing the two composites' `PerItemResult[]` arrays item-by-item:
 
 | Metric | Definition | What it captures |
 |---|---|---|
-| `coverageDelta` | mean over items of `\|coverage_with_X − coverage_without_X\|` where either run had `recognized > 0` | Magnitude of the pack's effect on requirement-matching, independent of whether it crossed a verdict threshold |
+| `coverageDelta` | mean over items of `\|coverage_with_X − coverage_without_X\|` where either run had `recognized > 0` | Magnitude of the pack's effect on requirement-matching, direction-blind |
+| `coverageIncrease` *(added during CARD-009 implementation)* | mean of the signed positive deltas only (items where `coverage_with_X > coverage_without_X`) | How much the pack adds, isolated from regressions |
+| `coverageDecrease` *(added during CARD-009 implementation)* | mean magnitude of the signed negative deltas only (items where `coverage_with_X < coverage_without_X`) | How much the pack removes — without this, `coverageDelta` alone makes an improvement and a regression of equal size indistinguishable, which a PR review on CARD-009 caught before merge |
 | `verdictTransitionCount` | count of items where `verdict_with_X ≠ verdict_without_X` | How many items the pack actually moves, on the axis CARD-007 showed is pack-sensitive (chiefly `consider`↔`apply`) |
 | `verdictTransitionDirection` | breakdown of transitions by direction (e.g. `consider→apply: N`, `apply→consider: M`) | Whether the pack's effect is "more confident surfacing" or noise/regression |
 | `coincidentGroundTruthAlignment` | of items with a verdict transition, the fraction where the transition moved *toward* the item's ground truth (`consider→apply` on a `WORTH_ATTENTION` item counts as aligned) | Whether the pack's causal effect is directionally correct, not just present |

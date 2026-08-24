@@ -5,7 +5,7 @@
 **Decision Protocol Version:** Protocol v1  
 **Current Operational Knowledge Version:** 1  
 **Architecture Freeze Reference:** [freeze-v0.7.0.md](architecture/freeze-v0.7.0.md)  
-**Governance ADRs:** [ADR-001](architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), [ADR-002](architecture/adr/ADR-002-neon-canonical-market-orchestration.md)
+**Governance ADRs:** [ADR-001](architecture/adr/ADR-001-v0.7.0-architectural-reconciliation.md), [ADR-002](architecture/adr/ADR-002-neon-canonical-market-orchestration.md), [ADR-003](architecture/adr/ADR-003-knowledge-promotion-mechanism.md)
 
 ---
 

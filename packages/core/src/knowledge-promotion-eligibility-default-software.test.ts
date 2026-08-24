@@ -22,34 +22,22 @@ test('Operational Knowledge v1 promotion contract §3: DEFAULT_SOFTWARE_KNOWLEDG
 
   const oos = result.outOfSampleCorpusMetrics
 
-  // Scale (contract §3)
+  // Contract §3 gate — DEFAULT_SOFTWARE_KNOWLEDGE evaluated in isolation
+  // (never run alone in the frozen H8/Step 10 suites, only composed with
+  // Systems/Fintech/Occupational packs) must clear the same thresholds any
+  // candidate pack must clear. This is a hard gate: a future regression
+  // below any threshold must fail this test, not just show up in a log.
   assert.ok(oos.totalEvaluated >= 50, `Corpus v3 size must be >= 50, got ${oos.totalEvaluated}`)
-
-  // This test intentionally does not assert pass/fail on the remaining §3
-  // thresholds: DEFAULT_SOFTWARE_KNOWLEDGE in isolation (never run alone in
-  // the frozen H8/Step 10 suites, only composed with Systems/Fintech/
-  // Occupational packs) is exactly the unknown this card exists to resolve.
-  // The eligibility verdict is recorded in
-  // docs/architecture/knowledge-promotion-eligibility-default-software.md.
-  const meetsMOR = oos.missedOpportunityRate <= 0.05
-  const meetsReduction = oos.attentionReduction >= 0.50
-  const meetsPrecision = oos.attentionPrecision >= 0.75
-
-  console.log('DEFAULT_SOFTWARE_KNOWLEDGE isolated OOS metrics:', {
-    totalEvaluated: oos.totalEvaluated,
-    missedOpportunityRate: oos.missedOpportunityRate,
-    attentionReduction: oos.attentionReduction,
-    attentionPrecision: oos.attentionPrecision,
-    meetsMOR,
-    meetsReduction,
-    meetsPrecision,
-  })
-
-  // The only hard assertion: metrics must be computable and finite, so this
-  // test fails loudly (not silently) if the benchmark engine breaks —
-  // eligibility itself is a documented verdict, not a CI gate, per the
-  // contract's explicit "this card does not promote" scope.
-  assert.ok(Number.isFinite(oos.missedOpportunityRate))
-  assert.ok(Number.isFinite(oos.attentionReduction))
-  assert.ok(Number.isFinite(oos.attentionPrecision))
+  assert.ok(
+    oos.missedOpportunityRate <= 0.05,
+    `§3 MOR guardrail: expected <= 5%, got ${(oos.missedOpportunityRate * 100).toFixed(1)}%`
+  )
+  assert.ok(
+    oos.attentionReduction >= 0.50,
+    `§3 Attention Reduction: expected >= 50%, got ${(oos.attentionReduction * 100).toFixed(1)}%`
+  )
+  assert.ok(
+    oos.attentionPrecision >= 0.75,
+    `§3 Attention Precision: expected >= 75%, got ${(oos.attentionPrecision * 100).toFixed(1)}%`
+  )
 })

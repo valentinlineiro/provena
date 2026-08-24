@@ -169,4 +169,9 @@ export { VERDICT_GROUND_TRUTH_DATASET } from './fixtures/verdict-ground-truth.js
 export type { VerdictBenchmarkMetrics } from './verdict-benchmark.js'
 export { runVerdictQualityBenchmark } from './verdict-benchmark.js'
 
+// ── Scaled Attention Validation ────────────────────────────────────
+export type { AttentionValidationMetrics } from './attention-validation.js'
+export { runAttentionValidationAtScale } from './attention-validation.js'
+
+
 

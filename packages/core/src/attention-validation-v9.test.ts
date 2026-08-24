@@ -10,7 +10,6 @@ import {
   SYSTEMS_INFRA_KNOWLEDGE,
   FINTECH_PLATFORM_KNOWLEDGE,
   OCCUPATIONAL_CONTEXT_KNOWLEDGE,
-  evaluateOpportunity,
 } from './index.js'
 
 test('Step 9 Contextual Disambiguation: recovers Attention Reduction >60% and Precision >80% while preserving MOR = 0% guardrail', () => {

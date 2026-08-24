@@ -29,3 +29,10 @@ export interface Profile {
   /** O2.1: structured preferences — authoritative when present. */
   readonly preferenceSet?: PreferenceSet
 }
+
+import valentinProfile from '../../provena-web/src/profile.js'
+
+export function getEmbeddedProfile(): Profile {
+  return valentinProfile as Profile
+}
+

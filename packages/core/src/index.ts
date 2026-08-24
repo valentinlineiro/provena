@@ -165,3 +165,7 @@ export { MarketFeedService } from './market-feed-service.js'
 export type { GroundTruthOpportunity } from './fixtures/verdict-ground-truth.js'
 export { VERDICT_GROUND_TRUTH_DATASET } from './fixtures/verdict-ground-truth.js'
 
+export type { VerdictBenchmarkMetrics } from './verdict-benchmark.js'
+export { runVerdictQualityBenchmark } from './verdict-benchmark.js'
+
+

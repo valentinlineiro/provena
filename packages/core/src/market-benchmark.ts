@@ -8,6 +8,7 @@ export interface MarketBenchmarkResult {
   readonly recognitionCoverage: number
   readonly falsePositiveRate: number
   readonly qualifierPreservation: number
+  readonly qualifierDensity: number
   readonly unparsedFragments: readonly string[]
 }
 
@@ -22,6 +23,7 @@ export function runMarketRequirementBenchmark(
       recognitionCoverage: 0,
       falsePositiveRate: 0,
       qualifierPreservation: 0,
+      qualifierDensity: 0,
       unparsedFragments: [],
     }
   }
@@ -29,6 +31,7 @@ export function runMarketRequirementBenchmark(
   let totalCoverage = 0
   let totalReqs = 0
   let totalQualifiers = 0
+  let reqsWithQualifiers = 0
   const unparsed: string[] = []
 
   for (const jd of corpus) {
@@ -39,6 +42,7 @@ export function runMarketRequirementBenchmark(
     for (const req of model.requirements) {
       if (req.qualifiers && req.qualifiers.length > 0) {
         totalQualifiers += req.qualifiers.length
+        reqsWithQualifiers++
       }
     }
 
@@ -53,8 +57,8 @@ export function runMarketRequirementBenchmark(
   }
 
   const avgCoverage = Math.round((totalCoverage / corpus.length) * 100) / 100
-  const qualifierRate = Math.round((totalQualifiers / corpus.length) * 100) / 100
-  // False positive estimate based on isolated non-domain single-letter matches (baseline 0 for declarative patterns)
+  const qualifierPreservation = totalReqs > 0 ? Math.round((reqsWithQualifiers / totalReqs) * 100) / 100 : 0
+  const qualifierDensity = totalReqs > 0 ? Math.round((totalQualifiers / totalReqs) * 100) / 100 : 0
   const fpRate = 0
 
   return {
@@ -62,7 +66,8 @@ export function runMarketRequirementBenchmark(
     totalRequirementsExtracted: totalReqs,
     recognitionCoverage: avgCoverage,
     falsePositiveRate: fpRate,
-    qualifierPreservation: qualifierRate,
+    qualifierPreservation,
+    qualifierDensity,
     unparsedFragments: unparsed,
   }
 }

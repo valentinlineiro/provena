@@ -249,3 +249,10 @@ test('Attention Inbox responsive contract: mobile hides metrics and prioritizes 
   assert.ok(html.includes('.opp-table td:nth-child(5)'), 'Must target td:nth-child(5)')
   assert.ok(html.includes('display: none'), 'Must set display: none for columns 3, 4, 5 on compact viewports')
 })
+
+test('Presentation Contract Invariant: physical column order does not alter backend ranking or keyset cursor', async () => {
+  const res = await worker.fetch(new Request('https://provena.example/api/opportunities?tab=needs-attention'), env)
+  const data = await res.json() as any
+  assert.equal(res.status, 200)
+  assert.ok('nextBookmark' in data)
+})

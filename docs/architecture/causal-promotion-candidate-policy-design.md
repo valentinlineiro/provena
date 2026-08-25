@@ -1,18 +1,22 @@
-# Causal Promotion Calibration Rule — Design
+# Causal Promotion Candidate Policy — Design
 
-**Status:** Design only. Not implemented, not applied to any pack, not validated.
+**Status:** Design only. Not implemented, not applied to any pack, not validated. **This document proposes a candidate policy, not a calibrated criterion** — every threshold-shaped choice in it (§4, §6) is a design hypothesis awaiting the validation card in §9, not a number derived from the evidence distribution. See the terminology note below.
 **Card:** CARD-014
 **Authorized by:** [`causal-evidence-sufficiency-decision.md`](causal-evidence-sufficiency-decision.md) (CARD-013) — "sufficient to proceed to designing a calibration rule," not to calibrate numbers against the current n or to promote anything.
+
+## Terminology note (PR #16 review)
+
+This document originally called `R` a "calibration rule." Review correctly flagged that name as misleading: `R` contains two threshold-shaped choices (§4's unconditional veto, §6's `≥2 independent comparisons` bar) that are policy decisions dressed as thresholds, not values fit to the evidence distribution — the same conceptual move as a numeric threshold even though both are small integers rather than a continuous score. Calling the whole thing a "calibration rule" understated that these are still unvalidated hypotheses. `R` is renamed **candidate promotion policy** throughout, and §4/§6's two threshold-shaped choices are each labeled `[DESIGN CHOICE — HYPOTHESIS, NOT VALIDATED]` at the point they're introduced, so neither can be mistaken for a calibrated criterion by a future reader skimming the document.
 **Input evidence:** [`causal-evidence-survey.md`](causal-evidence-survey.md) (CARD-010, 7 points), [`causal-signal-classification.md`](causal-signal-classification.md) (CARD-011, 4-class taxonomy), [`causal-evidence-survey-round-2.md`](causal-evidence-survey-round-2.md) (CARD-012, 19 points total).
 **Instrument:** [`runCausalContributionBenchmark`](../../packages/core/src/causal-contribution-benchmark.ts) (CARD-009).
 
 ---
 
-## 1. Shape of the rule: ordinal first, not scalar
+## 1. Shape of the policy: ordinal first, not scalar
 
 The 19 observations gathered so far never produced a single "goodness score" — they produced a *class* per comparison (Aligned Contribution / Misaligned Regression / Sub-threshold Movement / No Observable Effect), and the two promotion-relevant classes sit at `n=4` and `n=2`. Fitting a scalar threshold (`score ≥ 0.73 → promote`) on n this small would repeat the CARD-001 mistake this whole lineage exists to avoid: a number that looks precise because it is machine-checked, not because it is justified by a distribution.
 
-**Rule `R` is therefore ordinal, not numeric**, over the same four classes CARD-011 defined, plus the two structurally-unobserved classes CARD-012 named:
+**Candidate policy `R` is therefore ordinal, not numeric**, over the same four classes CARD-011 defined, plus the two structurally-unobserved classes CARD-012 named:
 
 ```text
 evidence (Δ metrics for one pack X, one corpus)
@@ -29,7 +33,7 @@ evidence (Δ metrics for one pack X, one corpus)
    promotion verdict  ─────────────────  ELIGIBLE / VETOED / INSUFFICIENT / INCONCLUSIVE
 ```
 
-A numeric layer (e.g. "how many Aligned Contribution instances are required," or a magnitude floor on `coverageIncrease`) is a legitimate *future* refinement of the ordinal rule below, once more evidence exists — see §7. This design does not propose one now.
+A numeric layer (e.g. "how many Aligned Contribution instances are required," or a magnitude floor on `coverageIncrease`) is a legitimate *future* refinement of the ordinal policy below, once more evidence exists — see §7. This design does not propose one now.
 
 ## 2. Necessary signals (§2 requirement)
 
@@ -47,7 +51,7 @@ This is necessary, not sufficient — see §3.
 
 ## 4. What constitutes a veto / regression (§4 requirement)
 
-**Any single instance of Misaligned Regression is an unconditional veto**, regardless of how many Aligned Contribution instances the same pack also produced. This follows CARD-011 §2's proposed semantics directly ("Misaligned Regression should disqualify a pack, or at minimum require it to be weighed against any positive evidence") and this design chooses the stronger of the two options CARD-011 left open: weighing a regression against positive evidence would require a magnitude/frequency comparison this design has explicitly deferred as premature (§1). An unconditional veto needs no such comparison and cannot be gamed by accumulating unrelated positive instances to outvote a real regression — `SYSTEMS_INFRA_KNOWLEDGE`'s n=2 Misaligned Regression evidence is exactly the case this guards: 1 instance standalone (CARD-010) and 3 transitions in one comparison (CARD-012's V2 round), the largest transition count of any comparison in the whole 19-point survey.
+**`[DESIGN CHOICE — HYPOTHESIS, NOT VALIDATED]` Any single instance of Misaligned Regression is an unconditional veto**, regardless of how many Aligned Contribution instances the same pack also produced. This is a policy decision, not a value calibrated from the evidence distribution — it follows CARD-011 §2's proposed semantics directly ("Misaligned Regression should disqualify a pack, or at minimum require it to be weighed against any positive evidence") and this design chooses the stronger of the two options CARD-011 left open: weighing a regression against positive evidence would require a magnitude/frequency comparison this design has explicitly deferred as premature (§1). An unconditional veto needs no such comparison and cannot be gamed by accumulating unrelated positive instances to outvote a real regression — `SYSTEMS_INFRA_KNOWLEDGE`'s n=2 Misaligned Regression evidence is exactly the case this guards: 1 instance standalone (CARD-010) and 3 transitions in one comparison (CARD-012's V2 round), the largest transition count of any comparison in the whole 19-point survey. §9's adversarial veto check is where this hypothesis gets tested against a real conflicting-signal case, not here.
 
 **Rationale for choosing veto over weighing, stated explicitly since CARD-011 left it open:** a promotion criterion that lets enough Sub-threshold or Aligned instances outvote a confirmed regression is a criterion a large-enough corpus of *unrelated* good behavior could paper over a real harm with — the opposite of what "causal" is meant to guarantee here.
 
@@ -76,9 +80,9 @@ A pack with mixed evidence across multiple comparisons (e.g. Sub-threshold Movem
 | 0 Misaligned Regression, 0 Aligned Contribution / Aligned Regression, ≥1 Sub-threshold Movement or Misaligned Sub-threshold Movement | **INCONCLUSIVE** |
 | 0 Misaligned Regression, only No Observable Effect on every run | **INCONCLUSIVE** |
 
-The `≥2 independent comparisons` clause in the `ELIGIBLE` row is deliberate: it prevents one pack/one-corpus/one-run from ever reaching `ELIGIBLE` outright, forcing at minimum the same "second real source" discipline CARD-012 already applied when it doubled the evidence base. No pack in the current 19-point survey meets this bar yet — `FINTECH_PLATFORM_KNOWLEDGE` is the closest at 3 Aligned Contribution instances, but 1 of those 3 (the v3 removal-audit row) was already flagged in CARD-012 as a different causal story (removing a *different*, regression-causing pack) and should not be counted as an independent confirmation of `FINTECH_PLATFORM_KNOWLEDGE`'s own contribution without that caveat attached.
+**`[DESIGN CHOICE — HYPOTHESIS, NOT VALIDATED]`** The `≥2 independent comparisons` clause in the `ELIGIBLE` row is deliberate but explicitly not calibrated: it prevents one pack/one-corpus/one-run from ever reaching `ELIGIBLE` outright, forcing at minimum the same "second real source" discipline CARD-012 already applied when it doubled the evidence base. It is a policy choice about how much independent confirmation to require, not a number derived from the evidence — §8 states directly that `3` would be just as defensible. No pack in the current 19-point survey meets this bar yet — `FINTECH_PLATFORM_KNOWLEDGE` is the closest at 3 Aligned Contribution instances, but 1 of those 3 (the v3 removal-audit row) was already flagged in CARD-012 as a different causal story (removing a *different*, regression-causing pack) and should not be counted as an independent confirmation of `FINTECH_PLATFORM_KNOWLEDGE`'s own contribution without that caveat attached.
 
-## 7. Is the rule numeric, ordinal, or hybrid (§5 requirement) — answered
+## 7. Is the policy numeric, ordinal, or hybrid (§5 requirement) — answered
 
 **Ordinal**, per §1. No scalar score, no weighted sum, no probability. The only place anything resembling a number appears is the `≥2 independent comparisons` count in §6 — a count of *evidence instances*, not a score computed from the causal metrics — chosen specifically because it is auditable by inspection (count rows in a table) rather than requiring a magnitude judgment call this evidence base cannot yet support.
 
@@ -92,9 +96,9 @@ Stated explicitly, not smoothed over:
 - **`FINTECH_PLATFORM_KNOWLEDGE`'s removal-audit-row double-counting risk (§6)** is flagged but not mechanically prevented — the summary table's counting rule relies on a human/reviewer noticing and excluding it, not on the class-assignment step itself distinguishing "new-pack addition" from "harmful-pack removal" causal stories. A future implementation of `R` would need to either tag comparisons by shape (addition vs. removal-audit) or treat this as a known gap.
 - **Whether `INSUFFICIENT` and `INCONCLUSIVE` should ever converge into the same non-promotion outcome** for a downstream consumer that just needs a boolean "promote now or not" is left open — this design keeps them distinct because they call for different next actions (more comparisons of the same pack vs. a different corpus), but a future card wiring `R` into an actual promotion decision will need to decide whether that distinction survives contact with a real workflow.
 
-## 9. How the rule must be validated before it can be used for promotion (§7 requirement)
+## 9. How the policy must be validated before it can be used for promotion (§7 requirement)
 
-This card designs `R`. It does not conclude `R` is valid. Validation is out of scope here and must happen as a separate, later card, at minimum covering:
+This card designs candidate policy `R`. It does not conclude `R` is valid. Validation is out of scope here and must happen as a separate, later card, at minimum covering:
 
 1. **Retrospective replay**: run `R` against all 19 existing observations (CARD-010 + CARD-012) and confirm every resulting verdict matches the qualitative judgment CARD-011/CARD-012 already reached by hand for that comparison (e.g. `SYSTEMS_INFRA_KNOWLEDGE` → `VETOED`, `FINTECH_PLATFORM_KNOWLEDGE` → not yet `ELIGIBLE` under the `≥2 independent comparisons` clause once the removal-audit row is excluded per §6's caveat). A mismatch here means `R`'s mechanical rules don't actually encode the qualitative reasoning they claim to.
 2. **New-evidence stress test**: apply `R` to at least one comparison gathered *after* this design is written (not from the 19-point set it was designed against), to check `R` doesn't only fit the data it was reasoned from.

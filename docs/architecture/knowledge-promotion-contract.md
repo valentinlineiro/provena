@@ -1,8 +1,8 @@
-# Operational Knowledge Promotion Contract (v0 → v1)
+# Operational Knowledge Promotion Contract
 
-**Status:** Draft — defines the gate; does not itself promote any pack or change `Operational Knowledge Version`.
-**Scope:** Governs when an experimental market knowledge pack becomes part of `Operational Knowledge Version 1`, per the milestone defined in [`roadmap.md`](../roadmap.md) ("the first experimental K12 pattern model satisfies empirical validation criteria and is formally promoted into production operational knowledge").
-**Non-goals:** This document does not perform a promotion, does not touch `Operational Knowledge Version` (currently `0`, per [`project-status.md`](../project-status.md)), and does not modify code. Promotion execution, versioning, and regression-suite wiring are separate follow-up work gated on this contract.
+**Status:** Active — defines the gate a pack must clear to be promoted. Two packs have cleared a promotion gate so far: `DEFAULT_SOFTWARE_KNOWLEDGE` (CARD-002/003, this contract's original §2/§3 isolated-benchmark gate) and `FINTECH_PLATFORM_KNOWLEDGE` (CARD-014–019, the causal-contribution policy that superseded §3 after CARD-007 found it structurally blind to any pack's real effect — see [`ADR-003`](adr/ADR-003-knowledge-promotion-mechanism.md) and [`causal-promotion-policy-complete-validation.md`](causal-promotion-policy-complete-validation.md)). This document itself does not perform a promotion or change `Operational Knowledge Version` — it defines eligibility; promotion is executed by a separate promotion-record card each time.
+**Scope:** Governs when an experimental market knowledge pack becomes part of `Operational Knowledge Version 1` — see [`operational-knowledge-v1.md`](operational-knowledge-v1.md) for the current composition and full per-pack lineage.
+**Non-goals:** This document does not perform a promotion and does not modify code. Promotion execution and regression-suite wiring are separate follow-up work gated on this contract.
 
 ---
 

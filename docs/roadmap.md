@@ -29,7 +29,7 @@ Validation & Product Science (Research)
 
 Future & Milestone v1.0.0
 ──────
-○ First Operational Knowledge Version Promotion (Version = 1)
+✔ First Operational Knowledge Version Promotion (Version = 1)
 ○ Verified Continuous Attention Platform
 ○ Public Beta & Stable Platform APIs
 ```
@@ -68,7 +68,9 @@ Future & Milestone v1.0.0
 Operational Knowledge Version: 0  ──►  1
 ```
 
-- **Definition**: The milestone when the first experimental K12 pattern model satisfies empirical validation criteria and is formally promoted into production operational knowledge.
+**Status: Achieved.** `Operational Knowledge Version` is `1`, currently composed of `DEFAULT_SOFTWARE_KNOWLEDGE` and `FINTECH_PLATFORM_KNOWLEDGE` — see [`project-status.md`](project-status.md) and [`architecture/operational-knowledge-v1.md`](architecture/operational-knowledge-v1.md) for the full composition and lineage.
+
+- **Definition, as achieved — noted honestly against the original framing below**: the promoted packs are pre-existing domain knowledge packs cleared via a governance eligibility gate (first the original isolated-benchmark §3 gate, then a causal-contribution policy after that gate was found structurally blind — see [`architecture/adr/ADR-003-knowledge-promotion-mechanism.md`](architecture/adr/ADR-003-knowledge-promotion-mechanism.md)), not K12-discovered pattern models. The milestone below was originally framed around a K12 pattern model specifically; K12 knowledge acquisition (§1) has not yet produced a pack that has cleared this gate, so this line item is retained as written for historical accuracy, not edited to match what actually happened.
 - **Significance**: Marks the transition of Provena from foundational software infrastructure to an evolving, self-accumulating operational market intelligence platform.
 
 ---

@@ -17,7 +17,6 @@ import {
   UrlOpportunitySource,
   GreenhousePublicSource,
   reconcileBoardSync,
-  MarketFeedService,
   MarketIngestionEngine,
   DeclarativeMarketRecognizer,
   encodeBookmark,
@@ -1789,37 +1788,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (request.method === 'POST' && url.pathname === '/api/market/sync') {
       try {
-        if (!env.DATABASE_URL) {
-          return new Response('DATABASE_URL secret is not set in environment', { status: 500 })
-        }
-
-        const sql = postgres(env.DATABASE_URL, { max: 1 })
-        const oppRepo = new PostgresMarketOpportunityRepository(sql)
-        const postRepo = new PostgresMarketPostingRepository(sql)
-        const modelStore = new PostgresMarketModelStore(sql)
-        const composedK = composeKnowledge(...PROMOTED_OPERATIONAL_KNOWLEDGE)
-        const recognizer = new DeclarativeMarketRecognizer(composedK)
-
-        const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
-        const feedService = new MarketFeedService(postRepo, engine)
-
-        const source = new GreenhousePublicSource('stripe', { maxSizeBytes: 10 * 1024 * 1024 })
-        const registration = {
-          id: 'stripe-board',
-          sourceType: 'greenhouse' as const,
-          source,
-          sourceBoardId: 'stripe',
-        }
-
-        const syncResult = await feedService.syncSource(registration, {
-          now: new Date().toISOString(),
-          marketKnowledgeVersion: composedK.version,
-          recognitionOrder: 100,
-        })
-
-        await sql.end()
-
-        return new Response(JSON.stringify({ status: 'ok', syncResult }), {
+        // CARD-027: periodic ingestion moved to GitHub Actions
+        // (.github/workflows/market-sync.yml) -- the Free-tier Worker's
+        // 10ms CPU budget can't fit the recognition+HTML-cleanup workload
+        // (observed ~2020ms median, 100% error rate). Running the same
+        // MarketIngestionEngine here too would be exactly the duplicate
+        // ingestion model CARD-027 forbids. Trigger a sync manually with
+        // `gh workflow run market-sync.yml` or from the Actions tab.
+        return new Response(JSON.stringify({
+          status: 'moved',
+          message: 'Market sync now runs via GitHub Actions (.github/workflows/market-sync.yml), not this Worker. Trigger with `gh workflow run market-sync.yml` or from the repo\'s Actions tab.',
+        }), {
+          status: 410,
           headers: { 'Content-Type': 'application/json' },
         })
       } catch (e) {
@@ -1830,42 +1810,10 @@ window.addEventListener('DOMContentLoaded', () => {
     return new Response('Not found', { status: 404 })
   },
 
-  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    if (!env.DATABASE_URL) {
-      console.error('[Cloudflare Cron] Cannot execute autonomous market sync: DATABASE_URL is not set.')
-      return
-    }
-
-    ctx.waitUntil(
-      (async () => {
-        const sql = postgres(env.DATABASE_URL!, { max: 1 })
-        const oppRepo = new PostgresMarketOpportunityRepository(sql)
-        const postRepo = new PostgresMarketPostingRepository(sql)
-        const modelStore = new PostgresMarketModelStore(sql)
-        const composedK = composeKnowledge(...PROMOTED_OPERATIONAL_KNOWLEDGE)
-        const recognizer = new DeclarativeMarketRecognizer(composedK)
-
-        const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
-        const feedService = new MarketFeedService(postRepo, engine)
-
-        const source = new GreenhousePublicSource('stripe', { maxSizeBytes: 10 * 1024 * 1024 })
-        const registration = {
-          id: 'stripe-board',
-          sourceType: 'greenhouse' as const,
-          source,
-          sourceBoardId: 'stripe',
-        }
-
-        const res = await feedService.syncSource(registration, {
-          now: new Date().toISOString(),
-          marketKnowledgeVersion: composedK.version,
-          recognitionOrder: 100,
-        })
-
-        console.log(`[Cloudflare Cron Auto-Sync Result]: ${JSON.stringify(res.ingestResult)}`)
-        await sql.end()
-      })()
-    )
-  },
+  // CARD-027: the scheduled() Cron handler was removed along with
+  // wrangler.jsonc's cron trigger -- periodic ingestion now runs via
+  // GitHub Actions (.github/workflows/market-sync.yml), which isn't bound
+  // by the Free-tier Worker's 10ms CPU limit. Keeping both would be the
+  // duplicate ingestion model CARD-027 forbids.
 }
 

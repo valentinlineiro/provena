@@ -11,15 +11,21 @@ import {
 } from '@provena/core'
 
 // CARD-023: validates the governance-to-runtime invariant from CARD-021 --
-// "runtime composition == promoted set" -- across the 6 production
+// "runtime composition == promoted set" -- across the production
 // knowledge-consumption points CARD-022 wired (both /api/opportunities/ingest
-// branches, /api/evaluate-url, /api/evaluate, /api/market/sync, and the Cron
-// scheduled handler). The Worker's fetch/scheduled handlers require Env
-// (KV/Postgres) to invoke directly, so this validates at the source level --
-// every DeclarativeMarketRecognizer construction site must route through
-// composeKnowledge(...PROMOTED_OPERATIONAL_KNOWLEDGE), with no non-promoted
-// pack literal reachable anywhere in the file -- plus a genuine runtime check
-// that the composition itself produces exactly the promoted patterns.
+// branches, /api/evaluate-url, /api/evaluate). The Worker's fetch handler
+// requires Env (KV/Postgres) to invoke directly, so this validates at the
+// source level -- every DeclarativeMarketRecognizer construction site must
+// route through composeKnowledge(...PROMOTED_OPERATIONAL_KNOWLEDGE), with no
+// non-promoted pack literal reachable anywhere in the file -- plus a genuine
+// runtime check that the composition itself produces exactly the promoted
+// patterns.
+//
+// CARD-027 removed 2 of the original 6 sites (/api/market/sync's own
+// ingestion and the Cron scheduled handler) -- periodic ingestion moved to
+// packages/market-postgres/src/sync-market.ts, outside the Worker's CPU
+// budget entirely, so those two constructions no longer exist here at all
+// rather than needing to route through the promoted set in this file.
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const indexSource = readFileSync(join(__dirname, 'index.ts'), 'utf-8')
@@ -27,7 +33,7 @@ const indexSource = readFileSync(join(__dirname, 'index.ts'), 'utf-8')
 test('every DeclarativeMarketRecognizer construction routes through composeKnowledge(...PROMOTED_OPERATIONAL_KNOWLEDGE)', () => {
   const recognizerCount = (indexSource.match(/new DeclarativeMarketRecognizer\(/g) ?? []).length
   const promotedComposeCount = (indexSource.match(/composeKnowledge\(\.\.\.PROMOTED_OPERATIONAL_KNOWLEDGE\)/g) ?? []).length
-  assert.ok(recognizerCount >= 6, `expected at least the 6 known production call sites, found ${recognizerCount}`)
+  assert.ok(recognizerCount >= 4, `expected at least the 4 known production call sites, found ${recognizerCount}`)
   assert.equal(
     recognizerCount,
     promotedComposeCount,

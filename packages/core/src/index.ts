@@ -76,6 +76,7 @@ export type { MarketPatternDefinition, MarketKnowledge, IMarketRecognizer } from
 export { DeclarativeMarketRecognizer, composeKnowledge } from './market-knowledge.js'
 export { DEFAULT_SOFTWARE_KNOWLEDGE, ADMIN_KNOWLEDGE, MLOPS_KNOWLEDGE, DATA_AGENTIC_KNOWLEDGE } from './default-knowledge.js'
 export { SYSTEMS_INFRA_KNOWLEDGE, FINTECH_PLATFORM_KNOWLEDGE, OCCUPATIONAL_CONTEXT_KNOWLEDGE } from './domain-knowledge.js'
+export { PROMOTED_OPERATIONAL_KNOWLEDGE } from './promoted-knowledge.js'
 
 export type { RawOpportunity, OpportunitySourceInput, OpportunitySource, SafeFetchOptions, StoredOpportunity, OpportunityUserDecision, GreenhouseJobItem, OpportunityRepository } from './opportunity-source.js'
 export { validateSafeUrl, fetchSafeContent, extractJobFromHtml, UrlOpportunitySource, GreenhousePublicSource, hashOpportunityKey, MemoryOpportunityRepository, reconcileBoardSync } from './opportunity-source.js'

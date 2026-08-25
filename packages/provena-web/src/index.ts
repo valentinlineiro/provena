@@ -21,6 +21,8 @@ import {
   DeclarativeMarketRecognizer,
   encodeBookmark,
   decodeBookmark,
+  deriveOpportunityDedupeKey,
+  assessOpportunityDescription,
 } from '@provena/core'
 import {
   PostgresMarketOpportunityRepository,
@@ -1670,37 +1672,10 @@ window.addEventListener('DOMContentLoaded', () => {
             })
 
             for (const rawOpp of fetchedRawJobs) {
-              const companyName = rawOpp.company ?? boardToken ?? 'Unknown'
-              const normalizedCompany = companyName.toLowerCase().replace(/[^a-z0-9]/g, '')
               const externalId = rawOpp.externalId ?? rawOpp.url
-              const oppDedupeKey = `opp-${normalizedCompany}-${externalId}`
-
-              const marketModel = recognizer.extractMarketRequirements(rawOpp.description)
-              const resolved = resolveRequirements(marketModel, profile)
-              const suffList = resolved.map(evaluateSufficiency)
-              const profFit = projectProfessionalFit(suffList)
-              const prefAssessments = assessPreferences(rawOpp.description, profile.preferences)
-              const persFit = projectPersonalFit(prefAssessments)
-              const recCov = computeRecognitionCoverage(rawOpp.description, marketModel)
-              const assessment = applyPolicy(profFit, persFit, recCov)
-
-              const tierNum = assessment.recommendation === 'strong-candidate' ? 4 :
-                              assessment.recommendation === 'consider' ? 3 :
-                              assessment.recommendation === 'abstain' ? 2 : 1
-
-              await assessmentRepo.saveAssessment({
-                opportunityId: oppDedupeKey,
-                profileId: 'valentin',
-                profileVersion: '1.0.0',
-                protocolVersion: 1,
-                marketKnowledgeVersion: 1,
-                recommendation: assessment.recommendation,
-                decisionTier: tierNum,
-                professionalFit: profFit.score,
-                personalFit: persFit.assessedCount > 0 ? persFit.score : 0,
-                confidence: assessment.confidence,
-                evaluatedAt: new Date().toISOString(),
-              })
+              const oppDedupeKey = deriveOpportunityDedupeKey(rawOpp.company, boardToken, externalId)
+              const record = assessOpportunityDescription(oppDedupeKey, rawOpp.description, profile, recognizer, new Date().toISOString())
+              await assessmentRepo.saveAssessment(record)
             }
 
             if (!env.PROVENA_KV) {

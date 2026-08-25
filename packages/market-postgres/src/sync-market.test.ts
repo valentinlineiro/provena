@@ -22,6 +22,12 @@ test('sync-market.ts exits non-zero on failure so GitHub Actions surfaces it', (
   assert.match(scriptSource, /process\.exit\(1\)/)
 })
 
+test('sync-market.ts materializes assessments via the shared on-demand contract, not a reimplementation (CARD-028)', () => {
+  assert.match(scriptSource, /assessOpportunityDescription\(/)
+  assert.match(scriptSource, /new PostgresMarketAssessmentRepository\(/)
+  assert.match(scriptSource, /affectedOpportunityIds/, 'should materialize assessments for what MarketFeedService reports as affected')
+})
+
 test('the GitHub Actions workflow exists and runs sync-market.ts on the same 6-hour cadence the Worker Cron used', () => {
   const workflowPath = join(import.meta.dirname, '../../../.github/workflows/market-sync.yml')
   assert.ok(existsSync(workflowPath), 'market-sync.yml workflow not found')

@@ -13,11 +13,15 @@ import {
   DeclarativeMarketRecognizer,
   composeKnowledge,
   PROMOTED_OPERATIONAL_KNOWLEDGE,
+  getEmbeddedProfile,
+  assessOpportunityDescription,
+  makeOpportunityId,
 } from '@provena/core'
 import {
   PostgresMarketOpportunityRepository,
   PostgresMarketPostingRepository,
   PostgresMarketModelStore,
+  PostgresMarketAssessmentRepository,
 } from './index.js'
 
 async function main() {
@@ -53,6 +57,31 @@ async function main() {
     })
 
     console.log(JSON.stringify(result.ingestResult, null, 2))
+
+    // CARD-028: materialize opportunity_assessments for every opportunity
+    // this run saw. affectedOpportunityIds (MarketFeedService) marks a
+    // posting affected whenever its lastSeenAt advances to this run's
+    // `now` -- which reconcilePostingStatus does for every currently-seen
+    // posting, not only new/content-changed ones (verified against
+    // production: a steady-state run with 0 newly-added/updated postings
+    // still returned all 584 as affected) -- so in practice this reassesses
+    // the full board each run, not a true content diff. Uses the one
+    // shared on-demand-assessment contract (assessOpportunityDescription)
+    // that /api/opportunities/ingest also calls, so "needs-attention" is
+    // decided identically regardless of which path ingested the item.
+    const assessmentRepo = new PostgresMarketAssessmentRepository(sql)
+    const profile = getEmbeddedProfile()
+    const assessedAt = new Date().toISOString()
+    let materialized = 0
+    for (const opportunityId of result.affectedOpportunityIds) {
+      const postings = await postRepo.listByOpportunity(makeOpportunityId(opportunityId))
+      const posting = postings[0]
+      if (!posting) continue
+      const record = assessOpportunityDescription(opportunityId, posting.rawDescription, profile, recognizer, assessedAt)
+      await assessmentRepo.saveAssessment(record)
+      materialized++
+    }
+    console.log(`Materialized ${materialized} assessment(s) for ${result.affectedOpportunityIds.length} affected opportunity(ies).`)
   } finally {
     await sql.end()
   }

@@ -1598,6 +1598,9 @@ window.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
         })
       } catch (e) {
+        // CARD-026: a backend failure (e.g. a missing table) must not be
+        // indistinguishable from a legitimately empty inbox -- it broke
+        // observability of the exact production gap CARD-025 found.
         return new Response(JSON.stringify({
           tab,
           counts: { 'needs-attention': 0, 'worth-considering': 0, 'unresolved': 0, 'decided': 0 },
@@ -1606,7 +1609,7 @@ window.addEventListener('DOMContentLoaded', () => {
           totalInTab: 0,
           error: e instanceof Error ? e.message : 'Failed to fetch opportunities',
         }), {
-          status: 200,
+          status: 500,
           headers: { 'Content-Type': 'application/json' },
         })
       }
@@ -1800,7 +1803,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
         const feedService = new MarketFeedService(postRepo, engine)
 
-        const source = new GreenhousePublicSource('stripe')
+        const source = new GreenhousePublicSource('stripe', { maxSizeBytes: 10 * 1024 * 1024 })
         const registration = {
           id: 'stripe-board',
           sourceType: 'greenhouse' as const,
@@ -1845,7 +1848,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const engine = new MarketIngestionEngine(oppRepo, postRepo, modelStore, recognizer)
         const feedService = new MarketFeedService(postRepo, engine)
 
-        const source = new GreenhousePublicSource('stripe')
+        const source = new GreenhousePublicSource('stripe', { maxSizeBytes: 10 * 1024 * 1024 })
         const registration = {
           id: 'stripe-board',
           sourceType: 'greenhouse' as const,

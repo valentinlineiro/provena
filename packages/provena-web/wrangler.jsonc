@@ -12,8 +12,5 @@
   ],
   "alias": {
     "node:test": "node_modules/@provena/core/src/compat.ts"
-  },
-  "triggers": {
-    "crons": ["0 */6 * * *"]
   }
 }

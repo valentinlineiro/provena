@@ -14,14 +14,25 @@ const indexSource = readFileSync(join(__dirname, 'index.ts'), 'utf-8')
 test('every GreenhousePublicSource construction raises maxSizeBytes above the 2MB default (regression for CARD-026 sync failure)', () => {
   // The default fetchSafeContent cap (2MB) is too small for a full
   // Greenhouse board listing with content=true -- Stripe's board alone is
-  // ~4.5MB. /api/opportunities/ingest already carried this fix; /api/market/sync
-  // and the Cron scheduled handler did not, which is why sync silently
-  // failed after the schema fix was applied.
+  // ~4.5MB. Only /api/opportunities/ingest (on-demand, single-board) still
+  // constructs this in the Worker after CARD-027 moved the periodic sync
+  // out to packages/market-postgres/src/sync-market.ts.
   const constructions = indexSource.match(/new GreenhousePublicSource\([^)]*\)/g) ?? []
-  assert.ok(constructions.length >= 3, `expected at least the 3 known construction sites, found ${constructions.length}`)
+  assert.equal(constructions.length, 1, `expected exactly the /api/opportunities/ingest construction site, found ${constructions.length}`)
   for (const call of constructions) {
     assert.match(call, /maxSizeBytes/, `${call} does not raise maxSizeBytes above the 2MB default`)
   }
+})
+
+test('the Worker no longer runs periodic ingestion itself (regression for CARD-027 duplicate-ingestion-model)', () => {
+  // CARD-027: periodic ingestion moved to GitHub Actions
+  // (.github/workflows/market-sync.yml) because the Worker's Free-tier
+  // 10ms CPU budget can't fit the recognition+HTML-cleanup workload
+  // (observed ~2020ms median, 100% error rate). Running the same
+  // MarketIngestionEngine on a schedule inside the Worker too would
+  // reintroduce the duplicate ingestion model CARD-027 forbids.
+  assert.ok(!/async scheduled\(/.test(indexSource), 'a scheduled() Cron handler must not reappear in the Worker')
+  assert.ok(!/new MarketFeedService\(/.test(indexSource), 'MarketFeedService must not be constructed in the Worker -- that is sync-market.ts\'s job now')
 })
 
 test('a backend failure in GET /api/opportunities returns a non-200 status (regression for CARD-025 silent-empty-inbox finding)', () => {

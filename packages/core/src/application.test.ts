@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createApplication, parseApplication, MemoryApplicationRepository, makeOpportunityId, transitionApplication, summarizeApplications } from './index.js'
+import { createApplication, parseApplication, MemoryApplicationRepository, makeOpportunityId, markApplied, transitionApplication, summarizeApplications } from './index.js'
 
 test('shouldPersistApplicationLinkedToOpportunityWhenMarkedApplied', async () => {
   const repo = new MemoryApplicationRepository()
@@ -65,4 +65,22 @@ test('shouldAnswerWhatIsOpenAndWhatIsNextWhenSummarizing', async () => {
   assert.deepEqual(summary.stale.map((s) => s.id), [a.id])
   assert.equal(summary.waitingOnMe.length, 2)
   assert.equal(summary.waitingOnCompany.length, 1)
+})
+
+test('shouldMoveReadyToAppliedAndStampDateWhenMarkApplied', () => {
+  const ready = createApplication({ platform: 'greenhouse', opportunityId: 'opp-1', status: 'ready' })
+  const done = markApplied(ready, '2026-10-02T09:00:00.000Z')
+  assert.equal(done.status, 'applied')
+  assert.equal(done.appliedAt, '2026-10-02T09:00:00.000Z')
+})
+test('shouldThrowWhenMarkAppliedFromNonReady', () => {
+  const applied = createApplication({ platform: 'greenhouse' })
+  assert.throws(() => markApplied(applied), /ready/)
+})
+test('shouldFindApplicationByOpportunityIdWhenSaved', async () => {
+  const repo = new MemoryApplicationRepository()
+  const a = createApplication({ platform: 'greenhouse', opportunityId: 'opp-9' })
+  await repo.save(a)
+  assert.equal((await repo.findByOpportunityId('opp-9'))?.id, a.id)
+  assert.equal(await repo.findByOpportunityId('nope'), undefined)
 })

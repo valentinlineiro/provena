@@ -76,6 +76,7 @@ export function createApplication(input: {
   url?: string
   notes?: string
   appliedAt?: string
+  status?: ApplicationStatus
 }): Application {
   return parseApplication({
     id: `app-${Date.now()}-${applicationSequence++}`,
@@ -84,7 +85,7 @@ export function createApplication(input: {
     ...(input.url ? { url: input.url } : {}),
     appliedAt: input.appliedAt ?? new Date().toISOString(),
     documents: {},
-    status: 'applied',
+    status: input.status ?? 'applied',
     ...(input.notes ? { notes: input.notes } : {}),
   })
 }
@@ -92,6 +93,7 @@ export function createApplication(input: {
 export interface ApplicationRepository {
   list(): Promise<readonly Application[]>
   save(application: Application): Promise<void>
+  findByOpportunityId(opportunityId: string): Promise<Application | undefined>
 }
 
 export class MemoryApplicationRepository implements ApplicationRepository {
@@ -103,6 +105,10 @@ export class MemoryApplicationRepository implements ApplicationRepository {
 
   async save(application: Application): Promise<void> {
     this.#applications.set(application.id, parseApplication(application))
+  }
+
+  async findByOpportunityId(opportunityId: string): Promise<Application | undefined> {
+    return [...this.#applications.values()].find((a) => a.opportunityId === opportunityId)
   }
 }
 
@@ -123,6 +129,11 @@ export function transitionApplication(application: Application, to: ApplicationS
     throw new Error(`cannot transition application from "${application.status}" to "${to}"`)
   }
   return { ...application, status: to }
+}
+
+export function markApplied(application: Application, nowIso: string = new Date().toISOString()): Application {
+  if (application.status !== 'ready') throw new Error(`cannot mark applied from "${application.status}": application must be ready`)
+  return { ...transitionApplication(application, 'applied'), appliedAt: nowIso }
 }
 
 const ACTIVE_STATUSES: ReadonlySet<ApplicationStatus> = new Set(['ready', 'applied', 'interviewing', 'offer'])

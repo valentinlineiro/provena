@@ -27,7 +27,6 @@ import {
   projectPersonalFit,
   applyPolicy,
 } from './opportunity.js'
-import { preferenceSetToLegacy } from './compat.js'
 
 export interface AssessmentContext {
   readonly userId: string
@@ -61,8 +60,7 @@ export class OpportunityAssessmentEngine {
     const professionalFit = projectProfessionalFit(sufficiencyList)
 
     // 2. K5B Personal Fit Resolution (using legacy adapter compatibility during transition)
-    const legacyPrefs = preferenceSetToLegacy(preferenceSet)
-    const preferenceAssessments = assessPreferences(candidate.rawDescription, legacyPrefs)
+    const preferenceAssessments = assessPreferences(candidate.rawDescription, preferenceSet)
     const personalFit = projectPersonalFit(preferenceAssessments)
 
     // 3. K6 Policy Application

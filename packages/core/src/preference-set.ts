@@ -107,7 +107,7 @@ export interface PreferenceConstraints {
 
   /**
    * O2 migration only — free-text avoid terms from legacy Preferences.avoid.
-   * Consumed by compat.ts adapter for K5B until K5B reads PreferenceSet directly.
+   * Consumed by the compat.ts adapter for the legacy evaluateOpportunity avoid check.
    * @deprecated Replace with structured excludedCompanies / excludedRoleFamilies.
    */
   readonly legacyAvoidTerms?: readonly string[]

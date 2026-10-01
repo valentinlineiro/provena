@@ -1,5 +1,6 @@
 import type { Profile } from './profile.js'
 import type { Preferences } from './types.js'
+import type { PreferenceSet } from './preference-set.js'
 import type { DecisionContext } from './cv-projector.js'
 import { extractMarketRequirements, type MarketModel } from './market.js'
 import type { IMarketRecognizer } from './market-knowledge.js'
@@ -729,7 +730,7 @@ export function projectProfessionalFit(
 
 // ---- K5B: Personal Fit Projection -----------------------------------------
 //
-// Invariant: assessPreferences and projectPersonalFit consume ONLY Preferences
+// Invariant: assessPreferences and projectPersonalFit consume ONLY PreferenceSet
 // and parsed JD attributes. They must NOT access the candidate Profile or any
 // K4 evidence. Personal Fit is orthogonal to Professional Fit.
 //
@@ -782,14 +783,18 @@ const PREFERENCE_SCORE: Record<PreferenceStatus, number | null> = {
   unknown:     null,   // excluded from score mean (same discipline as K5A)
 }
 
+// ponytail: behavior-preserving port to PreferenceSet. Only compensation.minimum and a
+// *required* remote work mode are read; compensation.preferred and preferred/hybrid
+// modes stay inert exactly as they were behind the legacy adapter. Adopting them is a
+// separate, visible change (it shifts materialized assessments).
 export function assessPreferences(
   jd: string,
-  prefs: Preferences | undefined,
+  prefs: PreferenceSet | undefined,
 ): readonly PreferenceAssessment[] {
   const assessments: PreferenceAssessment[] = []
 
   // ── Compensation ──────────────────────────────────────────────────────────
-  const min = prefs?.compensation?.minimum
+  const min = prefs?.targets.compensation?.minimum
   if (min !== undefined) {
     const salaries = extractSalaries(jd)
     if (salaries.length === 0) {
@@ -802,7 +807,6 @@ export function assessPreferences(
     } else {
       const eurSalaries = salaries.map(s => s.currency === 'USD' ? s.amount * 0.9 : s.amount)
       const floor = Math.min(...eurSalaries)
-      const preferred = (prefs as any)?.compensation?.preferred as number | undefined
       const displayFloor = `€${floor}`
 
       if (floor < min) {
@@ -811,13 +815,6 @@ export function assessPreferences(
           status: 'undesirable',
           eligibilityViolation: true,
           detail: `JD offers ${displayFloor}; below minimum €${min}`,
-        })
-      } else if (preferred !== undefined && floor >= preferred) {
-        assessments.push({
-          dimension: 'compensation',
-          status: 'preferred',
-          eligibilityViolation: false,
-          detail: `JD offers ${displayFloor}; meets preferred threshold €${preferred}`,
         })
       } else {
         assessments.push({
@@ -831,8 +828,8 @@ export function assessPreferences(
   }
 
   // ── Work Mode ─────────────────────────────────────────────────────────────
-  const remotePref = prefs?.work?.remote
-  if (remotePref !== undefined) {
+  const remoteRequired = prefs?.targets.workModes?.some((w) => w.mode === 'remote' && w.strength === 'required')
+  if (remoteRequired) {
     const parsed = parseWorkModeConstraint(jd)
     if (!parsed) {
       assessments.push({
@@ -841,7 +838,7 @@ export function assessPreferences(
         eligibilityViolation: false,
         detail: 'JD does not state work mode; not penalising',
       })
-    } else if (remotePref === 'required') {
+    } else {
       const isFullRemote = parsed.mode === 'remote' && parsed.remoteAvailability === 'full'
       assessments.push({
         dimension: 'work-mode',
@@ -850,26 +847,6 @@ export function assessPreferences(
         detail: isFullRemote
           ? `JD offers full remote: "${parsed.rawText}"`
           : `JD requires ${parsed.mode} (${parsed.rawText}); candidate requires remote`,
-      })
-    } else if (remotePref === 'hybrid') {
-      const acceptable = parsed.mode === 'remote' || parsed.mode === 'hybrid'
-      const isFullRemote = parsed.mode === 'remote' && parsed.remoteAvailability === 'full'
-      assessments.push({
-        dimension: 'work-mode',
-        status: isFullRemote ? 'preferred' : acceptable ? 'acceptable' : 'undesirable',
-        eligibilityViolation: !acceptable,
-        detail: acceptable
-          ? `JD allows ${parsed.mode}: "${parsed.rawText}"`
-          : `JD is on-site only: "${parsed.rawText}"; candidate requires at least hybrid`,
-      })
-    } else {
-      // 'optional' — any work mode is acceptable, fully remote is preferred
-      const isFullRemote = parsed.mode === 'remote' && parsed.remoteAvailability === 'full'
-      assessments.push({
-        dimension: 'work-mode',
-        status: isFullRemote ? 'preferred' : 'acceptable',
-        eligibilityViolation: false,
-        detail: `JD states ${parsed.mode} (${parsed.rawText}); preference is optional`,
       })
     }
   }

@@ -59,7 +59,7 @@ export class OpportunityAssessmentEngine {
     const sufficiencyList = resolved.map(r => evaluateSufficiency(r))
     const professionalFit = projectProfessionalFit(sufficiencyList)
 
-    // 2. K5B Personal Fit Resolution (using legacy adapter compatibility during transition)
+    // 2. K5B Personal Fit Resolution (assessPreferences reads the PreferenceSet natively)
     const preferenceAssessments = assessPreferences(candidate.rawDescription, preferenceSet)
     const personalFit = projectPersonalFit(preferenceAssessments)
 

@@ -10,7 +10,17 @@ import type { Preferences } from './types.js'
 export function preferenceSetToLegacy(ps: PreferenceSet): Preferences {
   const { targets, constraints } = ps
 
-  const roles = targets.roleFamilies?.length ? [...targets.roleFamilies] : undefined
+  // checkRoles matches JD titles against free-text role names, so family slugs
+  // alone ("software-engineering") miss JDs that never contain the word
+  // "engineering" (e.g. "Principal Solutions Engineer"). Emit level titles
+  // ("Principal Engineer") first for title-token matches, then family slugs
+  // for family-heavy JDs.
+  const levelTitles = (targets.roleLevels ?? [])
+    .filter((l) => l !== 'executive')
+    .map((l) => l.charAt(0).toUpperCase() + l.slice(1) + ' Engineer')
+  const roles = levelTitles.length || targets.roleFamilies?.length
+    ? [...levelTitles, ...(targets.roleFamilies ?? [])]
+    : undefined
 
   // Find required remote work mode if any
   const requiredRemote = targets.workModes?.find(

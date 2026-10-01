@@ -1,13 +1,20 @@
-// Generated from profiles/valentin — regenerate with command
+// Generated from profiles/valentin by `npm run profile:sync` — do not edit by hand.
 import type { Profile } from '@provena/core'
-export const updatedAt = '2026-07-30'
+export const updatedAt = '2026-10-01'
 export default {
   "identity": {
     "person": {
       "name": "Valentín Liñeiro Barea",
       "title": "Staff Software Engineer | Software Architecture | Developer Productivity | AI-Assisted Engineering",
       "summary": "Staff Software Engineer focused on software architecture, developer productivity, and AI-assisted engineering. I help teams evolve complex systems by reducing technical friction, modernizing architecture incrementally, and turning emerging technologies into practical engineering capabilities. I enjoy building tools and systems that make software development simpler, more reliable, and easier to maintain.",
-      "urls": {},
+      "email": "valentinlineiro@gmail.com",
+      "phone": "+34658996759",
+      "location": "Cádiz, Spain · Remote",
+      "availability": "15 days",
+      "urls": {
+        "linkedin": "https://www.linkedin.com/in/valentinlineiro/",
+        "github": "https://github.com/valentinlineiro"
+      },
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -139,7 +146,11 @@ export default {
         "AI-Assisted Engineering"
       ],
       "capabilityIds": [],
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-architecture-internal-systems",
+        "ev-dev-productivity",
+        "ev-ai-assisted-engineering"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -174,7 +185,10 @@ export default {
         "7c639d01-1906-417b-8b11-0252f80ee8b8",
         "dbda0e3e-2592-4f27-98f6-147d341a8fc8"
       ],
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-distributed-systems-prod",
+        "ev-backend-scale-40pct"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -201,7 +215,9 @@ export default {
       "capabilityIds": [
         "84f33db4-1a56-43ce-b04a-8db818a024c3"
       ],
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-legacy-migration-lead"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -231,7 +247,9 @@ export default {
       "capabilityIds": [
         "86791087-2d38-4f45-8e0c-bbc7b2521176"
       ],
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-research-knowledge-extraction"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -410,7 +428,9 @@ export default {
     {
       "id": "72e03a49-5880-401e-8aec-c1f6c0b21efd",
       "name": "Technical Leadership",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-legacy-migration-lead"
+      ],
       "signals": [
         "technical leadership",
         "technical direction",
@@ -481,7 +501,9 @@ export default {
     {
       "id": "aecf03a0-e35d-4b3a-aba9-aec91a862d5e",
       "name": "Fuzzy Logic",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-research-knowledge-extraction"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -490,7 +512,9 @@ export default {
     {
       "id": "4058c79d-0ba8-4a20-bfce-e4a8df5fd971",
       "name": "Knowledge Extraction",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-research-knowledge-extraction"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -517,7 +541,9 @@ export default {
     {
       "id": "49dd7b2b-0dc6-4d4a-86ba-5a409e0ac610",
       "name": "Developer Productivity",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-dev-productivity"
+      ],
       "signals": [
         "developer productivity",
         "developer experience",
@@ -535,7 +561,9 @@ export default {
     {
       "id": "7ab84b2f-5ef0-4619-8784-c700f27c2694",
       "name": "AI-Assisted Engineering",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-ai-assisted-engineering"
+      ],
       "signals": [
         "ai-assisted engineering",
         "ai-assisted development",
@@ -556,7 +584,10 @@ export default {
     {
       "id": "420b07b6-c49e-43ee-a409-f569e60378ab",
       "name": "Software Architecture",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-architecture-internal-systems",
+        "ev-legacy-migration-lead"
+      ],
       "signals": [
         "software architecture",
         "system architecture",
@@ -600,7 +631,10 @@ export default {
     {
       "id": "5cdea70c-e1b8-4699-abec-cbc326ba0ab1",
       "name": "Distributed Systems",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-distributed-systems-prod",
+        "ev-backend-scale-40pct"
+      ],
       "signals": [
         "distributed systems",
         "distributed architecture",
@@ -619,7 +653,9 @@ export default {
     {
       "id": "dbda0e3e-2592-4f27-98f6-147d341a8fc8",
       "name": "Cloud-Native Architecture",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-distributed-systems-prod"
+      ],
       "signals": [
         "cloud-native",
         "cloud-native platform",
@@ -764,7 +800,9 @@ export default {
     {
       "id": "de7e9885-3680-46db-8497-822bacae9ac1",
       "name": "Microservices",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "ev-distributed-systems-prod"
+      ],
       "provenance": {
         "source": "linkedin",
         "importedAt": "2026-07-30T07:42:17.425Z"
@@ -1158,7 +1196,50 @@ export default {
       }
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-distributed-systems-prod",
+      "type": "experience",
+      "description": "Built and operated distributed microservices in production (Spring Boot, Kafka, Docker, Kubernetes, Azure) across multiple consulting clients.",
+      "date": "2025-10"
+    },
+    {
+      "id": "ev-backend-scale-40pct",
+      "type": "experience",
+      "description": "Designed scalable backend services with Java, Spring Boot, Kafka and MongoDB, improving system capacity by 40%.",
+      "date": "2025-10"
+    },
+    {
+      "id": "ev-legacy-migration-lead",
+      "type": "experience",
+      "description": "Led migration of a legacy CRM/SFA to Spring Boot and Angular while leading a frontend team and driving backend architecture decisions.",
+      "date": "2021-06"
+    },
+    {
+      "id": "ev-architecture-internal-systems",
+      "type": "experience",
+      "description": "Design internal systems improving how engineering teams build, review, onboard and deliver software; architecture decisions reducing technical friction in a 4G network core product.",
+      "date": "2026-01"
+    },
+    {
+      "id": "ev-dev-productivity",
+      "type": "experience",
+      "description": "Turn developer workflows (review, onboarding, delivery) into internal tooling that gives engineering teams more leverage.",
+      "date": "2026-01"
+    },
+    {
+      "id": "ev-ai-assisted-engineering",
+      "type": "experience",
+      "description": "Apply AI-assisted engineering in daily practice: architecture modernization and developer tooling with LLM-based workflows.",
+      "date": "2026-01"
+    },
+    {
+      "id": "ev-research-knowledge-extraction",
+      "type": "experience",
+      "description": "Published research on knowledge extraction and Fuzzy Formal Concept Analysis with the UCASE group (Universidad de Cádiz).",
+      "date": "2015-12"
+    }
+  ],
   "contributions": [
     {
       "id": "summa-clean-architecture",
@@ -1262,26 +1343,65 @@ export default {
     "roles": [
       "Staff Engineer",
       "Principal Engineer",
-      "Tech Lead"
+      "software-engineering",
+      "ai-engineering"
     ],
     "work": {
       "remote": "required"
     },
     "compensation": {
       "minimum": 80000,
-      "currency": "€"
+      "currency": "EUR"
     },
     "avoid": [
       "Maintenance-only roles",
       "Legacy system migrations without modernization roadmap",
       "Six-round interview processes"
-    ],
-    "interests": [
-      "Software Architecture",
-      "Developer Productivity",
-      "AI-Assisted Engineering",
-      "Distributed Systems",
-      "Platform Engineering"
     ]
+  },
+  "preferenceSet": {
+    "targets": {
+      "roleFamilies": [
+        "software-engineering",
+        "ai-engineering"
+      ],
+      "roleLevels": [
+        "staff",
+        "principal"
+      ],
+      "workModes": [
+        {
+          "mode": "remote",
+          "strength": "required"
+        }
+      ],
+      "geographies": [
+        {
+          "continent": "Europe"
+        }
+      ],
+      "languages": [
+        {
+          "code": "es",
+          "proficiency": "native"
+        },
+        {
+          "code": "en",
+          "proficiency": "fluent"
+        }
+      ],
+      "compensation": {
+        "minimum": 80000,
+        "currency": "EUR"
+      }
+    },
+    "constraints": {
+      "visaSponsorshipRequired": true,
+      "legacyAvoidTerms": [
+        "Maintenance-only roles",
+        "Legacy system migrations without modernization roadmap",
+        "Six-round interview processes"
+      ]
+    }
   }
 } satisfies Profile

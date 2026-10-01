@@ -99,6 +99,7 @@ export type {
   PreferenceConstraints,
   PreferenceSet,
 } from './preference-set.js'
+export { preferenceSetToLegacy } from './compat.js'
 
 export type {
   RetrievalTreatment,
@@ -181,7 +182,7 @@ export type {
   NextActionItem,
   ApplicationSummary,
 } from './application.js'
-export { parseApplication, createApplication, MemoryApplicationRepository, transitionApplication, summarizeApplications } from './application.js'
+export { parseApplication, createApplication, MemoryApplicationRepository, transitionApplication, summarizeApplications, APPLICATION_STATUSES, APPLICATION_PLATFORMS } from './application.js'
 
 // ── Verdict Quality Benchmark Fixtures ─────────────────────────────
 export type { GroundTruthOpportunity } from './fixtures/verdict-ground-truth.js'

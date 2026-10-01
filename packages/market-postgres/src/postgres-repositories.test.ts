@@ -88,9 +88,9 @@ test('PostgresMarketAssessmentRepository and PostgresUserDecisionRepository data
     assert.equal(decision, 'interested')
 
     // Upsert decision
-    await decisionRepo.setDecision('opp-test-1', 'applied', 'valentin')
+    await decisionRepo.setDecision('opp-test-1', 'interested', 'valentin')
     const updatedDecision = await decisionRepo.getDecision('opp-test-1', 'valentin')
-    assert.equal(updatedDecision, 'applied')
+    assert.equal(updatedDecision, 'interested')
   } finally {
     await sql.end()
   }

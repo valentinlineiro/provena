@@ -82,7 +82,6 @@ test('shouldPreferApplicationOverDismissedWhenBothPresent', () => {
 })
 ```
 
-(Fix the stray `)` in the first test when typing — `assert.equal(..., 'new')` only.)
 
 - [ ] **Step 2: Run to verify it fails**
 

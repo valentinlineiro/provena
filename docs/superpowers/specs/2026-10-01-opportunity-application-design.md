@@ -37,7 +37,8 @@ Precedence (first match wins):
 ## Persistence
 - KV `applications` blob reused; no new store.
 - Postgres decision repo rejects `'applied'`.
-- **Backfill: measure first.** Query prod for `user_decision='applied'`.
+- **Backfill: measured 2026-10-01 — none required.** Neon `user_opportunity_decisions`: 0 rows; KV `applications` key absent. KV `opportunities_memory` holds 2 stale `applied` decisions (Stripe SA roles, `updatedAt` ~600ms apart, scripted-looking); production reads decisions from Postgres, so they are inert residue and left untouched.
+- Original plan (superseded by the measurement above): **measure first.** Query prod for `user_decision='applied'`.
   - 0 rows → no migration.
   - N rows → one-off script, only after checking decision timestamp exists and no matching Application exists (re-run safe: skip when `findByOpportunityId` hits).
 

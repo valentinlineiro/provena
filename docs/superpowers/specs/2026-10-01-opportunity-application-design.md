@@ -34,6 +34,11 @@ Precedence (first match wins):
 - `Application.appliedAt` is unset while `ready` and stamped by `markApplied`; no `decidedAt` until a need appears.
 - `ApplicationRepository` gains `findByOpportunityId`.
 
+## Stores and contract
+- Decision source: Postgres when `DATABASE_URL` is set, else KV fallback. Application store: KV only (`applications` key).
+- `PROVENA_KV` is therefore **required** for `POST /api/opportunities/decide` (503 otherwise), because the Application cannot be persisted without it. Postgres-backed deployments must also bind KV; `applications-postgres.test.ts` provisions both.
+- Deciding to apply promotes a `new`/`seen` decision to `interested` (commitment to apply implies consideration), so the opportunity leaves the attention tabs. Pinned by `shouldPersistInterestedDecisionWhenDecidingFromNew`.
+
 ## Persistence
 - KV `applications` blob reused; no new store.
 - Postgres decision repo rejects `'applied'`.

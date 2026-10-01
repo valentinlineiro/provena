@@ -1,25 +1,18 @@
 import type { OpportunityId } from './market-catalog.js'
 
-export type ApplicationPlatform =
-  | 'greenhouse'
-  | 'lever'
-  | 'ashby'
-  | 'workday'
-  | 'linkedin'
-  | 'company-site'
-  | 'referral'
-  | 'recruiter'
-  | 'other'
+export const APPLICATION_PLATFORMS = [
+  'greenhouse', 'lever', 'ashby', 'workday', 'linkedin',
+  'company-site', 'referral', 'recruiter', 'other',
+] as const
 
-export type ApplicationStatus =
-  | 'ready'
-  | 'applied'
-  | 'interviewing'
-  | 'offer'
-  | 'rejected'
-  | 'withdrawn'
-  | 'ghosted'
-  | 'closed'
+export type ApplicationPlatform = (typeof APPLICATION_PLATFORMS)[number]
+
+export const APPLICATION_STATUSES = [
+  'ready', 'applied', 'interviewing', 'offer',
+  'rejected', 'withdrawn', 'ghosted', 'closed',
+] as const
+
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number]
 
 export type ApplicationOutcome = 'accepted' | 'rejected' | 'withdrawn' | 'ghosted'
 
@@ -42,15 +35,9 @@ export interface Application {
   readonly notes?: string
 }
 
-const VALID_PLATFORMS: ReadonlySet<string> = new Set<string>([
-  'greenhouse', 'lever', 'ashby', 'workday', 'linkedin',
-  'company-site', 'referral', 'recruiter', 'other',
-])
+const VALID_PLATFORMS: ReadonlySet<string> = new Set<string>(APPLICATION_PLATFORMS)
 
-const VALID_STATUSES: ReadonlySet<string> = new Set<string>([
-  'ready', 'applied', 'interviewing', 'offer',
-  'rejected', 'withdrawn', 'ghosted', 'closed',
-])
+const VALID_STATUSES: ReadonlySet<string> = new Set<string>(APPLICATION_STATUSES)
 
 export function parseApplication(raw: unknown): Application {
   if (!raw || typeof raw !== 'object') throw new Error('application: expected an object')

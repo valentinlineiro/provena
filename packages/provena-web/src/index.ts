@@ -23,6 +23,11 @@ import {
   decodeBookmark,
   deriveOpportunityDedupeKey,
   assessOpportunityDescription,
+  createApplication,
+  transitionApplication,
+  summarizeApplications,
+  APPLICATION_STATUSES,
+  APPLICATION_PLATFORMS,
 } from '@provena/core'
 import {
   PostgresMarketOpportunityRepository,
@@ -34,11 +39,13 @@ import {
   PostgresObservationSourceRepository,
 } from '@provena/market-postgres'
 import postgres from 'postgres'
-import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab } from '@provena/core'
+import type { CVContext, CVProjection, OpportunityUserDecision, AttentionTab, ApplicationStatus } from '@provena/core'
 import { MarkdownResumeRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import profile, { updatedAt } from './profile.js'
 import { KvOpportunityRepository } from './kv-opportunity-repository.js'
+import { KvApplicationRepository } from './kv-application-repository.js'
+import { APPLICATIONS_PAGE, KIT_PAGE } from './application-pages.js'
 
 const TIMELINE = profileToTimeline(profile, updatedAt)
 
@@ -1637,6 +1644,86 @@ window.addEventListener('DOMContentLoaded', () => {
         return new Response('ok', { status: 200 })
       } catch (e) {
         return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
+    if (request.method === 'GET' && url.pathname === '/applications') {
+      return new Response(APPLICATIONS_PAGE, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+
+    if (request.method === 'GET' && url.pathname === '/kit') {
+      return new Response(KIT_PAGE, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/applications') {
+      const applications = env.PROVENA_KV
+        ? await new KvApplicationRepository(env.PROVENA_KV).list()
+        : []
+      return new Response(JSON.stringify({
+        applications,
+        summary: summarizeApplications(applications),
+        statuses: APPLICATION_STATUSES,
+        platforms: APPLICATION_PLATFORMS,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/applications') {
+      try {
+        if (!env.PROVENA_KV) return new Response('PROVENA_KV is not configured', { status: 503 })
+        const body = (await request.json()) as Record<string, unknown>
+        const application = createApplication({
+          platform: String(body.platform ?? ''),
+          ...(typeof body.url === 'string' && body.url ? { url: body.url } : {}),
+          ...(typeof body.notes === 'string' && body.notes ? { notes: body.notes } : {}),
+          ...(typeof body.opportunityId === 'string' && body.opportunityId ? { opportunityId: body.opportunityId } : {}),
+        })
+        await new KvApplicationRepository(env.PROVENA_KV).save(application)
+        return new Response(JSON.stringify({ application }), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/applications/update') {
+      try {
+        if (!env.PROVENA_KV) return new Response('PROVENA_KV is not configured', { status: 503 })
+        const body = (await request.json()) as {
+          id?: string
+          status?: string
+          nextAction?: string
+          nextActionDue?: string
+        }
+        if (!body.id) return new Response('Missing id', { status: 400 })
+        const repository = new KvApplicationRepository(env.PROVENA_KV)
+        const applications = await repository.list()
+        const current = applications.find((a) => a.id === body.id)
+        if (!current) return new Response('Application not found', { status: 404 })
+
+        let updated = current
+        if (body.status !== undefined) {
+          if (body.status === current.status) return new Response(JSON.stringify({ application: current }), { headers: { 'Content-Type': 'application/json' } })
+          updated = transitionApplication(updated, body.status as ApplicationStatus)
+        }
+        updated = {
+          ...updated,
+          ...(body.nextAction !== undefined ? { nextAction: body.nextAction || undefined } : {}),
+          ...(body.nextActionDue !== undefined ? { nextActionDue: body.nextActionDue || undefined } : {}),
+        }
+        await repository.save(updated)
+        return new Response(JSON.stringify({ application: updated }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 409 })
       }
     }
 

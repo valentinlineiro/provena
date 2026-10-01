@@ -1,4 +1,4 @@
-export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportunities' | 'sources', navClass = 'site'): string {
+export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportunities' | 'sources' | 'applications', navClass = 'site'): string {
   const link = (label: string, href: string, active: boolean) =>
     '<a' + (active ? ' class="active"' : '') + ' href="' + href + '">' + label + '</a>'
   const sections = [
@@ -6,6 +6,7 @@ export function siteNav(section: 'story' | 'prepare' | 'evaluate' | 'opportuniti
     { label: 'Identity', href: '/cv', id: 'prepare' as const },
     { label: 'Sources', href: '/sources', id: 'sources' as const },
     { label: 'Inbox', href: '/opportunities', id: 'opportunities' as const },
+    { label: 'Applications', href: '/applications', id: 'applications' as const },
   ]
   return (
     '<nav class="' + navClass + '">' +
@@ -36,7 +37,7 @@ export const THEME_INIT_SCRIPT =
   '}catch(e){}})()</script>'
 
 export function renderAppShell(
-  section: 'story' | 'prepare' | 'evaluate' | 'opportunities' | 'sources',
+  section: 'story' | 'prepare' | 'evaluate' | 'opportunities' | 'sources' | 'applications',
   pageHeaderHtml: string,
   pageContentHtml: string
 ): string {

@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import yaml from 'js-yaml'
 import type { WorkspaceLoader, Profile } from '@provena/core'
-import { validate, formatValidationErrors } from '@provena/core'
+import { validate, formatValidationErrors, preferenceSetToLegacy } from '@provena/core'
 import {
   parsePerson,
   parseExperiences,
@@ -74,8 +74,13 @@ export class YamlWorkspaceLoader implements WorkspaceLoader {
     const capabilities = parseCapabilities((await loadYaml<unknown>(join(path, 'capabilities.yaml'))) ?? [])
     const evidence = parseEvidence((await loadYaml<unknown>(join(path, 'evidence.yaml'))) ?? [])
     const rawPrefs = await loadYaml<unknown>(join(path, 'preferences.yaml'))
-    const preferences = parsePreferences(rawPrefs)
     const preferenceSet = parsePreferenceSet(rawPrefs)
+    // Structured PreferenceSet files would otherwise be cast into the legacy
+    // Preferences shape (roles/work/compensation all undefined), silently
+    // disabling legacy evaluation criteria — derive legacy instead.
+    const preferences = preferenceSet
+      ? preferenceSetToLegacy(preferenceSet)
+      : parsePreferences(rawPrefs)
     const contributions = parseContributions((await loadYaml<unknown>(join(path, 'contributions.yaml'))) ?? [])
 
     const profile: Profile = {

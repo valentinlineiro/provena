@@ -138,9 +138,9 @@ test('required workMode does NOT appear in hardExclusions', () => {
 // Import directly (not via index) — compat is internal to core
 import { preferenceSetToLegacy } from './compat.js'
 
-test('preferenceSetToLegacy forwards roleFamilies as roles', () => {
+test('preferenceSetToLegacy maps roleLevels and roleFamilies into legacy roles', () => {
   const legacy = preferenceSetToLegacy(staffEngineerPreferences)
-  assert.deepEqual(legacy.roles, ['software-engineering', 'ai-engineering'])
+  assert.deepEqual(legacy.roles, ['Staff Engineer', 'Principal Engineer', 'software-engineering', 'ai-engineering'])
 })
 
 test('preferenceSetToLegacy converts required remote workMode to legacy required', () => {

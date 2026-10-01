@@ -110,6 +110,7 @@ export interface Person {
   readonly title?: string
   readonly summary?: string
   readonly urls: Record<string, string>
+  readonly availability?: string
   readonly provenance?: Provenance
 }
 

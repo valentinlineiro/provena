@@ -15,7 +15,10 @@
     - "4G Network Core"
     - "AI-Assisted Engineering"
   capabilityIds: []
-  evidenceIds: []
+  evidenceIds:
+    - ev-architecture-internal-systems
+    - ev-dev-productivity
+    - ev-ai-assisted-engineering
   provenance: &ref_0
     source: linkedin
     importedAt: '2026-07-30T07:42:17.425Z'
@@ -54,7 +57,9 @@
     - 995557c1-b741-4e9b-bdfb-4e34dbf55989
     - 7c639d01-1906-417b-8b11-0252f80ee8b8
     - dbda0e3e-2592-4f27-98f6-147d341a8fc8
-  evidenceIds: []
+  evidenceIds:
+    - ev-distributed-systems-prod
+    - ev-backend-scale-40pct
   provenance: *ref_0
 - id: 406503ae-63be-46e4-b7a1-c22f1bc473a8
   organization: VINCLE
@@ -78,7 +83,8 @@
     - "Legacy Migration"
   capabilityIds:
     - 84f33db4-1a56-43ce-b04a-8db818a024c3
-  evidenceIds: []
+  evidenceIds:
+    - ev-legacy-migration-lead
   provenance: *ref_0
 - id: 7b6efa67-f0db-459c-a110-3ae58d6236a8
   organization: Universidad de Cádiz
@@ -105,7 +111,8 @@
     - "Knowledge Extraction"
   capabilityIds:
     - 86791087-2d38-4f45-8e0c-bbc7b2521176
-  evidenceIds: []
+  evidenceIds:
+    - ev-research-knowledge-extraction
   provenance: *ref_0
 - id: 477ec0bc-1636-4f5e-9923-1bd2316efffc
   organization: Universidad de Cádiz

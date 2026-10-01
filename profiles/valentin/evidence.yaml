@@ -1,1 +1,43 @@
-[]
+- id: ev-distributed-systems-prod
+  type: experience
+  description: >-
+    Built and operated distributed microservices in production (Spring Boot,
+    Kafka, Docker, Kubernetes, Azure) across multiple consulting clients.
+  date: '2025-10'
+- id: ev-backend-scale-40pct
+  type: experience
+  description: >-
+    Designed scalable backend services with Java, Spring Boot, Kafka and
+    MongoDB, improving system capacity by 40%.
+  date: '2025-10'
+- id: ev-legacy-migration-lead
+  type: experience
+  description: >-
+    Led migration of a legacy CRM/SFA to Spring Boot and Angular while
+    leading a frontend team and driving backend architecture decisions.
+  date: '2021-06'
+- id: ev-architecture-internal-systems
+  type: experience
+  description: >-
+    Design internal systems improving how engineering teams build, review,
+    onboard and deliver software; architecture decisions reducing technical
+    friction in a 4G network core product.
+  date: '2026-01'
+- id: ev-dev-productivity
+  type: experience
+  description: >-
+    Turn developer workflows (review, onboarding, delivery) into internal
+    tooling that gives engineering teams more leverage.
+  date: '2026-01'
+- id: ev-ai-assisted-engineering
+  type: experience
+  description: >-
+    Apply AI-assisted engineering in daily practice: architecture
+    modernization and developer tooling with LLM-based workflows.
+  date: '2026-01'
+- id: ev-research-knowledge-extraction
+  type: experience
+  description: >-
+    Published research on knowledge extraction and Fuzzy Formal Concept
+    Analysis with the UCASE group (Universidad de Cádiz).
+  date: '2015-12'

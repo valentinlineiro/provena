@@ -10,7 +10,8 @@
   provenance: *ref_0
 - id: 72e03a49-5880-401e-8aec-c1f6c0b21efd
   name: Technical Leadership
-  evidenceIds: []
+  evidenceIds:
+    - ev-legacy-migration-lead
   signals:
     - technical leadership
     - technical direction
@@ -49,11 +50,13 @@
   provenance: *ref_0
 - id: aecf03a0-e35d-4b3a-aba9-aec91a862d5e
   name: Fuzzy Logic
-  evidenceIds: []
+  evidenceIds:
+    - ev-research-knowledge-extraction
   provenance: *ref_0
 - id: 4058c79d-0ba8-4a20-bfce-e4a8df5fd971
   name: Knowledge Extraction
-  evidenceIds: []
+  evidenceIds:
+    - ev-research-knowledge-extraction
   provenance: *ref_0
 - id: 8ec73bea-4eaf-4574-b250-5c47b7cb038b
   name: Legacy Systems
@@ -65,7 +68,8 @@
   provenance: *ref_0
 - id: 49dd7b2b-0dc6-4d4a-86ba-5a409e0ac610
   name: Developer Productivity
-  evidenceIds: []
+  evidenceIds:
+    - ev-dev-productivity
   signals:
     - developer productivity
     - developer experience
@@ -77,7 +81,8 @@
   provenance: *ref_0
 - id: 7ab84b2f-5ef0-4619-8784-c700f27c2694
   name: AI-Assisted Engineering
-  evidenceIds: []
+  evidenceIds:
+    - ev-ai-assisted-engineering
   signals:
     - ai-assisted engineering
     - ai-assisted development
@@ -92,7 +97,9 @@
   provenance: *ref_0
 - id: 420b07b6-c49e-43ee-a409-f569e60378ab
   name: Software Architecture
-  evidenceIds: []
+  evidenceIds:
+    - ev-architecture-internal-systems
+    - ev-legacy-migration-lead
   signals:
     - software architecture
     - system architecture
@@ -119,7 +126,9 @@
   provenance: *ref_0
 - id: 5cdea70c-e1b8-4699-abec-cbc326ba0ab1
   name: Distributed Systems
-  evidenceIds: []
+  evidenceIds:
+    - ev-distributed-systems-prod
+    - ev-backend-scale-40pct
   signals:
     - distributed systems
     - distributed architecture
@@ -132,7 +141,8 @@
   provenance: *ref_0
 - id: dbda0e3e-2592-4f27-98f6-147d341a8fc8
   name: Cloud-Native Architecture
-  evidenceIds: []
+  evidenceIds:
+    - ev-distributed-systems-prod
   signals:
     - cloud-native
     - cloud-native platform
@@ -203,7 +213,8 @@
   provenance: *ref_0
 - id: de7e9885-3680-46db-8497-822bacae9ac1
   name: Microservices
-  evidenceIds: []
+  evidenceIds:
+    - ev-distributed-systems-prod
   provenance: *ref_0
 - id: 84f33db4-1a56-43ce-b04a-8db818a024c3
   name: REST APIs

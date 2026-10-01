@@ -38,7 +38,7 @@ export type {
 export { resumeProjector, recruiterProjector } from './projections.js'
 
 export type { ResumeBuildOptions } from './projections.js'
-export { buildResumeModel } from './projections.js'
+export { buildResumeModel, topTechnologies } from './projections.js'
 
 export type {
   DecisionContext,
@@ -165,6 +165,23 @@ export { encodeBookmark, decodeBookmark } from './opportunity-bookmark.js'
 // ── O2.8: Market Feed Service ────────────────────────────────────────
 export type { FeedSourceRegistration, DeltaSyncResult } from './market-feed-service.js'
 export { MarketFeedService } from './market-feed-service.js'
+
+// ── Application Kit (Day 2: copy-paste projection for application forms) ──
+export type { ApplicationKitModel } from './application-kit.js'
+export { buildApplicationKit, applicationKitProjector } from './application-kit.js'
+
+// ── Application (Day 3: what I did about an opportunity) ──────────────
+export type {
+  ApplicationPlatform,
+  ApplicationStatus,
+  ApplicationOutcome,
+  ApplicationDocuments,
+  Application,
+  ApplicationRepository,
+  NextActionItem,
+  ApplicationSummary,
+} from './application.js'
+export { parseApplication, createApplication, MemoryApplicationRepository, transitionApplication, summarizeApplications } from './application.js'
 
 // ── Verdict Quality Benchmark Fixtures ─────────────────────────────
 export type { GroundTruthOpportunity } from './fixtures/verdict-ground-truth.js'

@@ -10,7 +10,7 @@ function resolve<T extends { id: string }>(ids: readonly string[], items: readon
   return ids.map((id) => map.get(id)).filter((x): x is T => x !== undefined)
 }
 
-function topTechnologies(experiences: readonly Experience[]): string[] {
+export function topTechnologies(experiences: readonly Experience[]): string[] {
   const freq = new Map<string, number>()
   for (const e of experiences) {
     for (const t of e.technologies) {

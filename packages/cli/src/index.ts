@@ -5,16 +5,16 @@ import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import yaml from 'js-yaml'
 import { LinkedInImporter } from '@provena/linkedin-import'
-import { cvProjector, validate, formatValidationErrors, recruiterProjector } from '@provena/core'
+import { cvProjector, validate, formatValidationErrors, recruiterProjector, applicationKitProjector, createApplication, transitionApplication, summarizeApplications } from '@provena/core'
 import { jsonResumeProjector, jsonResumeRenderer } from '@provena/jsonresume'
 import { linkedInProjector, linkedInRenderer } from '@provena/linkedin'
-import { YamlWorkspaceLoader, YamlWorkspaceWriter, merge } from '@provena/yaml'
-import { MarkdownResumeRenderer, RecruiterBriefRenderer } from '@provena/markdown'
+import { YamlWorkspaceLoader, YamlWorkspaceWriter, YamlApplicationStore, merge } from '@provena/yaml'
+import { MarkdownResumeRenderer, RecruiterBriefRenderer, ApplicationKitRenderer } from '@provena/markdown'
 import { HtmlResumeRenderer } from '@provena/html'
 import { cmdInit } from './init.js'
 import { startServer } from './serve.js'
 import { runLandingReview, runLandingAccept } from './commands/landing.js'
-import type { Profile } from '@provena/core'
+import type { Profile, ApplicationStatus } from '@provena/core'
 
 async function cmdImportLinkedin(
   zipPath: string,
@@ -102,6 +102,11 @@ const FORMAT_REGISTRY: Record<string, FormatEntry> = {
     render: (m) => new RecruiterBriefRenderer().render(m as never),
     ext: 'recruiter.md',
   },
+  kit: {
+    project: (p) => applicationKitProjector.project(p),
+    render: (m) => new ApplicationKitRenderer().render(m as never),
+    ext: 'kit.md',
+  },
 }
 
 const [, , command, ...args] = process.argv
@@ -112,6 +117,10 @@ function help(stream: NodeJS.WriteStream = process.stdout): void {
 Usage:
   provena render <workspace> [options]
   provena validate <workspace>
+  provena apply <workspace> --platform <platform> [options]
+  provena applications <workspace>
+  provena update <workspace> <app-id> [--status <status>] [--next-action <text>] [--due <YYYY-MM-DD>]
+  provena dashboard <workspace>
   provena init <workspace>
   provena add [<text>] [--workspace <path>]
   provena serve [--workspace <path>] [--port <number>]
@@ -122,6 +131,10 @@ Usage:
 Commands:
   render    Generate output from a workspace
   validate  Check workspace integrity
+  apply     Record an application (explicit mark-applied)
+  applications  List recorded applications
+  update    Move an application (status / next action)
+  dashboard Show active search: next actions, stale, waiting
   init      Guided setup of a new workspace
   add       Capture something quickly
   serve     Start capture web interface
@@ -213,6 +226,74 @@ async function cmdValidate(path: string): Promise<void> {
   const loader = new YamlWorkspaceLoader()
   await loader.load(path)
   console.log('✓ Workspace is valid')
+}
+
+async function cmdApply(path: string, opts: { platform: string; url?: string; opportunity?: string; notes?: string }): Promise<void> {
+  const store = new YamlApplicationStore()
+  const applications = await store.load(path)
+  const application = createApplication({
+    platform: opts.platform,
+    ...(opts.opportunity ? { opportunityId: opts.opportunity } : {}),
+    ...(opts.url ? { url: opts.url } : {}),
+    ...(opts.notes ? { notes: opts.notes } : {}),
+  })
+  applications.push(application)
+  await store.save(path, applications)
+  console.log(`✓ Applied (${application.id}) — ${application.platform} — ${application.appliedAt}`)
+}
+
+async function cmdUpdate(path: string, id: string, opts: { status?: string; nextAction?: string; due?: string }): Promise<void> {
+  const store = new YamlApplicationStore()
+  const applications = await store.load(path)
+  const index = applications.findIndex((a) => a.id === id)
+  if (index === -1) err(`No application with id "${id}".`)
+  let updated = applications[index]!
+  if (opts.status) {
+    updated = transitionApplication(updated, opts.status as ApplicationStatus)
+  }
+  if (opts.nextAction !== undefined) {
+    updated = { ...updated, nextAction: opts.nextAction || undefined }
+  }
+  if (opts.due !== undefined) {
+    updated = { ...updated, nextActionDue: opts.due || undefined }
+  }
+  applications[index] = updated
+  await store.save(path, applications)
+  console.log(`✓ ${updated.id} → ${updated.status}${updated.nextAction ? ` — next: ${updated.nextAction}${updated.nextActionDue ? ` (due ${updated.nextActionDue})` : ''}` : ''}`)
+}
+
+async function cmdDashboard(path: string): Promise<void> {
+  const store = new YamlApplicationStore()
+  const summary = summarizeApplications(await store.load(path))
+
+  console.log('ACTIVE SEARCH')
+  console.log(`  ${summary.active.length} open  (${summary.waitingOnMe.length} waiting on me, ${summary.waitingOnCompany.length} waiting on company)`)
+  console.log('')
+
+  console.log('NEXT ACTIONS')
+  if (summary.nextActions.length === 0) console.log('  (none)')
+  for (const n of summary.nextActions) {
+    console.log(`  → ${n.action} [${n.platform}]${n.due ? ` — due ${n.due}` : ''}`)
+  }
+  console.log('')
+
+  console.log('STALE (>21d applied, no movement)')
+  if (summary.stale.length === 0) console.log('  (none)')
+  for (const s of summary.stale) {
+    console.log(`  ! ${s.id} [${s.platform}] applied ${s.appliedAt.split('T')[0]}`)
+  }
+}
+
+async function cmdApplications(path: string): Promise<void> {
+  const store = new YamlApplicationStore()
+  const applications = await store.load(path)
+  if (applications.length === 0) {
+    console.log('No applications yet.')
+    return
+  }
+  for (const a of applications) {
+    console.log(`- ${a.id} [${a.status}] ${a.platform}${a.opportunityId ? ` → ${a.opportunityId}` : ''} (${a.appliedAt.split('T')[0]})${a.url ? ` ${a.url}` : ''}`)
+  }
 }
 
 async function cmdAdd(path: string, text?: string): Promise<void> {
@@ -393,6 +474,55 @@ if (command === 'render') {
   } else {
     err(`Unknown landing command: "${subcommand}". Available: review, accept`)
   }
+} else if (command === 'apply') {
+  const path = args[0]
+  if (!path || path.startsWith('--')) err('Missing workspace path.', 'Usage: provena apply <workspace> --platform <platform> [--url <url>] [--opportunity <id>] [--notes <text>]')
+  let platform: string | undefined
+  let url: string | undefined
+  let opportunity: string | undefined
+  let notes: string | undefined
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--platform') platform = args[++i]
+    else if (args[i] === '--url') url = args[++i]
+    else if (args[i] === '--opportunity') opportunity = args[++i]
+    else if (args[i] === '--notes') notes = args[++i]
+  }
+  if (!platform) err('Missing --platform.', 'Platforms: greenhouse | lever | ashby | workday | linkedin | company-site | referral | recruiter | other')
+  try {
+    await cmdApply(path, { platform: platform!, ...(url ? { url } : {}), ...(opportunity ? { opportunity } : {}), ...(notes ? { notes } : {}) })
+  } catch (e) {
+    err(e instanceof Error ? e.message : String(e))
+  }
+} else if (command === 'applications') {
+  const path = args[0] ?? '.'
+  try { await cmdApplications(path) }
+  catch (e) { err(e instanceof Error ? e.message : String(e)) }
+} else if (command === 'update') {
+  const path = args[0]
+  const id = args[1]
+  if (!path || !id || path.startsWith('--') || id.startsWith('--')) {
+    err('Usage: provena update <workspace> <app-id> [--status <status>] [--next-action <text>] [--due <YYYY-MM-DD>]')
+  }
+  let status: string | undefined
+  let nextAction: string | undefined
+  let due: string | undefined
+  for (let i = 2; i < args.length; i++) {
+    if (args[i] === '--status') status = args[++i]
+    else if (args[i] === '--next-action') nextAction = args[++i]
+    else if (args[i] === '--due') due = args[++i]
+  }
+  if (!status && nextAction === undefined && due === undefined) {
+    err('Nothing to update.', 'Use --status, --next-action or --due')
+  }
+  try {
+    await cmdUpdate(path, id, { ...(status ? { status } : {}), ...(nextAction !== undefined ? { nextAction } : {}), ...(due !== undefined ? { due } : {}) })
+  } catch (e) {
+    err(e instanceof Error ? e.message : String(e))
+  }
+} else if (command === 'dashboard') {
+  const path = args[0] ?? '.'
+  try { await cmdDashboard(path) }
+  catch (e) { err(e instanceof Error ? e.message : String(e)) }
 } else {
-  err(`Unknown command: "${command}"`, 'Available commands: render, validate, init, landing')
+  err(`Unknown command: "${command}"`, 'Available commands: render, validate, init, landing, apply, applications, update, dashboard')
 }

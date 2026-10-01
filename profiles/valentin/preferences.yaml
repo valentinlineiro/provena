@@ -1,19 +1,26 @@
-roles:
-  - Staff Engineer
-  - Principal Engineer
-  - Tech Lead
-work:
-  remote: required
-compensation:
-  minimum: 80000
-  currency: €
-avoid:
-  - Maintenance-only roles
-  - Legacy system migrations without modernization roadmap
-  - Six-round interview processes
-interests:
-  - Software Architecture
-  - Developer Productivity
-  - AI-Assisted Engineering
-  - Distributed Systems
-  - Platform Engineering
+targets:
+  roleFamilies:
+    - software-engineering
+    - ai-engineering
+  roleLevels:
+    - staff
+    - principal
+  geographies:
+    - continent: Europe
+  workModes:
+    - mode: remote
+      strength: required
+  languages:
+    - code: es
+      proficiency: native
+    - code: en
+      proficiency: fluent
+  compensation:
+    minimum: 80000
+    currency: EUR
+constraints:
+  visaSponsorshipRequired: true
+  legacyAvoidTerms:
+    - Maintenance-only roles
+    - Legacy system migrations without modernization roadmap
+    - Six-round interview processes

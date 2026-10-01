@@ -101,3 +101,58 @@ test('POST /api/applications/update returns 404 for an unknown application', asy
   const res = await jsonPost('/api/applications/update', { id: 'app-missing', status: 'interviewing' }, kvEnv())
   assert.equal(res.status, 404)
 })
+
+const seedOpportunity = async (env: any, id = 'opp-1', userDecision = 'new') =>
+  env.PROVENA_KV.put('opportunities_memory', JSON.stringify({ opportunities: [{ id, userDecision, raw: { url: 'https://x.example/1', title: 'Eng', source: 'greenhouse', description: '' }, evaluation: {} }] }))
+
+test('shouldRunFullChainWhenOpportunityDecidedThenApplied', async () => {
+  const env = kvEnv()
+  await seedOpportunity(env)
+
+  const decided = await jsonPost('/api/opportunities/decide', { id: 'opp-1', platform: 'greenhouse' }, env)
+  assert.equal(decided.status, 201)
+  const { application } = await decided.json() as any
+  assert.equal(application.status, 'ready')
+  assert.equal(application.opportunityId, 'opp-1')
+
+  const applied = await jsonPost('/api/applications/update', { id: application.id, status: 'applied' }, env)
+  const body = await applied.json() as any
+  assert.equal(body.application.status, 'applied')
+
+  const listed = await (await worker.fetch(new Request('https://provena.example/api/applications'), env)).json() as any
+  assert.equal(listed.applications.length, 1)
+  assert.equal(listed.applications[0].status, 'applied')
+})
+
+test('shouldReturnSameApplicationWhenDecideCalledTwice', async () => {
+  const env = kvEnv(); await seedOpportunity(env)
+  const a = await (await jsonPost('/api/opportunities/decide', { id: 'opp-1', platform: 'greenhouse' }, env)).json() as any
+  const bRes = await jsonPost('/api/opportunities/decide', { id: 'opp-1', platform: 'greenhouse' }, env)
+  assert.equal(bRes.status, 200)
+  assert.equal((await bRes.json() as any).application.id, a.application.id)
+  const listed = await (await worker.fetch(new Request('https://provena.example/api/applications'), env)).json() as any
+  assert.equal(listed.applications.length, 1)
+})
+
+test('shouldReturn404WhenDecidingUnknownOpportunity', async () => {
+  const res = await jsonPost('/api/opportunities/decide', { id: 'nope', platform: 'greenhouse' }, kvEnv())
+  assert.equal(res.status, 404)
+})
+
+test('shouldReturn409WhenDecidingDismissedOpportunity', async () => {
+  const env = kvEnv(); await seedOpportunity(env, 'opp-1', 'dismissed')
+  assert.equal((await jsonPost('/api/opportunities/decide', { id: 'opp-1', platform: 'greenhouse' }, env)).status, 409)
+})
+
+test('shouldReturn409WhenCreatingSecondApplicationForSameOpportunity', async () => {
+  const env = kvEnv(); await seedOpportunity(env)
+  await jsonPost('/api/opportunities/decide', { id: 'opp-1', platform: 'greenhouse' }, env)
+  assert.equal((await jsonPost('/api/applications', { platform: 'greenhouse', opportunityId: 'opp-1' }, env)).status, 409)
+})
+
+test('shouldPersistInterestedDecisionWhenDecidingFromNew', async () => {
+  const env = kvEnv(); await seedOpportunity(env)
+  await jsonPost('/api/opportunities/decide', { id: 'opp-1', platform: 'greenhouse' }, env)
+  const stored = await (env as any).PROVENA_KV.get('opportunities_memory', 'json') as any
+  assert.equal(stored.opportunities[0].userDecision, 'interested')
+})

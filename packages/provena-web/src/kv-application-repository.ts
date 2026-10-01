@@ -30,4 +30,8 @@ export class KvApplicationRepository implements ApplicationRepository {
     else all.push(application)
     await this.kv.put(KV_KEY, JSON.stringify({ applications: all }))
   }
+
+  async findByOpportunityId(opportunityId: string): Promise<Application | undefined> {
+    return (await this.readAll()).find((a) => a.opportunityId === opportunityId)
+  }
 }

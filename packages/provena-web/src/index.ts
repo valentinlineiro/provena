@@ -24,6 +24,9 @@ import {
   deriveOpportunityDedupeKey,
   assessOpportunityDescription,
   createApplication,
+  decideToApply,
+  deriveOpportunityStage,
+  markApplied,
   transitionApplication,
   summarizeApplications,
   APPLICATION_STATUSES,
@@ -66,6 +69,40 @@ const COMPASS_HTML = (() => {
 interface Env {
   PROVENA_KV: KVNamespace
   DATABASE_URL?: string
+}
+
+async function persistDecision(env: Env, id: string, decision: OpportunityUserDecision): Promise<void> {
+  if (env.DATABASE_URL) {
+    const sql = postgres(env.DATABASE_URL, { max: 1 })
+    try {
+      await new PostgresUserDecisionRepository(sql).setDecision(id, decision, 'valentin')
+    } finally {
+      await sql.end()
+    }
+  }
+  if (env.PROVENA_KV) await new KvOpportunityRepository(env.PROVENA_KV).updateDecision(id, decision)
+}
+
+// Resolves {assessed, decision} for one opportunity; null when the opportunity is unknown.
+async function resolveOpportunityState(
+  env: Env,
+  id: string,
+): Promise<{ assessed: boolean; decision: OpportunityUserDecision } | null> {
+  if (env.DATABASE_URL) {
+    const sql = postgres(env.DATABASE_URL, { max: 1 })
+    try {
+      const rows = await sql<Array<{ d: string | null }>>`
+        SELECT d.user_decision AS d FROM current_opportunity_assessments a
+        LEFT JOIN user_opportunity_decisions d ON d.opportunity_id = a.opportunity_id AND d.user_id = 'valentin'
+        WHERE a.opportunity_id = ${id} AND a.profile_id = 'valentin' LIMIT 1`
+      if (rows.length === 0) return null
+      return { assessed: true, decision: (rows[0]!.d ?? 'new') as OpportunityUserDecision }
+    } finally {
+      await sql.end()
+    }
+  }
+  const opp = env.PROVENA_KV ? await new KvOpportunityRepository(env.PROVENA_KV).findById(id) : null
+  return opp ? { assessed: true, decision: opp.userDecision } : null
 }
 
 interface Capture {
@@ -1628,22 +1665,37 @@ window.addEventListener('DOMContentLoaded', () => {
         const body = (await request.json()) as { id?: string; decision?: OpportunityUserDecision }
         if (!body.id || !body.decision) return new Response('Missing id or decision', { status: 400 })
 
-        if (env.DATABASE_URL) {
-          const sql = postgres(env.DATABASE_URL, { max: 1 })
-          try {
-            const decisionRepo = new PostgresUserDecisionRepository(sql)
-            await decisionRepo.setDecision(body.id, body.decision, 'valentin')
-          } finally {
-            await sql.end()
-          }
-        }
-
-        if (env.PROVENA_KV) {
-          await new KvOpportunityRepository(env.PROVENA_KV).updateDecision(body.id, body.decision)
-        }
+        await persistDecision(env, body.id, body.decision)
         return new Response('ok', { status: 200 })
       } catch (e) {
         return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 400 })
+      }
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/opportunities/decide') {
+      try {
+        if (!env.PROVENA_KV) return new Response('PROVENA_KV is not configured', { status: 503 })
+        const body = (await request.json()) as { id?: string; platform?: string; url?: string }
+        if (!body.id) return new Response('Missing id', { status: 400 })
+        const base = await resolveOpportunityState(env, body.id)
+        if (!base) return new Response('Opportunity not found', { status: 404 })
+        const repository = new KvApplicationRepository(env.PROVENA_KV)
+        const existing = await repository.findByOpportunityId(body.id)
+        const application = decideToApply(
+          { ...base, ...(existing ? { application: existing } : {}) },
+          { opportunityId: body.id, platform: body.platform ?? 'other', ...(body.url ? { url: body.url } : {}) },
+        )
+        const created = application !== existing
+        if (created) {
+          await repository.save(application)
+          if (base.decision === 'new' || base.decision === 'seen') await persistDecision(env, body.id, 'interested')
+        }
+        return new Response(JSON.stringify({ application, stage: deriveOpportunityStage({ ...base, application }) }), {
+          status: created ? 201 : 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(e instanceof Error ? e.message : 'Invalid request', { status: 409 })
       }
     }
 
@@ -1677,6 +1729,10 @@ window.addEventListener('DOMContentLoaded', () => {
       try {
         if (!env.PROVENA_KV) return new Response('PROVENA_KV is not configured', { status: 503 })
         const body = (await request.json()) as Record<string, unknown>
+        if (typeof body.opportunityId === 'string' && body.opportunityId &&
+            await new KvApplicationRepository(env.PROVENA_KV).findByOpportunityId(body.opportunityId)) {
+          return new Response('An application already exists for this opportunity', { status: 409 })
+        }
         const application = createApplication({
           platform: String(body.platform ?? ''),
           ...(typeof body.url === 'string' && body.url ? { url: body.url } : {}),
@@ -1711,7 +1767,9 @@ window.addEventListener('DOMContentLoaded', () => {
         let updated = current
         if (body.status !== undefined) {
           if (body.status === current.status) return new Response(JSON.stringify({ application: current }), { headers: { 'Content-Type': 'application/json' } })
-          updated = transitionApplication(updated, body.status as ApplicationStatus)
+          updated = body.status === 'applied' && updated.status === 'ready'
+            ? markApplied(updated)
+            : transitionApplication(updated, body.status as ApplicationStatus)
         }
         updated = {
           ...updated,

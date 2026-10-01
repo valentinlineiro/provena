@@ -156,3 +156,10 @@ test('shouldPersistInterestedDecisionWhenDecidingFromNew', async () => {
   const stored = await (env as any).PROVENA_KV.get('opportunities_memory', 'json') as any
   assert.equal(stored.opportunities[0].userDecision, 'interested')
 })
+
+test('shouldOfferDecideAndMarkAppliedInsteadOfLegacyApplyWhenRenderingInbox', async () => {
+  const html = await (await worker.fetch(new Request('https://provena.example/opportunities'), {} as never)).text()
+  assert.ok(!html.includes("'applied')"))
+  assert.ok(html.includes('Decide to apply'))
+  assert.ok(html.includes('Mark applied'))
+})

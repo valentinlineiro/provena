@@ -1384,7 +1384,11 @@ async function loadTab(reset = false) {
         '<td>' + item.evidenceCoverage + '</td>' +
         '<td><div class="btn-group">' +
         '<button class="' + (item.userDecision === 'interested' ? 'active' : '') + '" title="Save" onclick="setDecision(\\'' + item.id + '\\', \\'interested\\')">⭐ Save</button>' +
-        '<button class="' + (item.userDecision === 'applied' ? 'active' : '') + '" title="Apply" onclick="setDecision(\\'' + item.id + '\\', \\'applied\\')">✓ Apply</button>' +
+        (item.stage === 'evaluated' || item.stage === 'considered'
+          ? '<button title="Decide to apply" onclick="decideToApply(\\'' + item.id + '\\')">Decide to apply</button>'
+          : item.stage === 'decided'
+            ? '<button class="active" title="Mark applied" onclick="markApplied(\\'' + item.applicationId + '\\')">Mark applied</button>'
+            : '<span class="badge ' + item.stage + '">' + item.stage + '</span>') +
         '<button class="' + (item.userDecision === 'dismissed' ? 'active' : '') + '" title="Dismiss" onclick="setDecision(\\'' + item.id + '\\', \\'dismissed\\')">✗ Dismiss</button>' +
         '</div></td>'
       rows.appendChild(tr)
@@ -1418,6 +1422,16 @@ async function syncBoard() {
     body: JSON.stringify({ boardToken }),
   })
   if (!res.ok) { container.innerHTML = '<p class="meta">Sync failed: ' + await res.text() + '</p>'; return }
+  switchTab(currentTab)
+}
+
+async function decideToApply(id) {
+  await fetch('/api/opportunities/decide', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, platform: 'other' }) })
+  switchTab(currentTab)
+}
+
+async function markApplied(applicationId) {
+  await fetch('/api/applications/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: applicationId, status: 'applied' }) })
   switchTab(currentTab)
 }
 
@@ -1503,6 +1517,10 @@ window.addEventListener('DOMContentLoaded', () => {
               if (tier === 3) return 'worth-considering'
               return 'unresolved'
             }
+            const appsByOpp = new Map(
+              (env.PROVENA_KV ? await new KvApplicationRepository(env.PROVENA_KV).list() : [])
+                .filter((a) => a.opportunityId).map((a) => [a.opportunityId as string, a]),
+            )
             const items = pageItems.map(r => ({
               id: r.id,
               title: r.title,
@@ -1514,6 +1532,12 @@ window.addEventListener('DOMContentLoaded', () => {
               personalFit: typeof r.personalFit === 'number' ? r.personalFit.toFixed(1) : '—',
               evidenceCoverage: typeof r.confidence === 'number' ? Math.round(r.confidence * 100) + '%' : '—',
               userDecision: r.userDecision || 'new',
+              stage: deriveOpportunityStage({
+                assessed: true,
+                decision: (r.userDecision || 'new') as OpportunityUserDecision,
+                ...(appsByOpp.get(r.id) ? { application: appsByOpp.get(r.id)! } : {}),
+              }),
+              applicationId: appsByOpp.get(r.id)?.id,
             }))
 
             const lastItem = pageItems[pageItems.length - 1]

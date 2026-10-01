@@ -163,3 +163,11 @@ test('shouldOfferDecideAndMarkAppliedInsteadOfLegacyApplyWhenRenderingInbox', as
   assert.ok(html.includes('Decide to apply'))
   assert.ok(html.includes('Mark applied'))
 })
+
+test('shouldReturn400WhenSettingLegacyAppliedDecision', async () => {
+  const env = kvEnv(); await seedOpportunity(env)
+  const res = await jsonPost('/api/opportunities/decision', { id: 'opp-1', decision: 'applied' }, env)
+  assert.equal(res.status, 400)
+  const stored = await (env as any).PROVENA_KV.get('opportunities_memory', 'json') as any
+  assert.equal(stored.opportunities[0].userDecision, 'new')
+})

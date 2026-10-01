@@ -22,6 +22,7 @@ export class KvApplicationRepository implements ApplicationRepository {
     return this.readAll()
   }
 
+  // ponytail: read-modify-write on one KV blob; concurrent saves can drop a write. Single-user today; add versioned CAS if that changes.
   async save(application: Application): Promise<void> {
     if (!this.kv) return
     const all = await this.readAll()

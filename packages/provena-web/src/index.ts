@@ -71,6 +71,8 @@ interface Env {
   DATABASE_URL?: string
 }
 
+const USER_DECISIONS: readonly OpportunityUserDecision[] = ['new', 'seen', 'interested', 'dismissed']
+
 async function persistDecision(env: Env, id: string, decision: OpportunityUserDecision): Promise<void> {
   if (env.DATABASE_URL) {
     const sql = postgres(env.DATABASE_URL, { max: 1 })
@@ -1688,6 +1690,7 @@ window.addEventListener('DOMContentLoaded', () => {
       try {
         const body = (await request.json()) as { id?: string; decision?: OpportunityUserDecision }
         if (!body.id || !body.decision) return new Response('Missing id or decision', { status: 400 })
+        if (!USER_DECISIONS.includes(body.decision)) return new Response('Invalid decision', { status: 400 })
 
         await persistDecision(env, body.id, body.decision)
         return new Response('ok', { status: 200 })

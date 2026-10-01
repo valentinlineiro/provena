@@ -84,3 +84,13 @@ test('shouldFindApplicationByOpportunityIdWhenSaved', async () => {
   assert.equal((await repo.findByOpportunityId('opp-9'))?.id, a.id)
   assert.equal(await repo.findByOpportunityId('nope'), undefined)
 })
+
+test('shouldLeaveAppliedAtUnsetWhenApplicationIsReady', () => {
+  const ready = createApplication({ platform: 'greenhouse', opportunityId: 'opp-1', status: 'ready' })
+  assert.equal(ready.appliedAt, undefined)
+  assert.equal(parseApplication(ready).appliedAt, undefined)
+})
+test('shouldRejectApplicationWhenAppliedWithoutAppliedAt', () => {
+  const { appliedAt: _, ...noDate } = createApplication({ platform: 'greenhouse' })
+  assert.throws(() => parseApplication(noDate), /appliedAt/)
+})

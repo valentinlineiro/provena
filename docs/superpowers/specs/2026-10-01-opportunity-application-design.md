@@ -30,7 +30,8 @@ Precedence (first match wins):
   - stage `dismissed` | `new` → throws (not decidable).
 - `markApplied(app)` — `transitionApplication(app,'applied')` + sets `appliedAt`; only valid from `ready`.
 - `createApplication` gains optional `status` (default `applied`, unchanged).
-- Invariant: at most one Application per `opportunityId`.
+- Invariant (domain rule): at most one Application per `opportunityId`. Storage guarantee: sequential only — the KV blob is read-modify-write, so concurrent decides can race. Accepted debt while single-user (`ponytail:` comment in `KvApplicationRepository.save`); fix with versioned CAS if that changes.
+- `Application.appliedAt` is unset while `ready` and stamped by `markApplied`; no `decidedAt` until a need appears.
 - `ApplicationRepository` gains `findByOpportunityId`.
 
 ## Persistence

@@ -186,7 +186,7 @@ function render(data) {
       'onchange="updateApplication(\'' + esc(a.id) + '\', {nextAction: this.value})"></td>' +
       '<td><input type="date" value="' + esc(a.nextActionDue) + '" ' +
       'onchange="updateApplication(\'' + esc(a.id) + '\', {nextActionDue: this.value})"></td>' +
-      '<td>' + esc(String(a.appliedAt).slice(0, 10)) + '</td>' +
+      '<td>' + esc(a.appliedAt ? String(a.appliedAt).slice(0, 10) : '—') + '</td>' +
       '</tr>'
     ).join('') +
     '</tbody></table>'

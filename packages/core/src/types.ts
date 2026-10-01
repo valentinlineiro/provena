@@ -124,7 +124,7 @@ export interface Capture {
 /**
  * @deprecated Use PreferenceSet from preference-set.ts instead.
  * Retained for YAML workspace compatibility during O2 migration.
- * Remove when the YAML loader and K5B consume PreferenceSet directly.
+ * Remove when the YAML loader, evaluateOpportunity, projections and cv-projector consume PreferenceSet directly.
  */
 export interface Preferences {
   readonly roles?: readonly string[]

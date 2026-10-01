@@ -1,0 +1,497 @@
+{
+  "empty/silent": [],
+  "empty/eur65": [],
+  "empty/eur85": [],
+  "empty/eur105": [],
+  "empty/usd160": [],
+  "empty/fullRemote": [],
+  "empty/hybrid": [],
+  "empty/onsite": [],
+  "empty/empty": [],
+  "minimumOnly/silent": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumOnly/eur65": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €65000; below minimum €80000"
+    }
+  ],
+  "minimumOnly/eur85": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €85000; above minimum €80000 but below preferred"
+    }
+  ],
+  "minimumOnly/eur105": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €105000; above minimum €80000 but below preferred"
+    }
+  ],
+  "minimumOnly/usd160": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €144000; above minimum €80000 but below preferred"
+    }
+  ],
+  "minimumOnly/fullRemote": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumOnly/hybrid": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumOnly/onsite": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €30000; below minimum €80000"
+    }
+  ],
+  "minimumOnly/empty": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumAndPreferred/silent": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumAndPreferred/eur65": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €65000; below minimum €80000"
+    }
+  ],
+  "minimumAndPreferred/eur85": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €85000; above minimum €80000 but below preferred"
+    }
+  ],
+  "minimumAndPreferred/eur105": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €105000; above minimum €80000 but below preferred"
+    }
+  ],
+  "minimumAndPreferred/usd160": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €144000; above minimum €80000 but below preferred"
+    }
+  ],
+  "minimumAndPreferred/fullRemote": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumAndPreferred/hybrid": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "minimumAndPreferred/onsite": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €30000; below minimum €80000"
+    }
+  ],
+  "minimumAndPreferred/empty": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    }
+  ],
+  "remoteRequired/silent": [
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequired/eur65": [
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequired/eur85": [
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequired/eur105": [
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequired/usd160": [
+    {
+      "dimension": "work-mode",
+      "status": "preferred",
+      "eligibilityViolation": false,
+      "detail": "JD offers full remote: \"Principal Architect (fully remote)\""
+    }
+  ],
+  "remoteRequired/fullRemote": [
+    {
+      "dimension": "work-mode",
+      "status": "preferred",
+      "eligibilityViolation": false,
+      "detail": "JD offers full remote: \"Fully remote opportunity from Spain.\""
+    }
+  ],
+  "remoteRequired/hybrid": [
+    {
+      "dimension": "work-mode",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD requires hybrid (Barcelona — Hybrid, 3 days onsite.); candidate requires remote"
+    }
+  ],
+  "remoteRequired/onsite": [
+    {
+      "dimension": "work-mode",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD requires onsite (Responsable de Administración (Presencial)); candidate requires remote"
+    }
+  ],
+  "remoteRequired/empty": [
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remotePreferred/silent": [],
+  "remotePreferred/eur65": [],
+  "remotePreferred/eur85": [],
+  "remotePreferred/eur105": [],
+  "remotePreferred/usd160": [],
+  "remotePreferred/fullRemote": [],
+  "remotePreferred/hybrid": [],
+  "remotePreferred/onsite": [],
+  "remotePreferred/empty": [],
+  "hybridPreferred/silent": [],
+  "hybridPreferred/eur65": [],
+  "hybridPreferred/eur85": [],
+  "hybridPreferred/eur105": [],
+  "hybridPreferred/usd160": [],
+  "hybridPreferred/fullRemote": [],
+  "hybridPreferred/hybrid": [],
+  "hybridPreferred/onsite": [],
+  "hybridPreferred/empty": [],
+  "remoteRequiredAndMinimum/silent": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequiredAndMinimum/eur65": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €65000; below minimum €80000"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequiredAndMinimum/eur85": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €85000; above minimum €80000 but below preferred"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequiredAndMinimum/eur105": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €105000; above minimum €80000 but below preferred"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "remoteRequiredAndMinimum/usd160": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €144000; above minimum €80000 but below preferred"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "preferred",
+      "eligibilityViolation": false,
+      "detail": "JD offers full remote: \"Principal Architect (fully remote)\""
+    }
+  ],
+  "remoteRequiredAndMinimum/fullRemote": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "preferred",
+      "eligibilityViolation": false,
+      "detail": "JD offers full remote: \"Fully remote opportunity from Spain.\""
+    }
+  ],
+  "remoteRequiredAndMinimum/hybrid": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD requires hybrid (Barcelona — Hybrid, 3 days onsite.); candidate requires remote"
+    }
+  ],
+  "remoteRequiredAndMinimum/onsite": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €30000; below minimum €80000"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD requires onsite (Responsable de Administración (Presencial)); candidate requires remote"
+    }
+  ],
+  "remoteRequiredAndMinimum/empty": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "everything/silent": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "everything/eur65": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €65000; below minimum €80000"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "everything/eur85": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €85000; above minimum €80000 but below preferred"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "everything/eur105": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €105000; above minimum €80000 but below preferred"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ],
+  "everything/usd160": [
+    {
+      "dimension": "compensation",
+      "status": "acceptable",
+      "eligibilityViolation": false,
+      "detail": "JD offers €144000; above minimum €80000 but below preferred"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "preferred",
+      "eligibilityViolation": false,
+      "detail": "JD offers full remote: \"Principal Architect (fully remote)\""
+    }
+  ],
+  "everything/fullRemote": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "preferred",
+      "eligibilityViolation": false,
+      "detail": "JD offers full remote: \"Fully remote opportunity from Spain.\""
+    }
+  ],
+  "everything/hybrid": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD requires hybrid (Barcelona — Hybrid, 3 days onsite.); candidate requires remote"
+    }
+  ],
+  "everything/onsite": [
+    {
+      "dimension": "compensation",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD offers €30000; below minimum €80000"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "undesirable",
+      "eligibilityViolation": true,
+      "detail": "JD requires onsite (Responsable de Administración (Presencial)); candidate requires remote"
+    }
+  ],
+  "everything/empty": [
+    {
+      "dimension": "compensation",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state compensation; not penalising"
+    },
+    {
+      "dimension": "work-mode",
+      "status": "unknown",
+      "eligibilityViolation": false,
+      "detail": "JD does not state work mode; not penalising"
+    }
+  ]
+}

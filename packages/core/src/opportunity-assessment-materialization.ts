@@ -52,7 +52,7 @@ export function assessOpportunityDescription(
   const resolved = resolveRequirements(marketModel, profile)
   const sufficiencyList = resolved.map(evaluateSufficiency)
   const professionalFit = projectProfessionalFit(sufficiencyList)
-  const preferenceAssessments = assessPreferences(description, profile.preferences)
+  const preferenceAssessments = assessPreferences(description, profile.preferenceSet)
   const personalFit = projectPersonalFit(preferenceAssessments)
   const recognitionCoverage = computeRecognitionCoverage(description, marketModel)
   const assessment = applyPolicy(professionalFit, personalFit, recognitionCoverage)

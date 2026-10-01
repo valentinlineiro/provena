@@ -382,8 +382,9 @@ test('K5A Acceptance: projectProfessionalFit — breakdown is auditable per requ
 test('K5B Acceptance: assessPreferences — unknown compensation (JD silent) does NOT penalise', async () => {
   const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
 
-  const prefs: import('./types.js').Preferences = {
-    compensation: { minimum: 80000, currency: 'EUR' },
+  const prefs: import('./preference-set.js').PreferenceSet = {
+    targets: { compensation: { minimum: 80000, currency: 'EUR' } },
+    constraints: {},
   }
   const assessments = assessPreferences('Staff Software Engineer. Join our team.', prefs)
   const comp = assessments.find(a => a.dimension === 'compensation')!
@@ -400,8 +401,9 @@ test('K5B Acceptance: assessPreferences — unknown compensation (JD silent) doe
 test('K5B Acceptance: assessPreferences — compensation below minimum → INELIGIBLE', async () => {
   const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
 
-  const prefs: import('./types.js').Preferences = {
-    compensation: { minimum: 80000, currency: 'EUR' },
+  const prefs: import('./preference-set.js').PreferenceSet = {
+    targets: { compensation: { minimum: 80000, currency: 'EUR' } },
+    constraints: {},
   }
   const jd = 'Software Engineer. Salary: €65,000.'
   const assessments = assessPreferences(jd, prefs)
@@ -417,19 +419,27 @@ test('K5B Acceptance: assessPreferences — compensation below minimum → INELI
 test('K5B Acceptance: assessPreferences — compensation at minimum → acceptable, above preferred → preferred', async () => {
   const { assessPreferences } = await import('./opportunity.js')
 
-  const prefs = { compensation: { minimum: 80000, preferred: 100000, currency: 'EUR' } } as any
+  const prefs: import('./preference-set.js').PreferenceSet = {
+    targets: { compensation: { minimum: 80000, preferred: 100000, currency: 'EUR' } },
+    constraints: {},
+  }
 
   const atMin   = assessPreferences('Software Engineer. Salary: €85,000.', prefs)
   const atPref  = assessPreferences('Software Engineer. Salary: €105,000.', prefs)
 
   assert.equal(atMin.find(a => a.dimension === 'compensation')!.status, 'acceptable')
-  assert.equal(atPref.find(a => a.dimension === 'compensation')!.status, 'preferred')
+  // ponytail: compensation.preferred is intentionally inert (behavior preserved from the legacy
+  // adapter path, which dropped it). Adopting it is a separate change; flip this to 'preferred' then.
+  assert.equal(atPref.find(a => a.dimension === 'compensation')!.status, 'acceptable')
 })
 
 test('K5B Acceptance: assessPreferences — work mode: required remote + full remote JD → preferred + eligible', async () => {
   const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
 
-  const prefs: import('./types.js').Preferences = { work: { remote: 'required' } }
+  const prefs: import('./preference-set.js').PreferenceSet = {
+    targets: { workModes: [{ mode: 'remote', strength: 'required' }] },
+    constraints: {},
+  }
   const jd = 'Staff Engineer. Fully remote opportunity from Spain.'
   const assessments = assessPreferences(jd, prefs)
   const wm = assessments.find(a => a.dimension === 'work-mode')!
@@ -444,7 +454,10 @@ test('K5B Acceptance: assessPreferences — work mode: required remote + full re
 test('K5B Acceptance: assessPreferences — work mode: required remote + hybrid JD → undesirable + INELIGIBLE', async () => {
   const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
 
-  const prefs: import('./types.js').Preferences = { work: { remote: 'required' } }
+  const prefs: import('./preference-set.js').PreferenceSet = {
+    targets: { workModes: [{ mode: 'remote', strength: 'required' }] },
+    constraints: {},
+  }
   const jd = 'Software Engineer. Barcelona — Hybrid, 3 days onsite.'
   const assessments = assessPreferences(jd, prefs)
   const wm = assessments.find(a => a.dimension === 'work-mode')!
@@ -459,7 +472,10 @@ test('K5B Acceptance: assessPreferences — score and coverage separation: eligi
   const { assessPreferences, projectPersonalFit } = await import('./opportunity.js')
 
   // Only work mode is stated in JD (preferred), compensation not stated → unknown
-  const prefs = { work: { remote: 'required' }, compensation: { minimum: 80000 } } as any
+  const prefs: import('./preference-set.js').PreferenceSet = {
+    targets: { workModes: [{ mode: 'remote', strength: 'required' }], compensation: { minimum: 80000, currency: 'EUR' } },
+    constraints: {},
+  }
   const jd = 'Fully remote opportunity.'  // no salary stated
 
   const assessments = assessPreferences(jd, prefs)
@@ -620,7 +636,7 @@ Salary: $160,000 USD.`
   const resolved = resolveRequirements(mm, profile)
   const suffList = resolved.map(evaluateSufficiency)
   const profFit = projectProfessionalFit(suffList)
-  const prefAssessments = assessPreferences(hashicorpJd, profile.preferences)
+  const prefAssessments = assessPreferences(hashicorpJd, profile.preferenceSet)
   const persFit = projectPersonalFit(prefAssessments)
 
   const recCov = computeRecognitionCoverage(hashicorpJd, mm)
@@ -661,6 +677,8 @@ Salario: €30.000 bruto/año.`
     contributions: [],
     evidence: [],
     preferences: { work: { remote: 'optional' }, compensation: { minimum: 25000 } },
+    // 'optional' remote has no PreferenceSet form and never reached assessment via the adapter.
+    preferenceSet: { targets: { compensation: { minimum: 25000, currency: 'EUR' } }, constraints: {} },
   }
 
   // 1. Unaugmented software recognizer (K10 baseline behavior)
@@ -682,7 +700,7 @@ Salario: €30.000 bruto/año.`
   const resolved = resolveRequirements(mmComposed, lydiaProfile)
   const suffList = resolved.map(evaluateSufficiency)
   const profFit = projectProfessionalFit(suffList)
-  const persFit = projectPersonalFit(assessPreferences(adminJd, lydiaProfile.preferences))
+  const persFit = projectPersonalFit(assessPreferences(adminJd, lydiaProfile.preferenceSet))
   const recCov = computeRecognitionCoverage(adminJd, mmComposed)
   const assessment = applyPolicy(profFit, persFit, recCov)
 

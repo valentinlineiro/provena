@@ -195,7 +195,6 @@ export type DecisionStatus =
   | 'new'          // ingested, not yet surfaced to user
   | 'seen'         // surfaced in inbox, user has not acted
   | 'interested'   // user flagged as interesting
-  | 'applied'      // user has applied externally
   | 'dismissed'    // user explicitly dismissed
 
 export interface UserOpportunityDecision {

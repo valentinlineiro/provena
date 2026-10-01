@@ -182,7 +182,7 @@ export type {
   NextActionItem,
   ApplicationSummary,
 } from './application.js'
-export { parseApplication, createApplication, MemoryApplicationRepository, transitionApplication, summarizeApplications, APPLICATION_STATUSES, APPLICATION_PLATFORMS } from './application.js'
+export { parseApplication, createApplication, markApplied, MemoryApplicationRepository, transitionApplication, summarizeApplications, APPLICATION_STATUSES, APPLICATION_PLATFORMS } from './application.js'
 
 // ── Verdict Quality Benchmark Fixtures ─────────────────────────────
 export type { GroundTruthOpportunity } from './fixtures/verdict-ground-truth.js'
@@ -211,3 +211,5 @@ export { runCausalContributionBenchmark } from './causal-contribution-benchmark.
 
 
 
+export { deriveOpportunityStage, decideToApply } from './opportunity-stage.js'
+export type { OpportunityStage, OpportunityState } from './opportunity-stage.js'

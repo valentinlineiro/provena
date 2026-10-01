@@ -203,13 +203,13 @@ test('reconcileBoardSync: O1.3A market memory invariant — A,B,C then A,C,D rec
 test('reconcileBoardSync: a human decision on an opportunity survives it disappearing from the source', () => {
   const t0 = '2026-08-05T00:00:00Z'
   const first = reconcileBoardSync([], [fakeRaw(1)], inScopeAcme, fakeEvaluate, t0)
-  const applied = { ...first.opportunities[0]!, userDecision: 'applied' as const }
+  const applied = { ...first.opportunities[0]!, userDecision: 'dismissed' as const }
 
   const t1 = '2026-08-06T00:00:00Z'
   const second = reconcileBoardSync([applied], [], inScopeAcme, fakeEvaluate, t1)
 
   assert.equal(second.opportunities.length, 1)
-  assert.equal(second.opportunities[0]!.userDecision, 'applied', 'decision must not be lost when position closes')
+  assert.equal(second.opportunities[0]!.userDecision, 'dismissed', 'decision must not be lost when position closes')
   assert.equal(second.opportunities[0]!.active, false)
 })
 

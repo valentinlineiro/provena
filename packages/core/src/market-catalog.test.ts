@@ -257,7 +257,7 @@ test('UserOpportunityDecision is independent of Assessment', () => {
 test('UserOpportunityDecision survives across DecisionStatus transitions', () => {
   // Document the lifecycle of a user decision
   const statuses: UserOpportunityDecision['status'][] = [
-    'new', 'seen', 'interested', 'applied',
+    'new', 'seen', 'interested', 'dismissed',
   ]
   for (const status of statuses) {
     const decision: UserOpportunityDecision = {

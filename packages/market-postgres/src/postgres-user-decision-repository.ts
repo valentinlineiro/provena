@@ -1,4 +1,5 @@
 import type { Sql } from 'postgres'
+import type { OpportunityUserDecision } from '@provena/core'
 
 export interface UserDecisionRecord {
   opportunityId: string
@@ -12,7 +13,7 @@ export class PostgresUserDecisionRepository {
 
   async setDecision(
     opportunityId: string,
-    decision: string,
+    decision: OpportunityUserDecision,
     userId: string = 'valentin'
   ): Promise<void> {
     await this.sql`

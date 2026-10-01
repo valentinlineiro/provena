@@ -9,7 +9,7 @@ export interface RawOpportunity {
   readonly description: string
 }
 
-export type OpportunityUserDecision = 'new' | 'seen' | 'interested' | 'applied' | 'dismissed'
+export type OpportunityUserDecision = 'new' | 'seen' | 'interested' | 'dismissed'
 
 /**
  * @deprecated O1 type — conflates OpportunityPosting, MarketModel evaluation, and

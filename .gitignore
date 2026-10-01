@@ -3,3 +3,6 @@ dist
 .env
 examples/*/resume.md
 examples/*/resume.html
+
+# wrangler local dev state
+.wrangler/

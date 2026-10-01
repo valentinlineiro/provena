@@ -26,7 +26,8 @@ export interface Application {
   readonly opportunityId?: OpportunityId
   readonly platform: ApplicationPlatform
   readonly url?: string
-  readonly appliedAt: string
+  /** Set when the application is submitted; absent while `ready`. */
+  readonly appliedAt?: string
   readonly documents: ApplicationDocuments
   readonly status: ApplicationStatus
   readonly nextAction?: string
@@ -46,19 +47,20 @@ export function parseApplication(raw: unknown): Application {
   if (!VALID_PLATFORMS.has(String(v.platform))) {
     throw new Error(`application.platform must be one of: ${[...VALID_PLATFORMS].join(', ')}`)
   }
-  if (typeof v.appliedAt !== 'string' || Number.isNaN(Date.parse(v.appliedAt))) {
-    throw new Error('application.appliedAt must be an ISO date string')
-  }
   const status = String(v.status ?? 'applied')
   if (!VALID_STATUSES.has(status)) {
     throw new Error(`application.status must be one of: ${[...VALID_STATUSES].join(', ')}`)
+  }
+  const hasDate = typeof v.appliedAt === 'string' && !Number.isNaN(Date.parse(v.appliedAt))
+  if (!hasDate && status !== 'ready' && status !== 'withdrawn' && status !== 'closed') {
+    throw new Error('application.appliedAt must be an ISO date string')
   }
   return {
     id: v.id,
     ...(typeof v.opportunityId === 'string' ? { opportunityId: v.opportunityId as OpportunityId } : {}),
     platform: v.platform as ApplicationPlatform,
     ...(typeof v.url === 'string' ? { url: v.url } : {}),
-    appliedAt: v.appliedAt,
+    ...(hasDate ? { appliedAt: v.appliedAt as string } : {}),
     documents: (v.documents && typeof v.documents === 'object' ? v.documents : {}) as ApplicationDocuments,
     status: status as ApplicationStatus,
     ...(typeof v.nextAction === 'string' ? { nextAction: v.nextAction } : {}),
@@ -76,15 +78,16 @@ export function createApplication(input: {
   url?: string
   notes?: string
   appliedAt?: string
+  status?: ApplicationStatus
 }): Application {
   return parseApplication({
     id: `app-${Date.now()}-${applicationSequence++}`,
     platform: input.platform,
     ...(input.opportunityId ? { opportunityId: input.opportunityId } : {}),
     ...(input.url ? { url: input.url } : {}),
-    appliedAt: input.appliedAt ?? new Date().toISOString(),
+    ...(input.status === 'ready' ? {} : { appliedAt: input.appliedAt ?? new Date().toISOString() }),
     documents: {},
-    status: 'applied',
+    status: input.status ?? 'applied',
     ...(input.notes ? { notes: input.notes } : {}),
   })
 }
@@ -92,6 +95,7 @@ export function createApplication(input: {
 export interface ApplicationRepository {
   list(): Promise<readonly Application[]>
   save(application: Application): Promise<void>
+  findByOpportunityId(opportunityId: string): Promise<Application | undefined>
 }
 
 export class MemoryApplicationRepository implements ApplicationRepository {
@@ -103,6 +107,10 @@ export class MemoryApplicationRepository implements ApplicationRepository {
 
   async save(application: Application): Promise<void> {
     this.#applications.set(application.id, parseApplication(application))
+  }
+
+  async findByOpportunityId(opportunityId: string): Promise<Application | undefined> {
+    return [...this.#applications.values()].find((a) => a.opportunityId === opportunityId)
   }
 }
 
@@ -123,6 +131,11 @@ export function transitionApplication(application: Application, to: ApplicationS
     throw new Error(`cannot transition application from "${application.status}" to "${to}"`)
   }
   return { ...application, status: to }
+}
+
+export function markApplied(application: Application, nowIso: string = new Date().toISOString()): Application {
+  if (application.status !== 'ready') throw new Error(`cannot mark applied from "${application.status}": application must be ready`)
+  return { ...transitionApplication(application, 'applied'), appliedAt: nowIso }
 }
 
 const ACTIVE_STATUSES: ReadonlySet<ApplicationStatus> = new Set(['ready', 'applied', 'interviewing', 'offer'])
@@ -159,7 +172,7 @@ export function summarizeApplications(applications: readonly Application[], nowI
     .sort((x, y) => (x.due ?? '9999').localeCompare(y.due ?? '9999'))
   const stale = active.filter((a) => {
     if (a.status !== 'applied') return false
-    const appliedDay = a.appliedAt.split('T')[0]!
+    const appliedDay = a.appliedAt!.split('T')[0]!
     const ageDays = (Date.parse(now) - Date.parse(appliedDay)) / 86_400_000
     return ageDays > STALE_AFTER_DAYS
   })

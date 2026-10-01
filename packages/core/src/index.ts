@@ -211,3 +211,5 @@ export { runCausalContributionBenchmark } from './causal-contribution-benchmark.
 
 
 
+export { deriveOpportunityStage } from './opportunity-stage.js'
+export type { OpportunityStage, OpportunityState } from './opportunity-stage.js'
